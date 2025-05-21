@@ -1,11 +1,7 @@
 from pydantic import BaseModel
 from uuid import UUID
 from sqlalchemy import Enum
-
-class Role(str, Enum):
-    ADMIN = 'ADMIN'
-    TEACHER = 'TEACHER'
-    STUDENT = 'STUDENT'
+from models import Role
 
 class User(BaseModel):
     email: str
