@@ -1,6 +1,6 @@
 from sqlalchemy import Boolean, Column, Enum, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
-from .base import BaseModel
+from database.session import Base
 from enum import Enum as PyEnum
 from sqlalchemy.orm import relationship
 
@@ -9,7 +9,7 @@ class Role(PyEnum):
     TEACHER = 'TEACHER'
     STUDENT = 'STUDENT'
 
-class User(BaseModel):
+class User(Base):
     __tablename__ = 'users'
     email = Column(String(255), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
@@ -19,7 +19,7 @@ class User(BaseModel):
     teacher = relationship("Teacher", back_populates="user", uselist=False)
     student = relationship("Student", back_populates="user", uselist=False)
 
-class Admin(BaseModel):
+class Admin(Base):
     __tablename__ = 'admins'
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
@@ -27,7 +27,7 @@ class Admin(BaseModel):
     
     user = relationship("User", back_populates="admin")
 
-class Teacher(BaseModel):
+class Teacher(Base):
     __tablename__ = 'teachers'
     first_name = Column(String(100))
     last_name = Column(String(100))
@@ -39,7 +39,7 @@ class Teacher(BaseModel):
     user = relationship("User", back_populates="teacher")
     courses = relationship("Course", back_populates="owner")
 
-class Student(BaseModel):
+class Student(Base):
     __tablename__ = 'students'
     first_name = Column(String(100))
     last_name = Column(String(100))
@@ -49,7 +49,7 @@ class Student(BaseModel):
     user = relationship("User", back_populates="student")
     courses = relationship("Course", secondary="student_courses",back_populates="students")
 
-class Course(BaseModel):
+class Course(Base):
     __tablename__ = 'courses'
     title = Column(String(255))
     description = Column(Text)
@@ -65,13 +65,13 @@ class Course(BaseModel):
     students = relationship("Student",secondary="student_courses",back_populates="courses")
     tags = relationship("Tag",secondary="course_tags",back_populates="courses")
 
-class Tag(BaseModel):
+class Tag(Base):
     __tablename__ = 'tags'
     name = Column(String(100), unique=True)
     
     courses = relationship("Course",secondary="course_tags",back_populates="tags")
 
-class StudentCourse(BaseModel):
+class StudentCourse(Base):
     __tablename__ = 'student_courses'
     student_id = Column(UUID(as_uuid=True), ForeignKey('students.uuid'), primary_key=True)
     course_id = Column(UUID(as_uuid=True), ForeignKey('courses.uuid'), primary_key=True)
@@ -81,7 +81,7 @@ class StudentCourse(BaseModel):
     student = relationship("Student", backref="course_associations")
     course = relationship("Course", backref="student_associations")
 
-class CourseTag(BaseModel):
+class CourseTag(Base):
     __tablename__ = 'course_tags'
     course_id = Column(UUID(as_uuid=True), ForeignKey('courses.uuid'), primary_key=True)
     tag_id = Column(UUID(as_uuid=True), ForeignKey('tags.uuid'), primary_key=True)
