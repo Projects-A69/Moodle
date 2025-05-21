@@ -1,6 +1,7 @@
 from jose import jwt
 import bcrypt
-
+from models.models import User
+from datetime import datetime, timedelta, timezone
 SECRET_KEY = "123"
 ALGORITHM = "HS256"
 TOKEN_EXPIRATION_TIME = 60
