@@ -1,6 +1,6 @@
 from sqlalchemy import Boolean, Column, Enum, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
-from database.session import Base
+from src.database.base import Base
 from enum import Enum as PyEnum
 from sqlalchemy.orm import relationship
 import uuid
