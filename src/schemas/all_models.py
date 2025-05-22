@@ -1,12 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel,EmailStr
 from uuid import UUID
-from sqlalchemy import Enum
 from src.models.models import Role
 
 class User(BaseModel):
     email: str
     password: str
     role: Role
+    
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
 
 class Admin(BaseModel):
     first_name: str
