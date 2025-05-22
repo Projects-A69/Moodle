@@ -67,6 +67,20 @@ class Course(Base):
     owner = relationship("Teacher", back_populates="courses")
     students = relationship("Student", secondary="student_courses", back_populates="courses")
     tags = relationship("Tag", secondary="course_tags", back_populates="courses")
+    sections = relationship("Section", back_populates="course", cascade="all, delete-orphan")
+
+class Section(Base):
+    __tablename__ = 'sections'
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    title = Column(String(255), nullable=False)
+    content = Column(Text)
+    description = Column(Text)
+    information = Column(Text)
+    link = Column(String(255))
+    course_id = Column(UUID(as_uuid=True), ForeignKey('courses.id'))
+
+    course = relationship("Course", back_populates="sections")
+
 
 class Tag(Base):
     __tablename__ = 'tags'

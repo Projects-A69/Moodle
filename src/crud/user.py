@@ -7,20 +7,14 @@ import bcrypt
 def get_by_id(db: Session, user_id: int) -> User:
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
+        raise HTTPException(status_code=404,detail="User not found")
     return user
 
 
-def get_by_email(db: Session, email: str) -> User:
+def get_by_email(db: Session, email: str) -> User | None:
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
+        raise HTTPException(status_code=404,detail="User not found")
     return user
 
 
@@ -28,11 +22,11 @@ def get_all_users(db: Session) -> list[User]:
     return db.query(User).all()
 
 
-def register_user(db: Session, user_data: User) -> User:
-    hashed_password = bcrypt.hashpw(user_data.password.encode(), bcrypt.gensalt())
-    user_data.password = hashed_password.decode()
+def register_user(db: Session, email: str, password: str, role) -> User:
+    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    new_user = User(email=email, password=hashed_password, role=role)
 
-    db.add(user_data)
+    db.add(new_user)
     db.commit()
-    db.refresh(user_data)
-    return user_data
+    db.refresh(new_user)
+    return new_user
