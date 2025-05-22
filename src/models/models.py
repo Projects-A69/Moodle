@@ -47,7 +47,7 @@ class Student(Base):
     first_name = Column(String(100))
     last_name = Column(String(100))
     subscribed = Column(Boolean, default=False)
-    
+
     user = relationship("User", back_populates="student")
     courses = relationship("Course", secondary="student_courses", back_populates="students")
 
@@ -58,12 +58,13 @@ class Course(Base):
     description = Column(Text)
     objectives = Column(Text)
     owner_id = Column(UUID(as_uuid=True), ForeignKey('teachers.id'), nullable=False)
+    is_public = Column(Boolean, default=False)
     is_premium = Column(Boolean, default=False)
     is_hidden = Column(Boolean, default=False)
     picture = Column(String(255))
     rating = Column(Float, default=0.0)
     score = Column(Float, default=0.0)
-    
+   
     owner = relationship("Teacher", back_populates="courses")
     students = relationship("Student", secondary="student_courses", back_populates="courses")
     tags = relationship("Tag", secondary="course_tags", back_populates="courses")
