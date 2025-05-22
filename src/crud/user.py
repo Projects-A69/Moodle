@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from src.models.models import User
-import bcrypt
-
+from src.core.security import hash_password
 
 def get_by_id(db: Session, user_id: int) -> User:
     user = db.query(User).filter(User.id == user_id).first()
@@ -23,7 +22,7 @@ def get_all_users(db: Session) -> list[User]:
 
 
 def register_user(db: Session, email: str, password: str, role) -> User:
-    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    hashed_password = hash_password(password)
     new_user = User(email=email, password=hashed_password, role=role)
 
     db.add(new_user)
