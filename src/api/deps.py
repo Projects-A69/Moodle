@@ -1,13 +1,9 @@
 from typing import Generator
-from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException,Header
 from src.core.authentication import from_token, is_authenticated
 from src.database.session import SessionLocal
 from src.models.models import Course,Student
 from sqlalchemy.orm import Session
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
 
 def get_db() -> Generator:
     """
@@ -21,9 +17,7 @@ def get_db() -> Generator:
         db.close()
 
 
-
-def get_current_user(db: Session = Depends(get_db),
-                     token: str = Depends(oauth2_scheme)):
+def get_current_user(token: str = Header(...), db: Session = Depends(get_db)):
     if not is_authenticated(db,token):
         raise HTTPException(status_code=401, detail="Unauthorized")
     

@@ -49,6 +49,14 @@ class Course(BaseModel):
 
 class Tag(BaseModel):
     name: str
+    
+class Section(BaseModel):
+    title: str
+    content: str
+    description: str | None = None
+    information: str | None = None
+    link: str | None = None
+    course_id: UUID
 
 class StudentCourse(BaseModel):
     student_id: UUID
