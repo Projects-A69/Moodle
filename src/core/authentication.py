@@ -1,41 +1,34 @@
 from jose import jwt
-from models.models import User
 from datetime import datetime, timedelta, timezone
-from api.deps import get_current_user
-from fastapi import HTTPException
+from sqlalchemy.orm import Session
+from src.models.models import User
+from src.core.config import settings
+from src.crud import user as user_crud
 
-SECRET_KEY = "123"
-ALGORITHM = "HS256"
-TOKEN_EXPIRATION_TIME = 60
 
 def create_token(user: User) -> str:
     payload = {
-        "user_id": user.id,
+        "user_id": str(user.id),
         "email": user.email,
-        "exp": datetime.now(timezone.utc)+ timedelta(minutes = TOKEN_EXPIRATION_TIME)
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=settings.JWT_EXPIRATION)
     }
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
-def is_authenticated(token: str) -> bool:
+
+def is_authenticated(db: Session, token: str) -> bool:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         email = payload.get("email")
-        user = get_current_user(email)
+        user = user_crud.get_by_email(db, email)
         return user is not None and str(user.id) == str(payload.get("user_id"))
     except Exception:
         return False
 
-def from_token(token: str) -> User | None:
+
+def from_token(db: Session, token: str) -> User | None:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         email = payload.get("email")
-        return get_current_user(email)
+        return user_crud.get_by_email(db, email)
     except Exception:
         return None
-    
-    
-def get_user_or_raise_401(token: str):
-    if not is_authenticated(token):
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    return from_token(token)
-

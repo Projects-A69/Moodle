@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from uuid import UUID
 from sqlalchemy import Enum
-from models import Role
+from src.models.models import Role
 
 class User(BaseModel):
     email: str

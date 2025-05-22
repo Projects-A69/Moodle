@@ -5,6 +5,9 @@ from src.core.authentication import from_token, is_authenticated
 from src.database.session import SessionLocal
 from sqlalchemy.orm import Session
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
 def get_db() -> Generator:
     """
     Get a database connection from the connection pool and return it
@@ -17,14 +20,13 @@ def get_db() -> Generator:
         db.close()
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def get_current_user(db: Session = Depends(get_db),
                      token: str = Depends(oauth2_scheme)):
-    if not is_authenticated(token):
+    if not is_authenticated(db,token):
         raise HTTPException(status_code=401, detail="Unauthorized")
     
-    user = from_token(token)
+    user = from_token(db,token)
     if user is None:
         raise HTTPException(status_code=401, detail="Invalid token")
 
