@@ -26,11 +26,3 @@ def get_current_user(token: str = Header(...), db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
     return user
-
-
-def check_course_access(course: Course, user: Student):
-    if course.is_public:
-        return True
-    if course.is_premium and user and user.subscribed(course.id):
-        return True
-    raise HTTPException(status_code=403, detail="Access denied")
