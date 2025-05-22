@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
 from src.models.models import Course, Teacher
 
-router = APIRouter()
+router = APIRouter(prefix="/teachers", tags=["Teachers"])
 
 
 @router.get("/courses")
