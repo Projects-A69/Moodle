@@ -12,7 +12,7 @@ def list_accessible_courses(current_student: Student = Depends(get_current_user)
     """
     Lists all public courses and premium courses the student is subscribed to.
     """
-    public_courses = db.query(Course).filter(Course.is_public == True).all()
+    public_courses = db.query(Course).filter(Course.is_premium == False).all()
     subscribed_courses = current_student.courses
 
     return {
@@ -33,7 +33,7 @@ def subscribe_to_course(course_id: int,
     if course is None:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    if course.is_public:
+    if not course.is_premium:
         raise HTTPException(status_code=400, detail="No need to subscribe to a public course")
 
     if course in current_student.courses:
@@ -87,11 +87,6 @@ def subscribe_to_course(course_id: int,
 
 @router.post("/courses/{course_id}/rating")
 def rate_course():
-    pass
-
-
-@router.post("/")
-def register_as_student():
     pass
 
 

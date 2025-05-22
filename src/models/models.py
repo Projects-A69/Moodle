@@ -58,7 +58,6 @@ class Course(Base):
     description = Column(Text)
     objectives = Column(Text)
     owner_id = Column(UUID(as_uuid=True), ForeignKey('teachers.id'), nullable=False)
-    is_public = Column(Boolean, default=False)
     is_premium = Column(Boolean, default=False)
     is_hidden = Column(Boolean, default=False)
     picture = Column(String(255))

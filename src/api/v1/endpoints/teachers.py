@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
 from src.models.models import Course, Teacher
@@ -12,7 +12,7 @@ def list_accessible_courses(current_teacher: Teacher = Depends(get_current_user)
     """
     Lists all public and premium courses the teacher is owner of.
     """
-    public_courses = db.query(Course).filter(Course.is_public == True).all()
+    public_courses = db.query(Course).filter(Course.is_premium == False).all()
     owned_courses = current_teacher.courses
 
     return {
