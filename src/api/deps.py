@@ -3,6 +3,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from src.core.authentication import from_token, is_authenticated
 from src.database.session import SessionLocal
+from src.models.models import Course,Student
 from sqlalchemy.orm import Session
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -31,3 +32,11 @@ def get_current_user(db: Session = Depends(get_db),
         raise HTTPException(status_code=401, detail="Invalid token")
 
     return user
+
+
+def check_course_access(course: Course, user: Student):
+    if course.is_public:
+        return True
+    if course.is_premium and user and user.subscribed(course.id):
+        return True
+    raise HTTPException(status_code=403, detail="Access denied")
