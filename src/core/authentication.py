@@ -1,8 +1,8 @@
 from jose import jwt
-import bcrypt
 from models.models import User
 from datetime import datetime, timedelta, timezone
 from api.deps import get_current_user
+from fastapi import HTTPException
 
 SECRET_KEY = "123"
 ALGORITHM = "HS256"
@@ -32,3 +32,10 @@ def from_token(token: str) -> User | None:
         return get_current_user(email)
     except Exception:
         return None
+    
+    
+def get_user_or_raise_401(token: str):
+    if not is_authenticated(token):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return from_token(token)
+
