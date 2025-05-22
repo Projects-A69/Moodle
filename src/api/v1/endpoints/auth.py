@@ -22,7 +22,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     if not bcrypt.checkpw(form_data.password.encode(), user.password.encode()):
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
-    return {"access_token": create_token(user), "token_type": "bearer"}
+    return {"access_token": create_token(user)}
 
 
 @router.post("/register")
