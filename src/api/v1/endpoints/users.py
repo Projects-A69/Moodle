@@ -29,9 +29,14 @@ def register_user(payload: UserCreate, db: Session = Depends(get_db)):
             raise HTTPException(status_code=422, detail="Admins must provide first and last name")
 
     elif payload.role == Role.TEACHER:
-        missing_fields = [field for field in ["first_name", "last_name", "phone_number", "linked_in_acc"] if not getattr(payload, field)]
-        if missing_fields:
-            raise HTTPException(status_code=422,detail=f"Missing teacher fields: {', '.join(missing_fields)}")
+        if not payload.first_name:
+            raise HTTPException(status_code=422, detail="Teachers must provide first name")
+        if not payload.last_name:
+            raise HTTPException(status_code=422, detail="Teachers must provide last name")
+        if not payload.phone_number:
+            raise HTTPException(status_code=422, detail="Teachers must provide phone number")
+        if not payload.linked_in_acc:
+            raise HTTPException(status_code=422, detail="Teachers must provide LinkedIn account")
 
     elif payload.role == Role.STUDENT:
         if not payload.first_name or not payload.last_name:

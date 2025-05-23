@@ -46,7 +46,6 @@ class Student(Base):
     id = Column(UUID(as_uuid=True), ForeignKey('users.id'), primary_key=True)
     first_name = Column(String(100))
     last_name = Column(String(100))
-    subscribed = Column(Boolean, default=False)
 
     user = relationship("User", back_populates="student")
     courses = relationship("Course", secondary="student_courses", back_populates="students")
