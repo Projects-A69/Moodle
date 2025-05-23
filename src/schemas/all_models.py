@@ -19,8 +19,6 @@ class UserCreate(BaseModel):
     phone_number: str | None = None
     linked_in_acc: str| None = None
 
-    subscribed: bool = False
-
 class UserUpdate(BaseModel):
     email: str | None = None
     password: str | None = None

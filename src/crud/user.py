@@ -21,36 +21,18 @@ def get_by_email(db: Session, email: str) -> User | None:
 
 def register_user(db: Session, payload: UserCreate) -> User:
     hashed_password = hash_password(payload.password)
-    new_user = User(
-        email=payload.email,
-        password=hashed_password,
-        role=payload.role
-    )
+    new_user = User(email=payload.email,password=hashed_password,role=payload.role)
     db.add(new_user)
     db.flush()
 
     if payload.role == Role.ADMIN:
-        db.add(Admin(
-            id=new_user.id,
-            first_name=payload.first_name,
-            last_name=payload.last_name
-        ))
+        db.add(Admin(id=new_user.id,first_name=payload.first_name,last_name=payload.last_name))
     elif payload.role == Role.TEACHER:
-        db.add(Teacher(
-            id=new_user.id,
-            first_name=payload.first_name,
-            last_name=payload.last_name,
-            profile_picture=payload.profile_picture,
-            phone_number=payload.phone_number,
-            linked_in_acc=payload.linked_in_acc
-        ))
+        db.add(Teacher(id=new_user.id,first_name=payload.first_name,
+            last_name=payload.last_name,profile_picture=payload.profile_picture,
+            phone_number=payload.phone_number,linked_in_acc=payload.linked_in_acc))
     elif payload.role == Role.STUDENT:
-        db.add(Student(
-            id=new_user.id,
-            first_name=payload.first_name,
-            last_name=payload.last_name,
-            subscribed=payload.subscribed
-        ))
+        db.add(Student(id=new_user.id,first_name=payload.first_name,last_name=payload.last_name,))
     else:
         raise HTTPException(status_code=400, detail="Invalid role")
 

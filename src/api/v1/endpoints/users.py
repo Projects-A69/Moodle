@@ -31,10 +31,7 @@ def register_user(payload: UserCreate, db: Session = Depends(get_db)):
     elif payload.role == Role.TEACHER:
         missing_fields = [field for field in ["first_name", "last_name", "phone_number", "linked_in_acc"] if not getattr(payload, field)]
         if missing_fields:
-            raise HTTPException(
-                status_code=422,
-                detail=f"Missing teacher fields: {', '.join(missing_fields)}"
-            )
+            raise HTTPException(status_code=422,detail=f"Missing teacher fields: {', '.join(missing_fields)}")
 
     elif payload.role == Role.STUDENT:
         if not payload.first_name or not payload.last_name:
@@ -48,42 +45,25 @@ def register_user(payload: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/info")
-def get_current_user_info(
-    current_user: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    base_info = {
-        "email": current_user.email,
-        "role": current_user.role.value
-    }
+def get_current_user_info(current_user: UserModel = Depends(get_current_user),db: Session = Depends(get_db)):
+    base_info = {"email": current_user.email,"role": current_user.role.value}
 
     if current_user.role == Role.STUDENT:
         student = db.query(Student).filter(Student.id == current_user.id).first()
         if student:
-            base_info.update({
-                "first_name": student.first_name,
-                "last_name": student.last_name,
-                "subscribed": student.subscribed
-            })
+            base_info.update({"first_name": student.first_name,"last_name": student.last_name,})
 
     elif current_user.role == Role.TEACHER:
         teacher = db.query(Teacher).filter(Teacher.id == current_user.id).first()
         if teacher:
-            base_info.update({
-                "first_name": teacher.first_name,
-                "last_name": teacher.last_name,
-                "phone_number": teacher.phone_number,
-                "linked_in_acc": teacher.linked_in_acc,
-                "profile_picture": teacher.profile_picture
-            })
+            base_info.update({"first_name": teacher.first_name,"last_name": teacher.last_name,
+                "phone_number": teacher.phone_number,"linked_in_acc": teacher.linked_in_acc,
+                "profile_picture": teacher.profile_picture})
 
     elif current_user.role == Role.ADMIN:
         admin = db.query(Admin).filter(Admin.id == current_user.id).first()
         if admin:
-            base_info.update({
-                "first_name": admin.first_name,
-                "last_name": admin.last_name
-            })
+            base_info.update({"first_name": admin.first_name,"last_name": admin.last_name})
 
     return base_info
 
