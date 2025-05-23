@@ -7,6 +7,24 @@ class User(BaseModel):
     password: str
     role: Role
     
+class UserCreate(BaseModel):
+    email: str
+    password: str
+    role: Role
+
+    first_name: str
+    last_name: str
+
+    profile_picture: str | None = None
+    phone_number: str | None = None
+    linked_in_acc: str| None = None
+
+    subscribed: bool = False
+
+class UserUpdate(BaseModel):
+    email: str | None = None
+    password: str | None = None
+
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
