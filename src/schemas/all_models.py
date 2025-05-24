@@ -3,12 +3,12 @@ from uuid import UUID
 from src.models.models import Role
 
 class User(BaseModel):
-    email: str
+    email: EmailStr
     password: str
     role: Role
     
 class UserCreate(BaseModel):
-    email: str
+    email: EmailStr
     password: str
     role: Role
     first_name: str
@@ -32,13 +32,13 @@ class LoginRequest(BaseModel):
 class Admin(BaseModel):
     first_name: str
     last_name: str
-    email: str
+    email: EmailStr
     password: str
 
 class Teacher(BaseModel):
     first_name: str
     last_name: str
-    email: str
+    email: EmailStr
     password: str
     profile_picture: str
     phone_number: str
@@ -47,9 +47,9 @@ class Teacher(BaseModel):
 class Student(BaseModel):
     first_name: str
     last_name: str
-    email: str
+    email: EmailStr
     password: str
-    subscribed: bool
+    profile_picture: str
     user_id: UUID
 
 class CourseInDB(BaseModel):

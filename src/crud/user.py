@@ -23,7 +23,6 @@ def login_user(db: Session, payload: LoginRequest) -> User:
     return user
 
 
-
 def handle_registration(db: Session, payload: UserCreate):
     if get_by_email(db, payload.email):
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -63,7 +62,7 @@ def register_user(db: Session, payload: UserCreate) -> User:
                        last_name=payload.last_name, profile_picture=payload.profile_picture,
                        phone_number=payload.phone_number, linked_in_acc=payload.linked_in_acc))
     elif payload.role == Role.STUDENT:
-        db.add(Student(id=new_user.id, first_name=payload.first_name, last_name=payload.last_name))
+        db.add(Student(id=new_user.id, first_name=payload.first_name, last_name=payload.last_name,profile_picture=payload.profile_picture))
     else:
         raise HTTPException(status_code=400, detail="Invalid role")
 
@@ -92,7 +91,7 @@ def get_user_info(db: Session, current_user: User) -> dict:
     elif current_user.role == Role.STUDENT:
         student = db.query(Student).filter(Student.id == current_user.id).first()
         if student:
-            base_info.update({"first_name": student.first_name,"last_name": student.last_name})
+            base_info.update({"first_name": student.first_name,"last_name": student.last_name,"profile_picture": student.profile_picture})
 
     return base_info
 
@@ -135,6 +134,9 @@ def update_user_info(db: Session, user_id: int, payload: UserUpdate) -> User:
             student.first_name = payload.first_name
         if payload.last_name:
             student.last_name = payload.last_name
+        if payload.profile_picture:
+            student.profile_picture = payload.profile_picture
+        
 
     db.commit()
     db.refresh(user)
