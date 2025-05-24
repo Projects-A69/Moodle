@@ -34,7 +34,6 @@ class Admin(BaseModel):
     last_name: str
     email: str
     password: str
-    user_id: UUID
 
 class Teacher(BaseModel):
     first_name: str
@@ -44,7 +43,6 @@ class Teacher(BaseModel):
     profile_picture: str
     phone_number: str
     linked_in_acc: str
-    user_id: UUID
 
 class Student(BaseModel):
     first_name: str
@@ -54,7 +52,8 @@ class Student(BaseModel):
     subscribed: bool
     user_id: UUID
 
-class Course(BaseModel):
+class CourseInDB(BaseModel):
+    id: UUID
     title: str
     description: str
     objectives: str
@@ -63,6 +62,22 @@ class Course(BaseModel):
     is_hidden: bool
     picture: str
     rating: float
+    score: float
+
+class CoursesCreate(BaseModel):
+    title: str
+    description: str
+    objectives: str
+
+class CoursesUpdate(BaseModel):
+    title: str
+    description: str
+    objectives: str
+    picture: str
+
+class CoursesRate(BaseModel):
+    id: UUID
+    user_id: UUID
     score: float
 
 class Tag(BaseModel):
