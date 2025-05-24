@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
 from src.utils.custom_responses import Unauthorized,BadRequest
 from src.models.models import User,Role, Admin, Teacher, Student
-
+from src.crud import user as user_crud
+from src.utils.custom_responses import NotFound
 def list_all_users(db: Session,current_user: User,role:str = None, search:str = None) -> list[User]:
     
     if current_user.role != Role.ADMIN:
@@ -24,7 +25,7 @@ def list_all_users(db: Session,current_user: User,role:str = None, search:str = 
 
     for user in users:
         user_info = {"id": str(user.id),"email": user.email,
-                                    "role": user.role.value}
+                                    "role": user.role.value,"is_active": user.is_active}
 
         if user.role == Role.ADMIN:
             admin = db.query(Admin).filter(Admin.id == user.id).first()
@@ -46,5 +47,19 @@ def list_all_users(db: Session,current_user: User,role:str = None, search:str = 
         result.append(user_info)
 
     return result
+
+def update_user_activation(db: Session, email: str):
+    user = user_crud.get_by_email(db, email)
+    
+    if not user:
+        raise NotFound(f"User with email: {email} not found")
+
+    user.is_active = not user.is_active
+
+    db.commit()
+
+    status = "activated" if user.is_active else "deactivated"
+    
+    return {"message": f"User {status} successfully."}
     
     

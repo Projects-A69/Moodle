@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
-from src.models.models import User as UserModel
+from src.models.models import User as UserModel, Role
 from src.crud import admin as admin_crud
+from src.utils.custom_responses import Unauthorized
 router = APIRouter()
 
 @router.get("/users")
@@ -10,13 +11,12 @@ def get_all_users(role: str = None,search: str = None,db: Session = Depends(get_
                   current_user: UserModel = Depends(get_current_user)):
     return admin_crud.list_all_users(db, current_user, role, search)
 
-@router.put("/users/{user_id}/deactivate")
-def deactivate_user(user_id: str):
-    pass
-
-@router.put("/users/{user_id}/reactivate")
-def reactivate_user(user_id: str):
-    pass
+@router.put("/users/update-status/{email}")
+def update_user_status_by_email(email: str,db: Session = Depends(get_db),current_user: UserModel = Depends(get_current_user)):
+    if current_user.role != Role.ADMIN:
+        raise Unauthorized("Only admins can toggle user status.")
+    
+    return admin_crud.update_user_activation(db, email)
 
 @router.get("/pending-teachers")
 def list_pending_teachers():

@@ -6,6 +6,7 @@ class User(BaseModel):
     email: EmailStr
     password: str
     role: Role
+    is_active: bool = True
     
 class UserCreate(BaseModel):
     email: EmailStr
@@ -24,6 +25,7 @@ class UserUpdate(BaseModel):
     phone_number: str | None = None
     linked_in_acc: str | None = None
     profile_picture: str | None = None
+
 
 class LoginRequest(BaseModel):
     email: EmailStr

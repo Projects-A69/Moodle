@@ -16,6 +16,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
     role = Column(Enum(Role), nullable=False)
+    is_active = Column(Boolean, default=True)
     
     admin = relationship("Admin", back_populates="user", uselist=False, cascade="all, delete-orphan")
     teacher = relationship("Teacher", back_populates="user", uselist=False, cascade="all, delete-orphan")

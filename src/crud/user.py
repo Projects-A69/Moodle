@@ -3,9 +3,10 @@ from fastapi import HTTPException
 from src.models.models import Admin, Role, User, Teacher, Student
 from src.schemas.all_models import UserUpdate, UserCreate, LoginRequest
 from src.core.security import hash_password, verify_password
+from uuid import UUID
 
 
-def get_by_id(db: Session, user_id: int) -> User:
+def get_by_id(db: Session, user_id: UUID) -> User:
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -13,13 +14,15 @@ def get_by_id(db: Session, user_id: int) -> User:
 
 
 def get_by_email(db: Session, email: str) -> User | None:
-    return db.query(User).filter(User.email == email).first()
-
+    return db.query(User).filter(User.email == email.lower()).first()
 
 def login_user(db: Session, payload: LoginRequest) -> User:
     user = get_by_email(db, payload.email)
     if user is None or not verify_password(payload.password, user.password):
-        raise HTTPException(status_code=400, detail="Invalid credentials")
+        raise HTTPException(status_code=400, detail="Invalid credentials.")
+    
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="User account is deactivated.")
     return user
 
 
@@ -96,7 +99,7 @@ def get_user_info(db: Session, current_user: User) -> dict:
     return base_info
 
 
-def update_user_info(db: Session, user_id: int, payload: UserUpdate) -> User:
+def update_user_info(db: Session, user_id: UUID, payload: UserUpdate) -> User:
     user = get_by_id(db, user_id)
 
     if payload.password:
