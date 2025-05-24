@@ -11,17 +11,19 @@ class UserCreate(BaseModel):
     email: str
     password: str
     role: Role
-
     first_name: str
     last_name: str
-
     profile_picture: str | None = None
     phone_number: str | None = None
     linked_in_acc: str| None = None
 
 class UserUpdate(BaseModel):
-    email: str | None = None
     password: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    phone_number: str | None = None
+    linked_in_acc: str | None = None
+    profile_picture: str | None = None
 
 class LoginRequest(BaseModel):
     email: EmailStr
