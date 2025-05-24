@@ -1,15 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
-from src.crud.course import create_courses, get_courses, get_course_by_id, update_specific_course
+from src.crud.course import create_courses, get_course, get_course_by_id, update_specific_course
 from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate
 from uuid import UUID
+from typing import Optional
 
 router = APIRouter(prefix="/courses", tags=["courses"])
 
 @router.get("/")
-def get_courses(title: str, is_hidden: bool, db: Session = Depends(get_db)):
-    return get_courses(db, title, is_hidden)
+def get_courses(title: Optional[str] = None, is_hidden: Optional[bool] = None, db: Session = Depends(get_db)):
+    return get_course(db, title, is_hidden)
 
 @router.get("/{course_id}")
 def get_courses_by_id(course_id: int, db: Session = Depends(get_db)):

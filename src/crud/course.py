@@ -1,11 +1,11 @@
-from src.api.deps import get_current_user
+from src.api.deps import get_current_user, get_db
 from src.models.models import Course
 from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, CoursesRate, User
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-def get_courses(db: Session, is_hidden: bool):
+def get_course(db: Session, is_hidden: bool, title: str):
     read_courses = db.query(Course)
     if is_hidden is not None:
         read_courses = read_courses.filter(Course.is_hidden == is_hidden)
