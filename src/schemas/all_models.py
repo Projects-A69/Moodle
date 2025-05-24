@@ -83,13 +83,26 @@ class CoursesRate(BaseModel):
 class Tag(BaseModel):
     name: str
     
-class Section(BaseModel):
+class SectionInDB(BaseModel):
     title: str
     content: str
     description: str | None = None
     information: str | None = None
     link: str | None = None
     course_id: UUID
+
+class SectionCreate(BaseModel):
+    title: str
+    content: str
+    description: str
+    information: str
+
+class SectionUpdate(BaseModel):
+    title: str
+    description: str
+    information: str
+    link: str
+    section_id: UUID
 
 class StudentCourse(BaseModel):
     student_id: UUID
