@@ -1,4 +1,3 @@
-from dns.e164 import query
 from src.api.deps import get_current_user
 from src.models.models import Course
 from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, CoursesRate, User
