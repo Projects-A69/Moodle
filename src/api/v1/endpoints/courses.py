@@ -1,37 +1,36 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from src.api.deps import get_db, get_current_user
+from src.crud.course import create_courses, get_courses, get_course_by_id, update_specific_course
+from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate
 
 router = APIRouter(prefix="/courses", tags=["courses"])
 
 @router.get("/")
-def get_courses():
-    pass
+def get_courses(title: str, is_hidden: bool, db: Session = Depends(get_db)):
+    return get_courses(db, title, is_hidden)
 
-@router.post("/{course_id}")
-def get_courses_by_id():
-    pass
+@router.get("/{course_id}")
+def get_courses_by_id(course_id: int, db: Session = Depends(get_db)):
+    course = get_course_by_id(db, course_id)
+    return course
 
-@router.post("/courses")
-def create_course():
-    pass
+@router.post("/create_courses")
+def create_course(payload: CoursesCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    owner_id = current_user.id
+    new_courses = create_courses(db, payload.title, payload.description, payload.objectives, owner_id)
+    return new_courses
 
-@router.post("/{course_id}")
-def update_course():
-    pass
+@router.put("/update/{course_id}")
+def update_course(course_id: UUID, payload: CoursesUpdate, db: Session = Depends(get_db)):
+    return update_specific_course(db, course_id, payload)
 
 @router.delete("/")
-def delete_course():
-    pass
+def delete_course(course_id: UUID, db : Session = Depends(get_db)):
+    course = get_course_by_id(db, course_id)
+    return delete_course(db, course)
 
-@router.post("/{course_id}/subscribe")
-def subcribe_to_course():
-    pass
-
-@router.delete("/{course_id}/unsubscribe")
-def unsubcribe_to_course():
-    pass
-
-@router.get("rating/{course_id}")
+@router.post("rating/{course_id}")
 def get_rating_course():
     pass
 
