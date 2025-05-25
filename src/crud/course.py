@@ -4,6 +4,7 @@ from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, Cou
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
+from src.models.models import User, Role
 
 def get_course(db: Session, is_hidden: bool, title: str):
     read_courses = db.query(Course)
@@ -30,23 +31,15 @@ def create_courses(db: Session, title: str, description: str, objectives: str, o
     db.refresh(new_course)
     return new_course
 
-def delete_course(db: Session, course: Course):
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found to delete")
-    db.delete(course)
-    db.commit()
-    return course
-
 def update_specific_course(db: Session, id: UUID, payload: CoursesUpdate):
     course = get_course_by_id(db, id)
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-    if payload.title:
-        course.title = payload.title
-    if payload.description:
-        course.description = payload.description
-    if payload.objectives:
-        course.objectives = payload.objectives
+    update_data = payload.dict(exclude_unset=True)
+    if "title" in update_data:
+        course.title = update_data["title"]
+    if "description" in update_data:
+        course.description = update_data["description"]
+    if "objectives" in update_data:
+        course.objectives = update_data["objectives"]
     db.commit()
     db.refresh(course)
     return course
@@ -61,4 +54,3 @@ def update_specific_course(db: Session, id: UUID, payload: CoursesUpdate):
 #     existing_vote = db.query(CoursesRate).filter_by(user_id = user.id, course_id = course.id).first()
 #     if existing_vote:
 #         existing_vote.rating = payload.score
-

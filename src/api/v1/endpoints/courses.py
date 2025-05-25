@@ -1,8 +1,12 @@
+from email.header import Header
+
 from fastapi import APIRouter, Depends, HTTPException
+from pygments.lexer import default
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
 from src.crud.course import create_courses, get_course, get_course_by_id, update_specific_course
-from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate
+from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, User
+
 from uuid import UUID
 from typing import Optional
 
@@ -26,11 +30,6 @@ def create_course(payload: CoursesCreate, db: Session = Depends(get_db), current
 @router.put("/update/{course_id}")
 def update_course(course_id: UUID, payload: CoursesUpdate, db: Session = Depends(get_db)):
     return update_specific_course(db, course_id, payload)
-
-@router.delete("/")
-def delete_course(course_id: UUID, db : Session = Depends(get_db)):
-    course = get_course_by_id(db, course_id)
-    return delete_course(db, course)
 
 @router.post("rating/{course_id}")
 def get_rating_course():

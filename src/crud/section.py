@@ -1,4 +1,5 @@
-from src.models.models import Section
+from src.crud.course import get_course_by_id
+from src.models.models import Section, Course
 from src.schemas.all_models import SectionInDB, SectionCreate, SectionUpdate
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -12,12 +13,19 @@ def information_about_section(db: Session, section_id: UUID):
     section = db.query(Section).filter(Section.id == section_id).first()
     return section
 
-def add_section_to_course(db: Session, payload: SectionCreate):
-    new_section = Section(**payload.dict())
+def add_section_to_course(db: Session, payload: SectionCreate, course_id: UUID):
+    course = get_course_by_id(db, course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    new_section = Section(title = payload.title,
+                          content=payload.content,
+                          description = payload.description,
+                          information=payload.information,
+                          course_id=course_id)
     db.add(new_section)
     db.commit()
     db.refresh(new_section)
-    return new_section
+    return {"message": f"Section {payload.title} added to {course_id}"}
 
 def delete_section_from_course(db: Session, section: Section):
     db.delete(section)
@@ -25,7 +33,7 @@ def delete_section_from_course(db: Session, section: Section):
     return section
 
 def update_info_about_section(db: Session, payload: SectionUpdate):
-    section = get_section_by_id(db, payload.section_id)
+    section = information_about_section(db, payload.section_id)
     if payload.title:
         section.title = payload.title
     if payload.description:

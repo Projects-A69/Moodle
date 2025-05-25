@@ -105,7 +105,6 @@ class SectionUpdate(BaseModel):
     description: str
     information: str
     link: str
-    section_id: UUID
 
 class StudentCourse(BaseModel):
     student_id: UUID
