@@ -1,24 +1,11 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from src.api.deps import get_db, get_current_user
-from src.models.models import Course, Teacher
+from fastapi import APIRouter
 
 router = APIRouter(prefix="/teachers", tags=["Teachers"])
 
 
 @router.get("/courses")
-def list_accessible_courses(current_teacher: Teacher = Depends(get_current_user),
-                             db: Session = Depends(get_db)):
-    """
-    Lists all public and premium courses the teacher is owner of.
-    """
-    public_courses = db.query(Course).filter(Course.is_premium == False).all()
-    owned_courses = current_teacher.courses
-
-    return {
-        "public_courses": public_courses,
-        "owned_courses": owned_courses
-    }
+def list_accessible_courses():
+    pass
 
 
 @router.get("/courses/{course_id}")
@@ -32,8 +19,7 @@ def list_sections():
 
 
 @router.get("/")
-def view_profile(current_teacher:Teacher = Depends(get_current_user),
-                 db:Session = Depends(get_db)):
+def view_profile():
     pass
 
 
