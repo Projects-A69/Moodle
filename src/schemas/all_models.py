@@ -116,3 +116,6 @@ class StudentCourse(BaseModel):
 class CourseTag(BaseModel):
     course_id: UUID
     tag_id: UUID
+
+class CreateTag(BaseModel):
+    name: str
