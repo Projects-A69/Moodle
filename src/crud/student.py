@@ -7,10 +7,8 @@ from uuid import UUID
 from src.utils.common import get_by_id
 from src.utils.custom_responses import NotFound, BadRequest
 
-router = APIRouter(prefix="/students", tags=["Students"])
 
 
-@router.get("/courses")
 def list_accessible_courses(current_student: Student = Depends(get_current_user),
                              db: Session = Depends(get_db)):
     """
@@ -25,7 +23,6 @@ def list_accessible_courses(current_student: Student = Depends(get_current_user)
     }
 
 
-@router.post("/courses/{course_id}/subscribe")
 def subscribe_to_course(course_id: UUID,
                         current_student: Student = Depends(get_current_user),
                         db: Session = Depends(get_db)):
@@ -49,7 +46,6 @@ def subscribe_to_course(course_id: UUID,
     return {"message": f"Successfully subscribed to {course.title}"}
 
 
-@router.get("/courses/{course_id}")
 def view_course(course_id: UUID,
                 current_student: Student = Depends(get_current_user),
                 db: Session = Depends(get_db)):
@@ -67,9 +63,6 @@ def view_course(course_id: UUID,
     return course
 
 
-
-
-@router.get("/courses/{course_id}/sections")
 def list_sections(course_id: UUID,
                   current_student: Student = Depends(get_current_user),
                   db: Session = Depends(get_db)):
@@ -89,7 +82,6 @@ def list_sections(course_id: UUID,
     }
 
 
-@router.get("/courses/{course_id}/sections/{section_id}")
 def view_section(course_id: UUID,
                  section_id: UUID,
                  current_student: Student = Depends(get_current_user),
@@ -111,14 +103,12 @@ def view_section(course_id: UUID,
     return section
 
 
-@router.get("/profile")
 def view_profile(current_student: Student = Depends(get_current_user), db: Session = Depends(get_db)):
 
     student = get_by_id(db, current_student.id)
     return student
 
 
-@router.post("/courses/{course_id}/rating")
 def rate_course(course_id: UUID,
                 payload: CoursesRate,
                 current_student: Student = Depends(get_current_user),
@@ -146,8 +136,6 @@ def rate_course(course_id: UUID,
     return {"message": "Rating saved successfully"}
 
 
-
-@router.put("/profile")
 def edit_profile(payload: UserUpdate,
                  current_student: Student = Depends(get_current_user),
                  db: Session = Depends(get_db)):

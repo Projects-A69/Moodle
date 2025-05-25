@@ -1,13 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
 from src.models.models import Course, Teacher, Section
 from src.utils.common import get_by_id
 from src.utils.custom_responses import BadRequest, NotFound
 
-router = APIRouter(prefix="/teachers", tags=["Teachers"])
 
-@router.get("/courses")
 def list_accessible_courses(current_teacher: Teacher = Depends(get_current_user),
                              db: Session = Depends(get_db)):
     """
@@ -22,7 +20,6 @@ def list_accessible_courses(current_teacher: Teacher = Depends(get_current_user)
     }
 
 
-@router.get("/courses/{course_id}/sections")
 def list_sections(course_id: str,
                   current_teacher: Teacher = Depends(get_current_user),
                   db: Session = Depends(get_db)):
@@ -37,7 +34,6 @@ def list_sections(course_id: str,
     return {"sections": sections}
 
 
-@router.get("/profile")
 def view_profile(current_teacher: Teacher = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     View teacher's profile info.
@@ -47,7 +43,6 @@ def view_profile(current_teacher: Teacher = Depends(get_current_user), db: Sessi
     return teacher
 
 
-@router.post("/courses")
 def create_course(title: str, description: str, objectives: str,
                   current_teacher: Teacher = Depends(get_current_user),
                   db: Session = Depends(get_db)):
@@ -71,7 +66,6 @@ def create_course(title: str, description: str, objectives: str,
     return new_course
 
 
-@router.post("/courses/{course_id}/sections")
 def create_section(course_id: str, title: str, content: str = None, description: str = None,
                    current_teacher: Teacher = Depends(get_current_user),
                    db: Session = Depends(get_db)):
@@ -99,7 +93,6 @@ def create_section(course_id: str, title: str, content: str = None, description:
 
 
 
-@router.post("/")
 def register_as_teacher(first_name: str, last_name: str, phone_number: str = None, linked_in_acc: str = None,
                         current_user = Depends(get_current_user),
                         db: Session = Depends(get_db)):
@@ -126,8 +119,6 @@ def register_as_teacher(first_name: str, last_name: str, phone_number: str = Non
     return {"message": "Teacher registration submitted, awaiting approval."}
 
 
-
-@router.put("/courses/{course_id}")
 def edit_course(course_id: str, title: str = None, description: str = None, objectives: str = None,
                 current_teacher: Teacher = Depends(get_current_user),
                 db: Session = Depends(get_db)):
@@ -153,8 +144,6 @@ def edit_course(course_id: str, title: str = None, description: str = None, obje
     return course
 
 
-
-@router.put("/courses/{course_id}/sections/{section_id}")
 def edit_section(course_id: str, section_id: str, title: str = None, content: str = None, description: str = None,
                  current_teacher: Teacher = Depends(get_current_user),
                  db: Session = Depends(get_db)):
@@ -184,7 +173,6 @@ def edit_section(course_id: str, section_id: str, title: str = None, content: st
     return section
 
 
-@router.put("/")
 def edit_profile(first_name: str = None, last_name: str = None, phone_number: str = None, linked_in_acc: str = None,
                  current_teacher: Teacher = Depends(get_current_user),
                  db: Session = Depends(get_db)):
