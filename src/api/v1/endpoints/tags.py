@@ -1,26 +1,30 @@
 from sys import prefix
-
+from src.api import deps
+from src.crud import tag as crud_tag
+from src.schemas.all_models import Tag, CreateTag, CourseTag
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from src.api.deps import get_db
+from uuid import UUID
 
-router = APIRouter(prefix="tags", tags=["tags"])
+router = APIRouter(prefix="/tags", tags=["tags"])
 
 @router.get("/")
-def get_tags():
-    pass
+def get_tags(db: Session = Depends(get_db)):
+    return crud_tag.get_tags(db)
 
 @router.post("/")
-def create_tags():
-    pass
+def create_tags(payload: CreateTag, db: Session = Depends(get_db)):
+    return crud_tag.create_tags(db, payload)
 
 @router.delete("/{tag_id}")
-def delete_tags():
-    pass
+def delete_tags(tag_id: UUID, db: Session = Depends(get_db)):
+    return crud_tag.delete_tags(db, tag_id)
 
 @router.post("/courses/{course_id}/tags")
-def add_tag_to_course():
-    pass
+def add_tag_to_course(payload: CourseTag, db: Session = Depends(get_db)):
+    return crud_tag.add_tag_to_course(db, payload)
 
 @router.delete("/courses/{course_id}/tags/{tag_id}")
-def delete_tag_from_course():
-    pass
+def delete_tag_from_course(course_id: UUID, tag_id: UUID, db: Session = Depends(get_db)):
+    return crud_tag.delete_tag_from_course(db, course_id, tag_id)
