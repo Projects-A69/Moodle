@@ -1,26 +1,36 @@
-from fastapi import Response
+from fastapi import HTTPException, status
 
 
-class BadRequest(Response):
-    def __init__(self, content=''):
-        super().__init__(status_code=400, content=content)
+class BadRequest(HTTPException):
+    def __init__(self, detail: str = "Bad request"):
+        super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
 
 
-class NotFound(Response):
-    def __init__(self, content=''):
-        super().__init__(status_code=404, content=content)
+class NotFound(HTTPException):
+    def __init__(self, detail: str = "Not found"):
+        super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
 
 
-class Unauthorized(Response):
-    def __init__(self, content=''):
-        super().__init__(status_code=401, content=content)
+class Unauthorized(HTTPException):
+    def __init__(self, detail: str = "Unauthorized"):
+        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
 
 
-class NoContent(Response):
+class Forbidden(HTTPException):
+    def __init__(self, detail: str = "Forbidden"):
+        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
+
+
+class UnprocessableEntity(HTTPException):
+    def __init__(self, detail: str = "Unprocessable entity"):
+        super().__init__(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
+
+
+class InternalServerError(HTTPException):
+    def __init__(self, detail: str = "Internal server error"):
+        super().__init__(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail)
+
+
+class NoContent(HTTPException):
     def __init__(self):
-        super().__init__(status_code=204)
-
-
-class InternalServerError(Response):
-    def __init__(self):
-        super().__init__(status_code=500)
+        super().__init__(status_code=status.HTTP_204_NO_CONTENT, detail=None)

@@ -7,6 +7,7 @@ class User(BaseModel):
     password: str
     role: Role
     is_active: bool = True
+    is_approved: bool = False
     
 class UserCreate(BaseModel):
     email: EmailStr

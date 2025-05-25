@@ -17,6 +17,7 @@ class User(Base):
     password = Column(String(255), nullable=False)
     role = Column(Enum(Role), nullable=False)
     is_active = Column(Boolean, default=True)
+    is_approved = Column(Boolean, default=False)
     
     admin = relationship("Admin", back_populates="user", uselist=False, cascade="all, delete-orphan")
     teacher = relationship("Teacher", back_populates="user", uselist=False, cascade="all, delete-orphan")
@@ -96,6 +97,7 @@ class StudentCourse(Base):
     course_id = Column(UUID(as_uuid=True), ForeignKey('courses.id'), primary_key=True)
     status = Column(String(50), default='active')
     progress = Column(Integer, default=0)
+    score = Column(Float, nullable=True)
     
     student = relationship("Student", backref="course_associations")
     course = relationship("Course", backref="student_associations")

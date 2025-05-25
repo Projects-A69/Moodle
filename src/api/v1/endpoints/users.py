@@ -19,12 +19,14 @@ def register_user(payload: UserCreate, db: Session = Depends(get_db)):
 
 @router.get("/info")
 def get_current_user_info(current_user: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db)):
+                            db: Session = Depends(get_db)):
+    
     return user_crud.get_user_info(db, current_user)
 
 @router.put("/info")
 def update_user_info(payload: UserUpdate,db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user)):
+                    current_user: UserModel = Depends(get_current_user)):
+    
     return user_crud.update_user_info(db, current_user.id, payload)
 
 @router.post("/logout")

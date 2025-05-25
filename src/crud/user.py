@@ -4,13 +4,9 @@ from src.models.models import Admin, Role, User, Teacher, Student
 from src.schemas.all_models import UserUpdate, UserCreate, LoginRequest
 from src.core.security import hash_password, verify_password
 from uuid import UUID
+from src.utils.common import get_by_id
+from src.utils.custom_responses import Unauthorized, BadRequest, NotFound,NoContent,InternalServerError,Forbidden, UnprocessableEntity
 
-
-def get_by_id(db: Session, user_id: UUID) -> User:
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
 
 
 def get_by_email(db: Session, email: str) -> User | None:
@@ -19,34 +15,34 @@ def get_by_email(db: Session, email: str) -> User | None:
 def login_user(db: Session, payload: LoginRequest) -> User:
     user = get_by_email(db, payload.email)
     if user is None or not verify_password(payload.password, user.password):
-        raise HTTPException(status_code=400, detail="Invalid credentials.")
+        raise Unauthorized("Invalid email or password")
+        
     
     if not user.is_active:
-        raise HTTPException(status_code=403, detail="User account is deactivated.")
+        raise BadRequest("User account is deactivated. Please contact support.")
     return user
 
 
 def handle_registration(db: Session, payload: UserCreate):
     if get_by_email(db, payload.email):
-        raise HTTPException(status_code=400, detail="Email already registered")
-
+        raise BadRequest("Email already registered")
+        
     if payload.role == Role.ADMIN:
         if not payload.first_name or not payload.last_name:
-            raise HTTPException(status_code=422, detail="Admins must provide first and last name")
-
+            raise UnprocessableEntity("Admins must provide first and last name")
     elif payload.role == Role.TEACHER:
         if not payload.first_name:
-            raise HTTPException(status_code=422, detail="Teachers must provide first name")
+            raise UnprocessableEntity("Teachers must provide first name")
         if not payload.last_name:
-            raise HTTPException(status_code=422, detail="Teachers must provide last name")
+            raise UnprocessableEntity("Teachers must provide last name")
         if not payload.phone_number:
-            raise HTTPException(status_code=422, detail="Teachers must provide phone number")
+            raise UnprocessableEntity("Teachers must provide phone number")
         if not payload.linked_in_acc:
-            raise HTTPException(status_code=422, detail="Teachers must provide LinkedIn account")
+            raise UnprocessableEntity("Teachers must provide LinkedIn account")
 
     elif payload.role == Role.STUDENT:
         if not payload.first_name or not payload.last_name:
-            raise HTTPException(status_code=422, detail="Students must provide first and last name")
+            raise UnprocessableEntity("Students must provide first and last name")
 
     new_user = register_user(db, payload)
     return {"message": f"User:{payload.first_name} registered successfully", "user_id": str(new_user.id)}
@@ -54,7 +50,7 @@ def handle_registration(db: Session, payload: UserCreate):
 
 def register_user(db: Session, payload: UserCreate) -> User:
     hashed_password = hash_password(payload.password)
-    new_user = User(email=payload.email, password=hashed_password, role=payload.role)
+    new_user = User(email=payload.email.lower(), password=hashed_password, role=payload.role)
     db.add(new_user)
     db.flush()
 
@@ -108,7 +104,7 @@ def update_user_info(db: Session, user_id: UUID, payload: UserUpdate) -> User:
     if user.role == Role.ADMIN:
         admin = db.query(Admin).filter(Admin.id == user_id).first()
         if not admin:
-            raise HTTPException(status_code=404, detail="Admin not found")
+            raise NotFound("Admin not found")
         if payload.first_name:
             admin.first_name = payload.first_name
         if payload.last_name:
