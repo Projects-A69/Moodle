@@ -13,7 +13,7 @@ def get_courses(title: Optional[str] = None, is_hidden: Optional[bool] = None, d
     return get_course(db, title, is_hidden)
 
 @router.get("/{course_id}")
-def get_courses_by_id(course_id: int, db: Session = Depends(get_db)):
+def get_courses_by_id(course_id: UUID, db: Session = Depends(get_db)):
     course = get_course_by_id(db, course_id)
     return course
 
