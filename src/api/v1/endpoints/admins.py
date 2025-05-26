@@ -4,7 +4,9 @@ from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
 from src.models.models import User as UserModel, Role
 from src.crud import admin as admin_crud
-from src.utils.custom_responses import Unauthorized
+from src.utils.custom_responses import BadRequest, Unauthorized
+from itsdangerous import BadSignature, SignatureExpired
+from src.utils.token_utils import verify_approval_token
 
 router = APIRouter()
 
@@ -43,6 +45,20 @@ def approve_teacher(user_id: UUID, db: Session = Depends(get_db),
         raise Unauthorized("Only admins can approve teachers.")
     
     return admin_crud.approve_teacher_by_id(db, user_id)
+
+@router.get("/teachers/approve")
+def approve_teacher_with_token(token: str, db: Session = Depends(get_db)):
+
+
+    try:
+        user_id = verify_approval_token(token)
+    except SignatureExpired:
+        raise BadRequest("Token has expired.")
+    except BadSignature:
+        raise BadRequest("Invalid approval token.")
+
+    return admin_crud.approve_teacher_by_id(db, user_id)
+
 
 @router.get("/courses")
 def list_courses(teacher_id: UUID | None = None,student_id: UUID | None = None,
