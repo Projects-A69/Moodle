@@ -1,10 +1,9 @@
 from src.api.deps import get_current_user, get_db
-from src.models.models import Course
 from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, CoursesRate, User
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
-from src.models.models import User, Role
+from src.models.models import User, Role, StudentCourse, Course
 
 def get_course(db: Session, is_hidden: bool, title: str):
     read_courses = db.query(Course)
@@ -44,13 +43,19 @@ def update_specific_course(db: Session, id: UUID, payload: CoursesUpdate):
     db.refresh(course)
     return course
 
-# def rating_course(db: Session, id: UUID, payload: CoursesRate, user = Depends(get_current_user)):
-#     course = get_course_by_id(db, id)
-#     if user.role != Role.STUDENT:
-#         raise HTTPException(status_code=403, detail="Only student can rate course")
-#     if payload.score is None:
-#         raise HTTPException(status_code=404, detail="No score")
-#
-#     existing_vote = db.query(CoursesRate).filter_by(user_id = user.id, course_id = course.id).first()
-#     if existing_vote:
-#         existing_vote.rating = payload.score
+def rating_course(db: Session, id: UUID, payload: CoursesRate, user = Depends(get_current_user)):
+    if user.role != Role.STUDENT:
+        raise HTTPException(status_code=403, detail="Only student can rate course")
+    if payload.score is None:
+        raise HTTPException(status_code=404, detail="No score")
+    course = get_course_by_id(db, id)
+    student = db.query(StudentCourse).filter(student_id =user.id, course_id = course.id).first()
+    student.score = payload.score
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not enrolled in this course")
+    ratings = db.query(StudentCourse).filter(StudentCourse.course_id == course.id, StudentCourse.score != None).all()
+    average_rating = sum(r.score for r in ratings) / len(ratings)
+    course_rating = average_rating
+    db.commit()
+    db.refresh(course)
+    return {"course_id": course.id, "rating": course_rating}

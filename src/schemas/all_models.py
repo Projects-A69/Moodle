@@ -109,6 +109,7 @@ class SectionUpdate(BaseModel):
 class StudentCourse(BaseModel):
     student_id: UUID
     course_id: UUID
+    score: float
     status: str
     progress: int
 
