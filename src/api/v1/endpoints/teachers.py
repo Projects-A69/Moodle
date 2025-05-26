@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
 
-from src.crud.teacher import list_accessible_courses, list_sections, view_profile, register_as_teacher, edit_profile, approve_enrollment
+from src.crud.teacher import list_accessible_courses, list_sections, view_profile, register_as_teacher, edit_profile, approve_student_subscription
 
 from src.schemas.all_models import UserCreate, UserUpdate, Teacher
 
@@ -54,11 +54,11 @@ def update_teacher_profile(
 
 
 @router.post("/enrollments/{request_id}/approve")
-def approve_enrollment(
+def approve_student_subscription(
     request_id: UUID,
     current_teacher: Teacher = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    return approve_enrollment(request_id, current_teacher, db)
+    return approve_student_subscription(request_id, current_teacher, db)
 
 

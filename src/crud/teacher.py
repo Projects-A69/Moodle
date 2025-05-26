@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
-from src.models.models import Course, Teacher, EnrollmentStatus, EnrollmentRequest
+from src.models.models import Course, Teacher, Student
 from src.crud.user import get_by_id
 from src.utils.custom_responses import NotFound, Forbidden, BadRequest
 from uuid import UUID
@@ -205,22 +205,25 @@ def edit_profile(first_name: str = None, last_name: str = None, phone_number: st
     return current_teacher
 
 
-def approve_enrollment(request_id: UUID,
-                       current_teacher: Teacher = Depends(get_current_user),
-                       db: Session = Depends(get_db)):
-    request = db.query(EnrollmentRequest).filter_by(id=request_id).first()
-    if not request:
-        raise NotFound("Enrollment request not found")
+def approve_student_subscription(student_id: UUID, course_id: UUID,
+                                 current_teacher: Teacher = Depends(get_current_user),
+                                 db: Session = Depends(get_db)):
+    student = db.query(Student).filter(Student.id == student_id).first()
+    if not student:
+        raise NotFound("Student not found")
 
-    if request.course.owner_id != current_teacher.id:
-        raise Forbidden("You can only approve your own course's enrollments")
+    course = db.query(Course).filter(Course.id == course_id, Course.owner_id == current_teacher.id).first()
+    if not course:
+        raise NotFound("Course not found or you do not own it")
 
-    if request.status != EnrollmentStatus.pending:
-        raise BadRequest("This request has already been processed")
+    if course in student.courses:
+        raise BadRequest("Student already subscribed to this course")
 
-    request.status = EnrollmentStatus.approved
+    if not student.user.is_approved:
+        raise BadRequest("Student's user account is not approved")
 
-    request.course.students.append(request.student)
+    student.courses.append(course)
     db.commit()
 
-    return {"message": "Enrollment approved and student subscribed."}
+    return {"message": f"Student {student_id} successfully subscribed to course {course_id}"}
+

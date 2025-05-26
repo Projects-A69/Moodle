@@ -4,8 +4,6 @@ from src.database.base import Base
 from enum import Enum as PyEnum
 from sqlalchemy.orm import relationship
 import uuid
-from sqlalchemy import DateTime
-from datetime import datetime, timezone
 
 class Role(PyEnum):
     ADMIN = 'ADMIN'
@@ -111,20 +109,3 @@ class CourseTag(Base):
     
     course = relationship("Course", backref="tag_associations")
     tag = relationship("Tag", backref="course_associations")
-
-
-class EnrollmentStatus(PyEnum):
-    pending = "pending"
-    approved = "approved"
-    rejected = "rejected"
-
-class EnrollmentRequest(Base):
-    __tablename__ = "enrollment_requests"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    student_id = Column(UUID(as_uuid=True), ForeignKey("students.id"), nullable=False)
-    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id"), nullable=False)
-    status = Column(Enum(EnrollmentStatus), default=EnrollmentStatus.pending)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-
-    student = relationship("Student", backref="enrollment_requests")
-    course = relationship("Course", backref="enrollment_requests")
