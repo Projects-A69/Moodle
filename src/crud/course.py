@@ -4,15 +4,21 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
 from src.models.models import User, Role, StudentCourse, Course
+from typing import Optional
 
-def get_course(db: Session, is_hidden: bool, title: str):
+def get_course(db: Session, title: str, current_user: Optional[User] = None):
     read_courses = db.query(Course)
-    if is_hidden is not None:
-        read_courses = read_courses.filter(Course.is_hidden == is_hidden)
-    result = read_courses.all()
-    if not result:
-        raise HTTPException(status_code=404, detail="No courses")
-    return result
+    if title:
+        read_courses = read_courses.filter(Course.title.ilike(f"%{title}%"))
+
+    if current_user is None:
+        read_courses = read_courses.filter(Course.is_hidden == False)
+        return [{
+            "title": course.title,
+            "description": course.description} for course in read_courses.all()]
+    if current_user.role == Role.STUDENT:
+        return read_courses.filter(Course.is_hidden == False).all()
+    return read_courses.all()
 
 def get_course_by_id(db: Session, id: UUID):
     cousers = db.query(Course).filter(Course.id == id).first()
@@ -49,13 +55,13 @@ def rating_course(db: Session, id: UUID, payload: CoursesRate, user: User):
     if payload.score is None:
         raise HTTPException(status_code=404, detail="No score")
     course = get_course_by_id(db, id)
-    student = db.query(StudentCourse).filter(student_id =user.id, course_id = course.id).first()
-    student.score = payload.score
+    student = db.query(StudentCourse).filter(StudentCourse.student_id==user.id, course_id = course.id).first()
     if not student:
         raise HTTPException(status_code=404, detail="Student not enrolled in this course")
+    student.score = payload.score
     ratings = db.query(StudentCourse).filter(StudentCourse.course_id == course.id, StudentCourse.score != None).all()
     average_rating = sum(r.score for r in ratings) / len(ratings)
-    course_rating = average_rating
+    course.rating = average_rating
     db.commit()
     db.refresh(course)
     return {"course_id": course.id, "rating": course_rating}

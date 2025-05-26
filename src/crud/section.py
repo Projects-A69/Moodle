@@ -2,12 +2,17 @@ from src.crud.course import get_course_by_id
 from src.models.models import Section, Course
 from src.schemas.all_models import SectionInDB, SectionCreate, SectionUpdate
 from fastapi import HTTPException
+from src.utils.custom_responses import Unauthorized
 from sqlalchemy.orm import Session
 from uuid import UUID
+from src.api.deps import get_db, get_current_user
+from typing import Optional
 
-def get_all_sections(db: Session):
-    section = db.query(Section).all()
-    return section
+def get_all_sections(db: Session, title: Optional[str] = None):
+    section = db.query(Section)
+    if title:
+        section = section.filter(Section.title.ilike(f'%{title}%'))
+    return section.all()
 
 def information_about_section(db: Session, section_id: UUID):
     section = db.query(Section).filter(Section.id == section_id).first()

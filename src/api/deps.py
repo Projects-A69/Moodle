@@ -3,6 +3,7 @@ from fastapi import Depends, HTTPException,Header
 from src.core.authentication import from_token, is_authenticated
 from src.database.session import SessionLocal
 from sqlalchemy.orm import Session
+from typing import Optional
 
 def get_db() -> Generator:
     """
@@ -25,4 +26,13 @@ def get_current_user(token: str = Header(...), db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
     return user
+
+def optional_user(token: Optional[str] = Header(default= None), db: Session = Depends(get_db)):
+    if not token:
+        return None
+    try:
+        return from_token(db,token)
+    except:
+        return None
+
 
