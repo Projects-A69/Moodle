@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
-from src.models.models import Course, Student, Section, Role
-from src.schemas.all_models import CoursesRate, UserUpdate
+from src.models.models import Course, Student, Section, EnrollmentRequest
+from src.schemas.all_models import UserUpdate
 from uuid import UUID
-from src.utils.common import get_by_id
+from src.crud.user import get_by_id
 from src.utils.custom_responses import NotFound, BadRequest
+from src.utils.email_utils import send_email
 
 
 
@@ -24,26 +25,42 @@ def list_accessible_courses(current_student: Student = Depends(get_current_user)
 
 
 def subscribe_to_course(course_id: UUID,
+                        background_tasks: BackgroundTasks,
                         current_student: Student = Depends(get_current_user),
                         db: Session = Depends(get_db)):
     """
-    Subscribes the student to a premium course.
+    Sends an enrollment request to a premium course.
     """
     course = db.query(Course).filter(Course.id == course_id).first()
-
-    if course is None:
+    if not course:
         raise NotFound("Course not found")
-
     if not course.is_premium:
         raise BadRequest("No need to subscribe to a public course")
-
     if course in current_student.courses:
         raise BadRequest("Already subscribed to this course")
 
-    current_student.courses.append(course)
+    existing_request = db.query(EnrollmentRequest).filter_by(
+        course_id=course_id, student_id=current_student.id, status="pending"
+    ).first()
+    if existing_request:
+        raise BadRequest("You already have a pending enrollment request")
+
+    request = EnrollmentRequest(student_id=current_student.id, course_id=course_id)
+    db.add(request)
     db.commit()
 
-    return {"message": f"Successfully subscribed to {course.title}"}
+    to_email = course.owner.user.email
+    subject = f"Enrollment Request for {course.title}"
+    body = (
+        f"Hello {course.owner.user.first_name},\n\n"
+        f"{current_student.first_name} {current_student.last_name} "
+        f"has requested enrollment in your course: {course.title}.\n\n"
+        "Please review the request in your dashboard."
+    )
+
+    background_tasks.add_task(send_email, to_email, subject, body)
+
+    return {"message": "Enrollment request submitted. Please wait for approval."}
 
 
 def view_course(course_id: UUID,
@@ -109,31 +126,31 @@ def view_profile(current_student: Student = Depends(get_current_user), db: Sessi
     return student
 
 
-def rate_course(course_id: UUID,
-                payload: CoursesRate,
-                current_student: Student = Depends(get_current_user),
-                db: Session = Depends(get_db)):
-    """
-    Allows a student to rate a course.
-    """
-    course = db.query(Course).filter(Course.id == course_id).first()
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-
-    if current_student.user.role != Role.STUDENT:
-        raise HTTPException(status_code=403, detail="Only students can rate courses")
-
-    existing_rating = db.query(CoursesRate).filter_by(user_id=current_student.id, course_id=course_id).first()
-
-    if existing_rating:
-        existing_rating.score = payload.score
-    else:
-        new_rating = CoursesRate(id=course_id, user_id=current_student.id, score=payload.score)
-        db.add(new_rating)
-
-    db.commit()
-
-    return {"message": "Rating saved successfully"}
+# def rate_course(course_id: UUID,
+#                 payload: CoursesRate,
+#                 current_student: Student = Depends(get_current_user),
+#                 db: Session = Depends(get_db)):
+#     """
+#     Allows a student to rate a course.
+#     """
+#     course = db.query(Course).filter(Course.id == course_id).first()
+#     if not course:
+#         raise HTTPException(status_code=404, detail="Course not found")
+#
+#     if current_student.user.role != Role.STUDENT:
+#         raise HTTPException(status_code=403, detail="Only students can rate courses")
+#
+#     existing_rating = db.query(CoursesRate).filter_by(user_id=current_student.id, course_id=course_id).first()
+#
+#     if existing_rating:
+#         existing_rating.score = payload.score
+#     else:
+#         new_rating = CoursesRate(id=course_id, user_id=current_student.id, score=payload.score)
+#         db.add(new_rating)
+#
+#     db.commit()
+#
+#     return {"message": "Rating saved successfully"}
 
 
 def edit_profile(payload: UserUpdate,
