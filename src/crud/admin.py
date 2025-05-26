@@ -1,13 +1,12 @@
 from uuid import UUID
 from sqlalchemy.orm import Session
-from src.utils.custom_responses import Unauthorized,BadRequest
+from src.utils.custom_responses import BadRequest
 from src.models.models import StudentCourse, User,Role, Admin, Teacher, Student,Course
-from src.crud import user as user_crud
 from src.utils.custom_responses import NotFound
 from src.crud.user import get_by_id
 
 
-def list_all_users(db: Session,current_user: User,role:str = None, search:str = None) -> list[User]:
+def list_all_users(db: Session,role:str = None, search:str = None) -> list[User]:
 
     if role and role.upper() not in ["ADMIN", "TEACHER", "STUDENT"]:
         raise BadRequest("Invalid role. Must be one of: ADMIN, TEACHER, STUDENT.")
