@@ -20,6 +20,9 @@ def information_about_section(db: Session, section_id: UUID):
 
 def add_section_to_course(db: Session, payload: SectionCreate, course_id: UUID):
     course = get_course_by_id(db, course_id)
+    existing_title = db.query(Section).filter(Section.title == payload.title).first().title
+    if existing_title:
+        raise HTTPException(status_code=400, detail='Title already exists')
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     new_section = Section(title = payload.title,
@@ -30,12 +33,14 @@ def add_section_to_course(db: Session, payload: SectionCreate, course_id: UUID):
     db.add(new_section)
     db.commit()
     db.refresh(new_section)
-    return {"message": f"Section {payload.title} added to {course_id}"}
+    return {"message": f"Section {payload.title} added to {course.title}"}
 
 def delete_section_from_course(db: Session, section: Section):
+    if section is None:
+        raise HTTPException(status_code=404, detail="Course not found")
     db.delete(section)
     db.commit()
-    return section
+    return {"message": f"Section {section.title} deleted"}
 
 def update_info_about_section(db: Session, payload: SectionUpdate):
     section = information_about_section(db, payload.section_id)

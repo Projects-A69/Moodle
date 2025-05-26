@@ -28,10 +28,10 @@ def delete_tags(tag_id: UUID, db: Session = Depends(get_db), current_user = Depe
     return crud_tag.delete_tags(db, tag_id)
 
 @router.post("/courses/{course_id}/tags")
-def add_tag_to_course(payload: CourseTag, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def add_tag_to_course(course_id: UUID, tag_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     if current_user.role not in [Role.TEACHER, Role.ADMIN]:
         raise Unauthorized("Access for teacher only!")
-    return crud_tag.add_tag_to_course(db, payload)
+    return crud_tag.add_tag_to_course(db, course_id, tag_id)
 
 @router.delete("/courses/{course_id}/tags/{tag_id}")
 def delete_tag_from_course(course_id: UUID, tag_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):

@@ -1,6 +1,7 @@
 from pydantic import BaseModel,EmailStr
 from uuid import UUID
 from src.models.models import Role
+from typing import Optional
 
 class User(BaseModel):
     email: EmailStr
@@ -65,18 +66,21 @@ class CourseInDB(BaseModel):
     is_hidden: bool
     picture: str
     rating: float
-    score: float
 
 class CoursesCreate(BaseModel):
     title: str
     description: str
     objectives: str
+    picture: str
+    is_premium: bool
 
 class CoursesUpdate(BaseModel):
     title: str
     description: str
     objectives: str
     picture: str
+    is_premium: bool
+    is_hidden: bool
 
 class CoursesRate(BaseModel):
     id: UUID
@@ -84,6 +88,13 @@ class CoursesRate(BaseModel):
     score: float
 
 class Tag(BaseModel):
+    name: str
+
+class CourseTag(BaseModel):
+    course_id: UUID
+    tag_id: UUID
+
+class CreateTag(BaseModel):
     name: str
     
 class SectionInDB(BaseModel):
@@ -112,10 +123,3 @@ class StudentCourse(BaseModel):
     score: float
     status: str
     progress: int
-
-class CourseTag(BaseModel):
-    course_id: UUID
-    tag_id: UUID
-
-class CreateTag(BaseModel):
-    name: str

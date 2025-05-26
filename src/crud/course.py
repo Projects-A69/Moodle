@@ -17,7 +17,7 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
             "title": course.title,
             "description": course.description} for course in read_courses.all()]
     if current_user.role == Role.STUDENT:
-        return read_courses.filter(Course.is_hidden == False).all()
+        return read_courses.filter(Course.is_hidden == False, Course.is_premium == False).all()
     return read_courses.all()
 
 def get_course_by_id(db: Session, id: UUID):
@@ -26,11 +26,11 @@ def get_course_by_id(db: Session, id: UUID):
         raise HTTPException(status_code=404, detail="Course not found")
     return cousers
 
-def create_courses(db: Session, title: str, description: str, objectives: str, owner_id: UUID):
+def create_courses(db: Session, title: str, description: str, objectives: str, picture: str, is_premium: bool, owner_id: UUID):
     existing_title = db.query(Course).filter(Course.title == title).first()
     if existing_title:
         raise HTTPException(status_code=400, detail="Title already exists")
-    new_course = Course(title = title, description = description, objectives = objectives, owner_id= owner_id)
+    new_course = Course(title = title, description = description, objectives = objectives, picture= picture, is_premium = is_premium, owner_id= owner_id)
     db.add(new_course)
     db.commit()
     db.refresh(new_course)
@@ -45,9 +45,11 @@ def update_specific_course(db: Session, id: UUID, payload: CoursesUpdate):
         course.description = update_data["description"]
     if "objectives" in update_data:
         course.objectives = update_data["objectives"]
+    if "picture" in update_data:
+        course.picture = update_data["picture"]
     db.commit()
     db.refresh(course)
-    return course
+    return {"title": course.title, "description": course.description, "objectives": course.objectives, "picture": course.picture}
 
 def rating_course(db: Session, id: UUID, payload: CoursesRate, user: User):
     if user.role != Role.STUDENT:

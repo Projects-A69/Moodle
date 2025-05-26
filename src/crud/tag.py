@@ -26,7 +26,7 @@ def delete_tags(db: Session, tag_id: UUID):
     tag = db.query(TagModel).filter(TagModel.id == tag_id).first()
     db.delete(tag)
     db.commit()
-    return {"message": f"{tag_id} is deleted"}
+    return {"message": f"{tag.name} is deleted"}
 
 def add_tag_to_course(db: Session, payload: CourseTag):
     course = get_course_by_id(db, payload.course_id)
@@ -38,7 +38,7 @@ def add_tag_to_course(db: Session, payload: CourseTag):
     course.tags.append(tag)
     db.commit()
     db.refresh(course)
-    return {"message": f"Tag {payload.tag_id} added to {course.title}"}
+    return {"message": f"Tag {tag.name} added to {course.title}"}
 
 def delete_tag_from_course(db: Session, course_id: UUID, tag_id: UUID):
     course = get_course_by_id(db, course_id)
@@ -47,4 +47,4 @@ def delete_tag_from_course(db: Session, course_id: UUID, tag_id: UUID):
         raise HTTPException(status_code=404, detail="Tag not found")
     course.tags.remove(tag)
     db.commit()
-    return {"message": f"Tag {tag.id} removed from {course.title}"}
+    return {"message": f"Tag {tag.name} removed from {course.title}"}
