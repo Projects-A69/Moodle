@@ -34,14 +34,15 @@ def delete_section_from_course(db: Session, section: Section):
 
 def update_info_about_section(db: Session, payload: SectionUpdate):
     section = information_about_section(db, payload.section_id)
-    if payload.title:
-        section.title = payload.title
-    if payload.description:
-        section.description = payload.description
-    if payload.information:
-        section.information = payload.information
-    if payload.link:
-        section.link = payload.link
+    update_data = payload.dict(exclude_unset=True)
+    if "title" in update_data:
+        section.title = update_data["title"]
+    if "description" in update_data:
+        section.description = update_data["description"]
+    if "information" in update_data:
+        section.information = update_data["information"]
+    if "link" in update_data:
+        section.link = update_data["link"]
     db.commit()
     db.refresh(section)
     return section

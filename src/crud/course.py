@@ -43,7 +43,7 @@ def update_specific_course(db: Session, id: UUID, payload: CoursesUpdate):
     db.refresh(course)
     return course
 
-def rating_course(db: Session, id: UUID, payload: CoursesRate, user = Depends(get_current_user)):
+def rating_course(db: Session, id: UUID, payload: CoursesRate, user: User):
     if user.role != Role.STUDENT:
         raise HTTPException(status_code=403, detail="Only student can rate course")
     if payload.score is None:
