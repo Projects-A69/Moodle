@@ -64,7 +64,6 @@ class Course(Base):
     is_hidden = Column(Boolean, default=False)
     picture = Column(String(255))
     rating = Column(Float, default=0.0)
-    score = Column(Float, default=0.0)
    
     owner = relationship("Teacher", back_populates="courses")
     students = relationship("Student", secondary="student_courses", back_populates="courses")

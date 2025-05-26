@@ -4,6 +4,7 @@ from src.utils.custom_responses import BadRequest
 from src.models.models import StudentCourse, User,Role, Admin, Teacher, Student,Course
 from src.utils.custom_responses import NotFound
 from src.crud.user import get_by_id
+from src.utils.email_utils import send_email
 
 
 def list_all_users(db: Session,role:str = None, search:str = None) -> list[User]:
@@ -48,7 +49,7 @@ def list_all_users(db: Session,role:str = None, search:str = None) -> list[User]
 
     return result
 
-def update_user_activation(db: Session, user_id: UUID):
+def update_user_active(db: Session, user_id: UUID):
     user = get_by_id(db, user_id)
     
     user.is_active = not user.is_active
@@ -102,7 +103,7 @@ def approve_teacher_by_id(db: Session, user_id: UUID):
 def list_all_courses(db: Session,
                      teacher_id: UUID = None,
                      student_id: UUID = None,
-                     title: str = None):
+                     title: str = None,skip: int = 0, limit: int = 10):
     query = db.query(Course)
 
     if teacher_id:
@@ -114,7 +115,7 @@ def list_all_courses(db: Session,
     if title:
         query = query.filter(Course.title.ilike(f"%{title}%"))
 
-    courses = query.all()
+    courses = query.offset(skip).limit(limit).all()
 
     result = []
     for course in courses:
@@ -147,7 +148,14 @@ def hide_course_crud(db: Session, course_id: UUID):
 
     course.is_hidden = True
     db.commit()
-
+    for student in course.students:
+        user = db.query(User).filter(User.id == student.id).first()
+        if user and user.email:
+            send_email(
+                to=user.email,
+                subject="Course Hidden Notification",
+                body=f"The course '{course.title}' has been temporarily hidden by an administrator and is currently unavailable.")
+            
     return {"message": f"Course {course.title} hidden successfully."}
 
 def delete_course_crud(db: Session, course_id: UUID):
@@ -156,6 +164,15 @@ def delete_course_crud(db: Session, course_id: UUID):
     if not course:
         raise NotFound(f"Course with ID: {course_id} not found")
 
+    for student in course.students:
+        user = db.query(User).filter(User.id == student.id).first()
+        if user and user.email:
+            send_email(
+                to=user.email,
+                subject="Course Deleted Notification",
+                body=f"The course '{course.title}' has been deleted by an administrator and is no longer available."
+            )
+    
     db.delete(course)
     db.commit()
 

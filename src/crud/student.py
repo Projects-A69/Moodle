@@ -138,7 +138,7 @@ def rate_course(course_id: UUID,
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    if current_student.user.role != Role.STUDENT:
+    if current_student.role != Role.STUDENT:
         raise HTTPException(status_code=403, detail="Only students can rate courses")
 
     existing_rating = db.query(CoursesRate).filter_by(user_id=current_student.id, course_id=course_id).first()
