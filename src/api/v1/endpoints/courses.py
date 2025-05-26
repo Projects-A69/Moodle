@@ -24,8 +24,8 @@ def get_courses_by_id(course_id: UUID, db: Session = Depends(get_db)):
 @router.post("/create_courses")
 def create_course(payload: CoursesCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     owner_id = current_user.id
-    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
-        raise Unauthorized("Access for teacher or admin only!")
+    if current_user.role != Role.TEACHER:
+        raise Unauthorized("Only teachers can create courses!")
     new_courses = create_courses(db, payload.title, payload.description, payload.objectives, owner_id)
     return new_courses
 

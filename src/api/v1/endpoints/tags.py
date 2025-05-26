@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
 from uuid import UUID
+from src.utils.custom_responses import *
 
 router = APIRouter(prefix="/tags", tags=["tags"])
 
