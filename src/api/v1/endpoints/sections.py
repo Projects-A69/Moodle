@@ -18,6 +18,7 @@ def get_section_by_id(section_id: UUID, db: Session = Depends(get_db)):
 @router.post("/")
 def add_section(course_id: UUID, payload: SectionCreate, db: Session = Depends(get_db)):
     section = add_section_to_course(db, payload, course_id)
+    return section
 
 @router.delete("/{section_id}")
 def delete_section(section_id: UUID, db: Session = Depends(get_db)):
