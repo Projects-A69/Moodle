@@ -4,7 +4,7 @@ from src.utils.custom_responses import Unauthorized,BadRequest
 from src.models.models import StudentCourse, User,Role, Admin, Teacher, Student,Course
 from src.crud import user as user_crud
 from src.utils.custom_responses import NotFound
-from src.utils.common import get_by_id
+from src.crud.user import get_by_id
 
 
 def list_all_users(db: Session,current_user: User,role:str = None, search:str = None) -> list[User]:

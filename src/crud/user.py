@@ -1,12 +1,19 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
+from src.core.config import settings
 from src.models.models import Admin, Role, User, Teacher, Student
 from src.schemas.all_models import UserUpdate, UserCreate, LoginRequest
 from src.core.security import hash_password, verify_password
 from uuid import UUID
-from src.utils.common import get_by_id
 from src.utils.custom_responses import Unauthorized, BadRequest, NotFound, UnprocessableEntity
+from src.utils.email_utils import send_email
+from src.utils.token_utils import generate_approval_token
 
+def get_by_id(db: Session, user_id: UUID) -> User:
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise NotFound(f"User with id {user_id} not found")
+    return user
 
 
 def get_by_email(db: Session, email: str) -> User | None:
@@ -45,6 +52,20 @@ def handle_registration(db: Session, payload: UserCreate):
             raise UnprocessableEntity("Students must provide first and last name")
 
     new_user = register_user(db, payload)
+    if payload.role == Role.TEACHER:
+        token = generate_approval_token(str(new_user.id))
+        approve_link = f"{settings.APP_BASE_URL}/api/v1/admins/teachers/approve?token={token}"
+        email_body = (
+            f"A new teacher has registered:\n\n"
+            f"Name: {payload.first_name} {payload.last_name}\n"
+            f"Email: {payload.email}\n\n"
+            f"Click the link below to approve this teacher:\n"
+            f"{approve_link}")
+
+        send_email(
+            to=settings.ADMIN_NOTIFICATION_EMAIL,
+            subject="New Teacher Registration - Approval Required",
+            body=email_body)
     return {"message": f"User:{payload.first_name} registered successfully", "user_id": str(new_user.id)}
 
 
