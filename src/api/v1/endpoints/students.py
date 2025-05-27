@@ -1,10 +1,19 @@
+<<<<<<< HEAD
 from fastapi import APIRouter, Depends
+=======
+from re import S
+from fastapi import APIRouter, Depends, BackgroundTasks
+>>>>>>> 148cc55 (Working on RESTful endpoints, and separation of concerns)
 from sqlalchemy.orm import Session
 from uuid import UUID
 
 from src.api.deps import get_db, get_current_user
 from src.models.models import Student
+<<<<<<< HEAD
 from src.schemas.all_models import CoursesRate, UserUpdate
+=======
+from src.schemas.all_models import StudentUpdate, CoursesRate
+>>>>>>> 148cc55 (Working on RESTful endpoints, and separation of concerns)
 
 from src.crud.student import list_accessible_courses, subscribe_to_course, view_course, list_sections, view_section, view_profile, rate_course, edit_profile
 

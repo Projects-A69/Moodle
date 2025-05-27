@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
-from pygments.lexer import default
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import current_user
 from src.api.deps import get_db, get_current_user, optional_user

@@ -1,7 +1,6 @@
 from pydantic import BaseModel,EmailStr
 from uuid import UUID
 from src.models.models import Role
-from typing import Optional
 
 class User(BaseModel):
     email: EmailStr
@@ -10,17 +9,33 @@ class User(BaseModel):
     is_active: bool = True
     is_approved: bool = False
     
-class UserCreate(BaseModel):
+class BaseUserCreate(BaseModel):
     email: EmailStr
     password: str
     role: Role
+
+class AdminCreate(BaseUserCreate):
     first_name: str
     last_name: str
-    profile_picture: str | None = None
-    phone_number: str | None = None
-    linked_in_acc: str| None = None
 
-class UserUpdate(BaseModel):
+class TeacherCreate(BaseUserCreate):
+    first_name: str
+    last_name: str
+    profile_picture: str| None = None
+    phone_number: str
+    linked_in_acc: str
+
+class StudentCreate(BaseUserCreate):
+    first_name: str
+    last_name: str
+    profile_picture: str| None = None
+
+class AdminUpdate(BaseModel):
+    password: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+
+class TeacherUpdate(BaseModel):
     password: str | None = None
     first_name: str | None = None
     last_name: str | None = None
@@ -28,6 +43,11 @@ class UserUpdate(BaseModel):
     linked_in_acc: str | None = None
     profile_picture: str | None = None
 
+class StudentUpdate(BaseModel):
+    password: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    profile_picture: str | None = None
 
 class LoginRequest(BaseModel):
     email: EmailStr

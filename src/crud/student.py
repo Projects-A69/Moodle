@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
 from src.models.models import Course, Student, Section, Role
-from src.schemas.all_models import CoursesRate, UserUpdate
+from src.schemas.all_models import CoursesRate, StudentUpdate
 from uuid import UUID
 from src.crud.user import get_by_id
 from src.utils.custom_responses import NotFound, BadRequest
@@ -155,7 +155,7 @@ def rate_course(course_id: UUID,
     return {"message": "Rating saved successfully"}
 
 
-def edit_profile(payload: UserUpdate,
+def edit_profile(payload: StudentUpdate,
                  current_student: Student = Depends(get_current_user),
                  db: Session = Depends(get_db)):
     """
