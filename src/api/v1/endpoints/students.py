@@ -1,19 +1,19 @@
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from uuid import UUID
 
 from src.api.deps import get_db, get_current_user
 from src.models.models import Student
-from src.schemas.all_models import UserUpdate, CoursesRate
+from src.schemas.all_models import CoursesRate
 
 from src.crud.student import list_accessible_courses, subscribe_to_course, view_course, list_sections, view_section, \
-    view_profile, edit_profile, rate_course
+    view_profile, rate_course
 
-router = APIRouter(prefix="/students", tags=["Students"])
+router = APIRouter(prefix="/students", tags=["students"])
 
 
 @router.get("/courses")
-def list_accessible_courses_endpoint(
+def list_accessible_courses(
     current_student: Student = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -21,22 +21,19 @@ def list_accessible_courses_endpoint(
 
 
 @router.post("/courses/{course_id}/subscribe")
-def subscribe_to_course_endpoint(
+def subscribe_to_course(
     course_id: UUID,
-    background_tasks: BackgroundTasks,
     current_student: Student = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     return subscribe_to_course(
         course_id=course_id,
-        background_tasks=background_tasks,
         current_student=current_student,
-        db=db,
-    )
+        db=db,)
 
 
 @router.get("/courses/{course_id}")
-def view_course_endpoint(
+def view_course(
     course_id: UUID,
     current_student: Student = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -45,7 +42,7 @@ def view_course_endpoint(
 
 
 @router.get("/courses/{course_id}/sections")
-def list_sections_endpoint(
+def list_sections(
     course_id: UUID,
     current_student: Student = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -54,7 +51,7 @@ def list_sections_endpoint(
 
 
 @router.get("/courses/{course_id}/sections/{section_id}")
-def view_section_endpoint(
+def view_section(
     course_id: UUID,
     section_id: UUID,
     current_student: Student = Depends(get_current_user),
@@ -66,23 +63,14 @@ def view_section_endpoint(
 
 
 @router.get("/")
-def view_profile_endpoint(
+def view_profile(
     current_student: Student = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     return view_profile(current_student=current_student, db=db)
 
 
-@router.put("/profile")
-def edit_profile_endpoint(
-    payload: UserUpdate,
-    current_student: Student = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    return edit_profile(payload=payload, current_student=current_student, db=db)
-
-
 @router.post("/courses/{course_id}/rate")
-def rate_course_endpoint(
+def rate_course(
     course_id: UUID,
     payload: CoursesRate,
     current_student: Student = Depends(get_current_user),

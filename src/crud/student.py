@@ -1,14 +1,14 @@
-from fastapi import Depends, HTTPException, BackgroundTasks
+from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
 from src.models.models import Course, Student, Section, Role
-from src.schemas.all_models import UserUpdate, CoursesRate
+from src.schemas.all_models import CoursesRate
 from uuid import UUID
 from src.crud.user import get_by_id
 from src.utils.custom_responses import NotFound, BadRequest
 from src.utils.email_utils import send_email
-
-
+from src.utils.token_utils import generate_approval_token
+from src.core.config import settings
 
 def list_accessible_courses(current_student: Student = Depends(get_current_user),
                              db: Session = Depends(get_db)):
@@ -26,13 +26,9 @@ def list_accessible_courses(current_student: Student = Depends(get_current_user)
 
 def subscribe_to_course(
     course_id: UUID,
-    background_tasks: BackgroundTasks,
     current_student: Student = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Directly subscribes an approved student to a premium course.
-    """
     course = db.query(Course).filter(Course.id == course_id).first()
     if not course:
         raise NotFound("Course not found")
@@ -43,25 +39,27 @@ def subscribe_to_course(
     if course in current_student.courses:
         raise BadRequest("Already subscribed to this course")
 
-    if not current_student.user.is_approved:
-        raise BadRequest("Your student account is not approved to subscribe to premium courses")
+    if current_student.user.is_approved:
+        current_student.courses.append(course)
+        db.commit()
+        return {"message": "Successfully subscribed to the course."}
 
-    current_student.courses.append(course)
-    db.commit()
+    token = generate_approval_token(f"{current_student.id}:{course_id}")
+    approve_link = f"{settings.APP_BASE_URL}/api/v1/teachers/approve-subscription?token={token}"
 
     to_email = course.owner.user.email
-    subject = f"New Subscriber for {course.title}"
+    subject = f"Student Subscription Request for {course.title}"
     body = (
         f"Hello {course.owner.user.first_name},\n\n"
-        f"{current_student.first_name} {current_student.last_name} "
-        f"has subscribed to your course: {course.title}.\n\n"
-        "Thank you for your contribution!"
+        f"{current_student.first_name} {current_student.last_name} wants to subscribe to your premium course: {course.title}.\n"
+        f"To approve this student and allow access, click the link below:\n\n"
+        f"{approve_link}\n\n"
+        "Thank you!"
     )
 
-    background_tasks.add_task(send_email, to_email, subject, body)
+    send_email(to_email, subject, body)
 
-    return {"message": "Successfully subscribed to the course."}
-
+    return {"message": "Approval request sent to the course owner. Awaiting approval."}
 
 
 def view_course(course_id: UUID,
@@ -138,8 +136,11 @@ def rate_course(course_id: UUID,
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    if current_student.user.role != Role.STUDENT:
+    if current_student != Role.STUDENT:
         raise HTTPException(status_code=403, detail="Only students can rate courses")
+
+    if not (1 <= payload.score <= 10):
+        raise HTTPException(status_code=400, detail="Score must be between 1 and 10")
 
     existing_rating = db.query(CoursesRate).filter_by(user_id=current_student.id, course_id=course_id).first()
 
@@ -152,30 +153,3 @@ def rate_course(course_id: UUID,
     db.commit()
 
     return {"message": "Rating saved successfully"}
-
-
-def edit_profile(payload: UserUpdate,
-                 current_student: Student = Depends(get_current_user),
-                 db: Session = Depends(get_db)):
-    """
-    Update current student's profile fields.
-    """
-    if payload.password:
-        current_student.user.password = payload.password
-    if payload.first_name:
-        current_student.first_name = payload.first_name
-    if payload.last_name:
-        current_student.last_name = payload.last_name
-    if payload.phone_number:
-        current_student.phone_number = payload.phone_number
-    if payload.linked_in_acc:
-        current_student.linked_in_acc = payload.linked_in_acc
-    if payload.profile_picture:
-        current_student.profile_picture = payload.profile_picture
-
-    db.commit()
-    db.refresh(current_student)
-
-    return current_student
-
-
