@@ -136,7 +136,7 @@ def list_all_courses(db: Session,
     return result
 
 
-def hide_course_crud(db: Session, course_id: UUID):
+def toggle_course_visability(db: Session, course_id: UUID):
     course = db.query(Course).filter(Course.id == course_id).first()
 
     if not course:
@@ -157,7 +157,7 @@ def hide_course_crud(db: Session, course_id: UUID):
             
     return {"message": f"Course {course.title} hidden successfully."}
 
-def delete_course_crud(db: Session, course_id: UUID):
+def delete_course(db: Session, course_id: UUID):
     course = db.query(Course).filter(Course.id == course_id).first()
 
     if not course:
@@ -191,7 +191,7 @@ def remove_student_from_course(db: Session, course_id: UUID, student_id: UUID):
 
     return {"message": f"Student with ID: {student_id} removed from course with ID: {course_id} successfully."}
 
-def trace_course_ratings(db: Session, course_id: UUID):
+def get_course_ratings(db: Session, course_id: UUID):
     ratings = db.query(StudentCourse).filter(
         StudentCourse.course_id == course_id,
         StudentCourse.score.isnot(None)
