@@ -6,8 +6,7 @@ from src.api.deps import get_db, get_current_user
 from src.models.models import Student
 from src.schemas.all_models import CoursesRate
 
-from src.crud.student import list_accessible_courses, subscribe_to_course, view_course, list_sections, view_section, \
-    view_profile, rate_course, unsubscribe_from_course
+from src.crud.student import list_accessible_courses, subscribe_to_course, view_course, list_sections, view_section, view_profile, rate_course, unsubscribe_from_course
 
 router = APIRouter()
 
