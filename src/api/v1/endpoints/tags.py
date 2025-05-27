@@ -11,11 +11,11 @@ from src.utils.custom_responses import *
 
 router = APIRouter(prefix="/tags", tags=["tags"])
 
-@router.get("/")
+@router.get("")
 def get_tags(db: Session = Depends(get_db)):
     return crud_tag.get_tags(db)
 
-@router.post("/")
+@router.post("")
 def create_tags(payload: CreateTag, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     if current_user.role != Role.TEACHER:
         raise Unauthorized("Access for teacher only!")

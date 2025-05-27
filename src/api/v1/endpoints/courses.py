@@ -10,7 +10,7 @@ from typing import Optional
 
 router = APIRouter(prefix="/courses", tags=["courses"])
 
-@router.get("/")
+@router.get("")
 def get_courses(title: Optional[str] = None, db: Session = Depends(get_db), current_user: Optional[User] = Depends(optional_user)):
     return get_course(db, title = title, current_user = current_user)
 
@@ -18,10 +18,10 @@ def get_courses(title: Optional[str] = None, db: Session = Depends(get_db), curr
 def get_courses_by_id(course_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     if current_user.role != Role.TEACHER:
         raise Unauthorized("Only teachers can create courses!")
-    course = get_course_by_id(db, course_id)
+    course = get_course_by_id(db, course_id, current_user = current_user)
     return course
 
-@router.post("/create_courses")
+@router.post("")
 def create_course(payload: CoursesCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     owner_id = current_user.id
     if current_user.role != Role.TEACHER:
@@ -29,13 +29,13 @@ def create_course(payload: CoursesCreate, db: Session = Depends(get_db), current
     new_courses = create_courses(db, payload.title, payload.description, payload.objectives, payload.picture, payload.is_premium, owner_id)
     return new_courses
 
-@router.put("/update/{course_id}")
+@router.put("/courses/{course_id}")
 def update_course(course_id: UUID, payload: CoursesUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     if current_user.role != Role.TEACHER:
         raise Unauthorized("Only teacher can update courses!")
     return update_specific_course(db, course_id, payload, current_user= current_user)
 
-@router.post("/rating/{course_id}")
+@router.post("/courses/{course_id}")
 def get_rating_course(course_id: UUID, payload: CoursesRate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if current_user.role != Role.TEACHER:
         raise Unauthorized("Only teacher can view rating courses!")

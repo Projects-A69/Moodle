@@ -12,7 +12,6 @@ class User(BaseModel):
 class BaseUserCreate(BaseModel):
     email: EmailStr
     password: str
-    role: Role
 
 class AdminCreate(BaseUserCreate):
     first_name: str
@@ -95,12 +94,12 @@ class CoursesCreate(BaseModel):
     is_premium: bool
 
 class CoursesUpdate(BaseModel):
-    title: str
-    description: str
-    objectives: str
-    picture: str
-    is_premium: bool
-    is_hidden: bool
+    title: str | None = None
+    description: str | None = None
+    objectives: str | None = None
+    picture: str | None = None
+    is_premium: bool | None = None
+    is_hidden: bool | None = None
 
 class CoursesRate(BaseModel):
     id: UUID
@@ -133,11 +132,11 @@ class SectionCreate(BaseModel):
     link: str
 
 class SectionUpdate(BaseModel):
-    title: str
-    content: str
-    description: str
-    information: str
-    link: str
+    title: str | None = None
+    content: str | None = None
+    description: str | None = None
+    information: str | None = None
+    link: str | None = None
 
 class StudentCourse(BaseModel):
     student_id: UUID
