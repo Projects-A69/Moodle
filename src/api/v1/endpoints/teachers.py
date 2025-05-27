@@ -3,11 +3,11 @@ from uuid import UUID
 from itsdangerous import BadSignature, SignatureExpired
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
-from src.crud.teacher import list_accessible_courses, list_sections, view_profile, remove_student_from_course
+from src.crud.teacher import approve_student_by_id, list_accessible_courses, list_sections, view_profile, remove_student_from_course
 from src.models.models import Role, User
 from src.schemas.all_models import Teacher
 from src.utils.custom_responses import Unauthorized, BadRequest
-from src.utils.token_utils import verify_approval_token
+from src.utils.token_utils import verify_student_approval_token
 
 router = APIRouter()
 
@@ -41,7 +41,7 @@ def view_profile(
 def approve_student_by_token(token: str,
                              db: Session = Depends(get_db)):
     try:
-        user_id = verify_approval_token(token)
+        user_id = verify_student_approval_token(token)
     except SignatureExpired:
         raise BadRequest("Token has expired.")
 
@@ -73,7 +73,7 @@ def remove_student_from_course(course_id: UUID,
     return remove_student_from_course(db, course_id, student_id)
 
 @router.put("/courses/{course_id}/students/{student_id}", tags=["courses"])
-def approve_student_by_id(course_id: UUID,
+def approve_student_by_ids(course_id: UUID,
                           student_id: UUID,
                           db: Session = Depends(get_db),
                           current_user: User = Depends(get_current_user)):

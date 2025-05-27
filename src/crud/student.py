@@ -7,7 +7,7 @@ from uuid import UUID
 from src.crud.user import get_by_id
 from src.utils.custom_responses import NotFound, BadRequest
 from src.utils.email_utils import send_email
-from src.utils.token_utils import generate_approval_token
+from src.utils.token_utils import generate_student_approval_token
 from src.core.config import settings
 
 def list_accessible_courses(current_student: Student = Depends(get_current_user),
@@ -46,8 +46,8 @@ def subscribe_to_course(
         db.commit()
         return {"message": "Successfully subscribed to the course."}
 
-    token = generate_approval_token(f"{current_student.id}:{course_id}")
-    approve_link = f"{settings.APP_BASE_URL}/api/v1/teachers/approve-subscription?token={token}"
+    token = generate_student_approval_token(str(current_student.id))
+    approve_link = f"{settings.APP_BASE_URL}/api/v1/teachers/teachers/approval?token={token}"
     owner = course.owner
     to_email = owner.user.email
     subject = f"Student Subscription Request for {course.title}"
