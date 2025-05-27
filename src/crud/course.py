@@ -18,10 +18,8 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
             "description": course.description} for course in read_courses.all()]
     if current_user.role == Role.STUDENT:
         public_course = read_courses.filter(Course.is_hidden == False, Course.is_premium == False).all()
-        enrolled_premium = db.query(StudentCourse.course_id).filter(StudentCourse.student_id == current_user.id, StudentCourse.course.has(is_premium=True)).all()
-        premium_course = [row.course_id for row in enrolled_premium]
-        premium_courses = read_courses.filter(Course.id.in_(premium_course)).all()
-        return public_course + premium_courses
+        premium_courses = read_courses.join(StudentCourse).filter(Course.is_hidden == False, Course.is_premium == True, StudentCourse.student_id == current_user.id)
+        return public_course.all() + premium_courses.all()
     if current_user.role == Role.TEACHER:
         courses = []
         for course in read_courses.all():
