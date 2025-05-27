@@ -130,7 +130,6 @@ def list_all_courses(db: Session,
             "is_hidden": course.is_hidden,
             "picture": course.picture,
             "rating": course.rating,
-            "score": course.score,
             "student_count": len(course.students)
         })
 

@@ -17,7 +17,7 @@ def get_all_users(role: str = None,search: str = None,db: Session = Depends(get_
     if current_user.role != Role.ADMIN:
         raise Unauthorized("Only admins can list all users.")
     
-    return admin_crud.list_all_users(db, current_user, role, search)
+    return admin_crud.list_all_users(db, role, search)
 
 @router.put("/users/update-status/{user_id}")
 def update_is_active(user_id: UUID, db: Session = Depends(get_db),
