@@ -31,8 +31,8 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
     return read_courses.all()
 
 def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None):
-    cousers = db.query(Course).filter(Course.id == id).first()
-    if not cousers:
+    course = db.query(Course).filter(Course.id == id).first()
+    if not course:
         raise HTTPException(status_code=403, detail="Course not found")
     if current_user is None:
         if course.is_hidden or course.is_premium:
@@ -47,7 +47,7 @@ def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None)
     elif current_user.role == Role.TEACHER:
         if course.is_hidden and course.owner_id != current_user.id:
             raise HTTPException(status_code=403, detail="Access denied")
-    return cousers
+    return course
 
 def create_courses(db: Session, title: str, description: str, objectives: str, picture: str, is_premium: bool, owner_id: UUID):
     existing_title = db.query(Course).filter(Course.title == title).first()
