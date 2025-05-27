@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
 from src.models.models import Course, Student, Section, Role
-from src.schemas.all_models import CoursesRate
+from src.schemas.all_models import CoursesRate, UserUpdate
 from uuid import UUID
 from src.crud.user import get_by_id
 from src.utils.custom_responses import NotFound, BadRequest
@@ -153,3 +153,28 @@ def rate_course(course_id: UUID,
     db.commit()
 
     return {"message": "Rating saved successfully"}
+
+
+def edit_profile(payload: UserUpdate,
+                 current_student: Student = Depends(get_current_user),
+                 db: Session = Depends(get_db)):
+    """
+    Update current student's profile fields.
+    """
+    if payload.password:
+        current_student.user.password = payload.password
+    if payload.first_name:
+        current_student.first_name = payload.first_name
+    if payload.last_name:
+        current_student.last_name = payload.last_name
+    if payload.phone_number:
+        current_student.phone_number = payload.phone_number
+    if payload.linked_in_acc:
+        current_student.linked_in_acc = payload.linked_in_acc
+    if payload.profile_picture:
+        current_student.profile_picture = payload.profile_picture
+
+    db.commit()
+    db.refresh(current_student)
+
+    return current_student

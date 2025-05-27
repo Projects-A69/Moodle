@@ -4,10 +4,9 @@ from uuid import UUID
 
 from src.api.deps import get_db, get_current_user
 from src.models.models import Student
-from src.schemas.all_models import CoursesRate
+from src.schemas.all_models import CoursesRate, UserUpdate
 
-from src.crud.student import list_accessible_courses, subscribe_to_course, view_course, list_sections, view_section, \
-    view_profile, rate_course
+from src.crud.student import list_accessible_courses, subscribe_to_course, view_course, list_sections, view_section, view_profile, rate_course, edit_profile
 
 router = APIRouter(prefix="/students", tags=["students"])
 
@@ -82,3 +81,12 @@ def rate_course(
         current_student=current_student,
         db=db
     )
+
+
+@router.put("/profile")
+def edit_profile_endpoint(
+    payload: UserUpdate,
+    current_student: Student = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return edit_profile(payload=payload, current_student=current_student, db=db)

@@ -77,3 +77,23 @@ def approve_student_by_token(token: str, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": "Student approved successfully"}
+
+
+def edit_profile(first_name: str = None, last_name: str = None, phone_number: str = None, linked_in_acc: str = None,
+                 current_teacher: Teacher = Depends(get_current_user),
+                 db: Session = Depends(get_db)):
+    """
+    Edit teacher profile details.
+    """
+    if first_name:
+        current_teacher.first_name = first_name
+    if last_name:
+        current_teacher.last_name = last_name
+    if phone_number:
+        current_teacher.phone_number = phone_number
+    if linked_in_acc:
+        current_teacher.linked_in_acc = linked_in_acc
+
+    db.commit()
+    db.refresh(current_teacher)
+    return current_teacher
