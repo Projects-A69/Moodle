@@ -7,30 +7,30 @@ from src.models.models import Role
 from uuid import UUID
 router = APIRouter(prefix="/sections", tags=["sections"])
 
-@router.get("/")
+@router.get("/sections")
 def get_sections(db: Session = Depends(get_db)):
     return get_all_sections(db)
 
-@router.get("/{section_id}")
+@router.get("/courses/{section_id}")
 def get_section_by_id(section_id: UUID, db: Session = Depends(get_db)):
     section = information_about_section(db, section_id)
     return section
 
-@router.post("/")
+@router.post("/sections")
 def add_section(course_id: UUID, payload: SectionCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     if current_user.role != Role.TEACHER:
         raise Unauthorized("Access for teacher only!")
     section = add_section_to_course(db, payload, course_id)
     return section
 
-@router.delete("/{section_id}")
+@router.delete("/sections/{section_id}")
 def delete_section(section_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     if current_user.role != Role.TEACHER:
         raise Unauthorized("Access for teacher only!")
     section = information_about_section(db, section_id)
     return delete_section_from_course(db, section)
 
-@router.put("/{section_id}")
+@router.put("/sections/{section_id}")
 def update_section(section: UUID, payload: SectionUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     if current_user.role != Role.TEACHER:
         raise Unauthorized("Access for teacher only!")
