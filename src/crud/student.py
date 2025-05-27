@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
-from src.models.models import Course, Student, Section, Role
+from src.models.models import Course, Student, Section, Role,StudentCourse
 from src.schemas.all_models import CoursesRate
 from uuid import UUID
 from src.crud.user import get_by_id
@@ -38,22 +38,22 @@ def subscribe_to_course(
     if not course.is_premium:
         raise BadRequest("No need to subscribe to a public course")
 
-    if course in current_student.courses:
-        raise BadRequest("Already subscribed to this course")
+    # if course in current_student.courses:
+    #     raise BadRequest("Already subscribed to this course")
 
-    if current_student.user.is_approved:
+    if current_student.is_approved:
         current_student.courses.append(course)
         db.commit()
         return {"message": "Successfully subscribed to the course."}
 
     token = generate_approval_token(f"{current_student.id}:{course_id}")
     approve_link = f"{settings.APP_BASE_URL}/api/v1/teachers/approve-subscription?token={token}"
-
-    to_email = course.owner.email
+    owner = course.owner
+    to_email = owner.user.email
     subject = f"Student Subscription Request for {course.title}"
     body = (
         f"Hello {course.owner.first_name},\n\n"
-        f"{current_student.first_name} {current_student.last_name} wants to subscribe to your premium course: {course.title}.\n"
+        f"{current_student.student.first_name} {current_student.student.last_name} wants to subscribe to your premium course: {course.title}.\n"
         f"To approve this student and allow access, click the link below:\n\n"
         f"{approve_link}\n\n"
         "Thank you!"

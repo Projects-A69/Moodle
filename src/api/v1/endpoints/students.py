@@ -21,7 +21,7 @@ def list_accessible_courses(
 
 
 @router.post("/courses/{course_id}/subscribe")
-def subscribe_to_course(
+def subscribe_to_courses(
     course_id: UUID,
     current_student: Student = Depends(get_current_user),
     db: Session = Depends(get_db),
