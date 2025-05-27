@@ -30,10 +30,23 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
         return courses
     return read_courses.all()
 
-def get_course_by_id(db: Session, id: UUID):
+def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None):
     cousers = db.query(Course).filter(Course.id == id).first()
     if not cousers:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=403, detail="Course not found")
+    if current_user is None:
+        if course.is_hidden or course.is_premium:
+            raise HTTPException(status_code=403, detail="Access denied")
+    if current_user.role == Role.STUDENT:
+        if course.is_hidden:
+            raise HTTPException(status_code=403, detail="This course is hidden")
+        if course.is_premium:
+            enrolled_premium = db.query(StudentCourse).filterby(student_id == current_user.id, course_id = course.id).first()
+            if not enrolled_premium:
+                raise HTTPException(status_code=403, detail="You do not have enrolled in this premium course")
+    elif current_user.role == Role.TEACHER:
+        if course.is_hidden and course.owner_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Access denied")
     return cousers
 
 def create_courses(db: Session, title: str, description: str, objectives: str, picture: str, is_premium: bool, owner_id: UUID):
