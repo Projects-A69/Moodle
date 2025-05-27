@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
 from src.models.models import Course, Student, Section, Role
-from src.schemas.all_models import CoursesRate, StudentUpdate
+from src.schemas.all_models import CoursesRate
 from uuid import UUID
 from src.crud.user import get_by_id
 from src.utils.custom_responses import NotFound, BadRequest
@@ -27,8 +27,10 @@ def list_accessible_courses(current_student: Student = Depends(get_current_user)
 def subscribe_to_course(
     course_id: UUID,
     current_student: Student = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
+    db: Session = Depends(get_db)):
+    """
+    Allows a student to subscribe to a premium course, if the Teacher who owns the Course approves him.
+    """
     course = db.query(Course).filter(Course.id == course_id).first()
     if not course:
         raise NotFound("Course not found")
@@ -47,10 +49,10 @@ def subscribe_to_course(
     token = generate_approval_token(f"{current_student.id}:{course_id}")
     approve_link = f"{settings.APP_BASE_URL}/api/v1/teachers/approve-subscription?token={token}"
 
-    to_email = course.owner.user.email
+    to_email = course.owner.email
     subject = f"Student Subscription Request for {course.title}"
     body = (
-        f"Hello {course.owner.user.first_name},\n\n"
+        f"Hello {course.owner.first_name},\n\n"
         f"{current_student.first_name} {current_student.last_name} wants to subscribe to your premium course: {course.title}.\n"
         f"To approve this student and allow access, click the link below:\n\n"
         f"{approve_link}\n\n"
@@ -60,6 +62,26 @@ def subscribe_to_course(
     send_email(to_email, subject, body)
 
     return {"message": "Approval request sent to the course owner. Awaiting approval."}
+
+
+def unsubscribe_from_course(
+    course_id: UUID,
+    current_student: Student = Depends(get_current_user),
+    db: Session = Depends(get_db)):
+    """
+    Allows a student to unsubscribe from any course.
+    """
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise NotFound("Course not found")
+
+    if course not in current_student.courses:
+        raise BadRequest("You are not subscribed to this course")
+
+    current_student.courses.remove(course)
+    db.commit()
+
+    return {"message": f"Unsubscribed from {course.title} successfully."}
 
 
 def view_course(course_id: UUID,
@@ -119,7 +141,8 @@ def view_section(course_id: UUID,
     return section
 
 
-def view_profile(current_student: Student = Depends(get_current_user), db: Session = Depends(get_db)):
+def view_profile(current_student: Student = Depends(get_current_user),
+                 db: Session = Depends(get_db)):
 
     student = get_by_id(db, current_student.id)
     return student
@@ -153,28 +176,3 @@ def rate_course(course_id: UUID,
     db.commit()
 
     return {"message": "Rating saved successfully"}
-
-
-def edit_profile(payload: StudentUpdate,
-                 current_student: Student = Depends(get_current_user),
-                 db: Session = Depends(get_db)):
-    """
-    Update current student's profile fields.
-    """
-    if payload.password:
-        current_student.user.password = payload.password
-    if payload.first_name:
-        current_student.first_name = payload.first_name
-    if payload.last_name:
-        current_student.last_name = payload.last_name
-    if payload.phone_number:
-        current_student.phone_number = payload.phone_number
-    if payload.linked_in_acc:
-        current_student.linked_in_acc = payload.linked_in_acc
-    if payload.profile_picture:
-        current_student.profile_picture = payload.profile_picture
-
-    db.commit()
-    db.refresh(current_student)
-
-    return current_student
