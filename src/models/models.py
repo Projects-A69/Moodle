@@ -59,12 +59,11 @@ class Course(Base):
     title = Column(String(255), unique=True, nullable=False)
     description = Column(Text)
     objectives = Column(Text)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey('teachers.id'), nullable=True)
+    owner_id = Column(UUID(as_uuid=True), ForeignKey('teachers.id'), nullable=False)
     is_premium = Column(Boolean, default=False)
     is_hidden = Column(Boolean, default=False)
     picture = Column(String(255))
     rating = Column(Float, default=0.0)
-    score = Column(Float, default=0.0)
    
     owner = relationship("Teacher", back_populates="courses")
     students = relationship("Student", secondary="student_courses", back_populates="courses")

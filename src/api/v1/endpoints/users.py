@@ -29,6 +29,13 @@ def update_user_info(payload: UserUpdate,db: Session = Depends(get_db),
     
     return user_crud.update_user_info(db, current_user.id, payload)
 
+@router.delete("/delete")
+def delete_own_account(db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)):
+    return user_crud.delete_user(db, current_user.id)
+
+
 @router.post("/logout")
 def logout():
-    pass
+    return {"message": "Successfully logged out."}
+

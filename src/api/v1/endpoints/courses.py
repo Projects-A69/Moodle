@@ -24,21 +24,21 @@ def get_courses_by_id(course_id: UUID, db: Session = Depends(get_db)):
 @router.post("/create_courses")
 def create_course(payload: CoursesCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     owner_id = current_user.id
-    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
-        raise Unauthorized("Access for teacher or admin only!")
-    new_courses = create_courses(db, payload.title, payload.description, payload.objectives, owner_id)
+    if current_user.role != Role.TEACHER:
+        raise Unauthorized("Only teachers can create courses!")
+    new_courses = create_courses(db, payload.title, payload.description, payload.objectives, payload.picture, payload.is_premium, owner_id)
     return new_courses
 
 @router.put("/update/{course_id}")
 def update_course(course_id: UUID, payload: CoursesUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
-        raise Unauthorized("Access for teacher only!")
-    return update_specific_course(db, course_id, payload)
+    if current_user.role != Role.TEACHER:
+        raise Unauthorized("Only teacher can update courses!")
+    return update_specific_course(db, course_id, payload, current_user= current_user)
 
 @router.post("/rating/{course_id}")
 def get_rating_course(course_id: UUID, payload: CoursesRate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
-        raise Unauthorized("Access for teacher only!")
+    if current_user.role != Role.TEACHER:
+        raise Unauthorized("Only teacher can view rating courses!")
     return rating_course(db =db, id = id, payload = payload, user = user)
 
 

@@ -157,7 +157,13 @@ def update_user_info(db: Session, user_id: UUID, payload: UserUpdate) -> User:
         if payload.profile_picture:
             student.profile_picture = payload.profile_picture
         
-
     db.commit()
     db.refresh(user)
     return user
+
+
+def delete_user(db: Session, user_id: UUID):
+    user = get_by_id(db, user_id)
+    db.delete(user)
+    db.commit()
+    return {"message": "Account deleted successfully."}

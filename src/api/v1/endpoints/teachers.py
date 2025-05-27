@@ -6,6 +6,8 @@ from src.crud.teacher import list_accessible_courses, list_sections, view_profil
 from src.schemas.all_models import Teacher
 
 
+from src.schemas.all_models import UserCreate, UserUpdate, Teacher
+
 router = APIRouter(prefix="/teachers", tags=["teachers"])
 
 
