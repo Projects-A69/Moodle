@@ -48,25 +48,30 @@ def create_courses(db: Session, title: str, description: str, objectives: str, p
     db.refresh(new_course)
     return new_course
 
-def update_specific_course(db: Session, id: UUID, payload: CoursesUpdate):
+def update_specific_course(db: Session, id: UUID, payload: CoursesUpdate, current_user: Optional[User] = None):
+    if current_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
     course = get_course_by_id(db, id)
     update_data = payload.dict(exclude_unset=True)
-    if "title" in update_data:
-        existing = db.query(Course).filter(Course.title == update_data["title"], Course.id != id).first()
-        if existing:
-            raise HTTPException(status_code=400, detail="Course already exists")
-        course.title = update_data["title"]
-    if "description" in update_data:
-        course.description = update_data["description"]
-    if "objectives" in update_data:
-        course.objectives = update_data["objectives"]
-    if "picture" in update_data:
-        course.picture = update_data["picture"]
-    if "is_premium" in update_data:
-        course.is_premium = update_data["is_premium"]
-    db.commit()
-    db.refresh(course)
-    return course
+    if course.owner_id == current_user.id or current_user.role == Role.ADMIN:
+        if "title" in update_data:
+            existing = db.query(Course).filter(Course.title == update_data["title"], Course.id != id).first()
+            if existing:
+                raise HTTPException(status_code=400, detail="Course already exists")
+            course.title = update_data["title"]
+        if "description" in update_data:
+            course.description = update_data["description"]
+        if "objectives" in update_data:
+            course.objectives = update_data["objectives"]
+        if "picture" in update_data:
+            course.picture = update_data["picture"]
+        if "is_premium" in update_data:
+            course.is_premium = update_data["is_premium"]
+        db.commit()
+        db.refresh(course)
+        return course
+    else:
+        raise HTTPException(status_code=403, detail="You dont have permission to edit this course")
 
 def rating_course(db: Session, id: UUID, payload: CoursesRate, user: User):
     if user.role != Role.STUDENT:
