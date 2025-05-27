@@ -51,22 +51,23 @@ def create_courses(db: Session, title: str, description: str, objectives: str, p
 def update_specific_course(db: Session, id: UUID, payload: CoursesUpdate, current_user: Optional[User] = None):
     if current_user is None:
         raise HTTPException(status_code=404, detail="User not found")
+
     course = get_course_by_id(db, id)
-    update_data = payload.dict(exclude_unset=True)
+
     if course.owner_id == current_user.id or current_user.role == Role.ADMIN:
-        if "title" in update_data:
-            existing = db.query(Course).filter(Course.title == update_data["title"], Course.id != id).first()
+        if payload.title is not None:
+            existing = db.query(Course).filter(Course.title == payload.title, Course.id != id).first()
             if existing:
                 raise HTTPException(status_code=400, detail="Course already exists")
-            course.title = update_data["title"]
-        if "description" in update_data:
-            course.description = update_data["description"]
-        if "objectives" in update_data:
-            course.objectives = update_data["objectives"]
-        if "picture" in update_data:
-            course.picture = update_data["picture"]
-        if "is_premium" in update_data:
-            course.is_premium = update_data["is_premium"]
+            course.title = payload.title
+        if payload.description is not None:
+            course.description = payload.description
+        if payload.objectives is not None:
+            course.objectives = payload.objectives
+        if payload.picture is not None:
+            course.picture = payload.picture
+        if payload.is_premium is not None:
+            course.is_premium = payload.is_premium
         db.commit()
         db.refresh(course)
         return course
@@ -74,8 +75,6 @@ def update_specific_course(db: Session, id: UUID, payload: CoursesUpdate, curren
         raise HTTPException(status_code=403, detail="You dont have permission to edit this course")
 
 def rating_course(db: Session, id: UUID, payload: CoursesRate, user: User):
-    if user.role != Role.STUDENT:
-        raise HTTPException(status_code=403, detail="Only student can rate course")
     if payload.score is None:
         raise HTTPException(status_code=404, detail="No score")
     course = get_course_by_id(db, id)
@@ -88,4 +87,4 @@ def rating_course(db: Session, id: UUID, payload: CoursesRate, user: User):
     course.rating = average_rating
     db.commit()
     db.refresh(course)
-    return {"course_id": course.id, "rating": course_rating}
+    return {"course_id": course.id, "rating": average_rating}

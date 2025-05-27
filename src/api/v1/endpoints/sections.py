@@ -34,4 +34,4 @@ def delete_section(section_id: UUID, db: Session = Depends(get_db), current_user
 def update_section(section: UUID, payload: SectionUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     if current_user.role not in [Role.TEACHER, Role.ADMIN]:
         raise Unauthorized("Access for teacher only!")
-    return update_info_about_section(db, payload)
+    return update_info_about_section(db, section, payload, current_user = current_user)

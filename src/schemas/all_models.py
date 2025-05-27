@@ -110,9 +110,11 @@ class SectionCreate(BaseModel):
     content: str
     description: str
     information: str
+    link: str
 
 class SectionUpdate(BaseModel):
     title: str
+    content: str
     description: str
     information: str
     link: str

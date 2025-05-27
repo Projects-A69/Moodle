@@ -6,7 +6,6 @@ from src.api.deps import get_db, get_current_user, optional_user
 from src.crud.course import create_courses, get_course, get_course_by_id, update_specific_course, rating_course
 from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, User, CoursesRate, Role
 from src.utils.custom_responses import Unauthorized
-
 from uuid import UUID
 from typing import Optional
 
@@ -17,7 +16,9 @@ def get_courses(title: Optional[str] = None, db: Session = Depends(get_db), curr
     return get_course(db, title = title, current_user = current_user)
 
 @router.get("/{course_id}")
-def get_courses_by_id(course_id: UUID, db: Session = Depends(get_db)):
+def get_courses_by_id(course_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    if current_user.role != Role.TEACHER:
+        raise Unauthorized("Only teachers can create courses!")
     course = get_course_by_id(db, course_id)
     return course
 
