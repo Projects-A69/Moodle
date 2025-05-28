@@ -2,7 +2,6 @@ from typing import Generator, Optional
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-
 from src.core.authentication import from_token
 from src.database.session import SessionLocal
 from src.models.models import Role, User
