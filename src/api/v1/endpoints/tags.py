@@ -38,3 +38,7 @@ def delete_tag_from_course(course_id: UUID, tag_id: UUID, db: Session = Depends(
     if current_user.role != Role.TEACHER:
         raise Unauthorized("Access for teacher only!")
     return crud_tag.delete_tag_from_course(db, course_id, tag_id)
+
+@router.get("/courses/{course_id}/tags")
+def found_course_tags(tag_name: str, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    return crud_tag.search_course_by_tag(db, tag_name)

@@ -34,9 +34,9 @@ def update_course(course_id: UUID, payload: CoursesUpdate, db: Session = Depends
     return update_specific_course(db, course_id, payload, current_user= current_user)
 
 @router.post("/courses/{course_id}")
-def get_rating_course(course_id: UUID, payload: CoursesRate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def get_rating_course(course_id: UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     if current_user.role != Role.TEACHER:
         raise Unauthorized("Only teacher can view rating courses!")
-    return rating_course(db =db, id = id, payload = payload, user = user)
+    return rating_course(db, course_id, current_user)
 
 

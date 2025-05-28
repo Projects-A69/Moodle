@@ -61,10 +61,9 @@ from src.utils.token_utils import verify_student_approval_token
 #     return course
 
 
-def approve_student_by_token(token: str,
-                             db: Session = Depends(get_db)):
+def approve_student_by_token(token: str, db: Session = Depends(get_db)):
     """
-    Approves student enrolling in the course.
+    Approves a student's enrollment in a specific course using the token from the teacher's email.
     """
     try:
         data = verify_student_approval_token(token)
@@ -72,9 +71,8 @@ def approve_student_by_token(token: str,
         course_id = UUID(data["course_id"])
     except Exception:
         raise BadRequest("Invalid or expired approval token.")
-    
-    user = get_by_id(db, student_id)
 
+    user = get_by_id(db, student_id)
     if not user or user.role != Role.STUDENT:
         raise NotFound("Student not found")
 
@@ -82,15 +80,21 @@ def approve_student_by_token(token: str,
     if not course:
         raise NotFound("Course not found")
 
-    user.is_approved = True
-    existing = db.query(StudentCourse).filter_by(
+    enrollment = db.query(StudentCourse).filter_by(
         student_id=student_id, course_id=course_id
     ).first()
-    if not existing:
-        db.add(StudentCourse(student_id=student_id, course_id=course_id))
+
+    if not enrollment:
+        enrollment = StudentCourse(
+            student_id=student_id,
+            course_id=course_id,
+            is_approved=True)
+        db.add(enrollment)
+    else:
+        enrollment.is_approved = True
 
     db.commit()
-    
+
     return {"message": f"Student approved and enrolled in '{course.title}'."}
 
 
@@ -124,9 +128,6 @@ def approve_student_by_id(db: Session, student_id: UUID, course_id: UUID):
     if user.role != Role.STUDENT:
         raise BadRequest("User is not a student")
 
-    if not user.is_approved:
-        user.is_approved = True
-
     course = db.query(Course).filter(Course.id == course_id).first()
     if not course:
         raise NotFound("Course not found")
@@ -136,11 +137,19 @@ def approve_student_by_id(db: Session, student_id: UUID, course_id: UUID):
     ).first()
 
     if not existing:
-        db.add(StudentCourse(student_id=student_id, course_id=course_id))
+        existing = StudentCourse(
+            student_id=student_id,
+            course_id=course_id,
+            is_approved=True
+        )
+        db.add(existing)
+    else:
+        existing.is_approved = True
 
     db.commit()
 
     return {"message": f"Student approved and enrolled in '{course.title}'."}
+
 
 
 
