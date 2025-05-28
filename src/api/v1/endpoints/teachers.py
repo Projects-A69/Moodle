@@ -3,7 +3,7 @@ from uuid import UUID
 from itsdangerous import BadSignature, SignatureExpired
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
-from src.crud.teacher import approve_student_by_id, list_accessible_courses, list_sections, view_profile, remove_student_from_course
+from src.crud.teacher import approve_student_by_id, remove_student_from_course
 from src.models.models import Role, User
 from src.schemas.all_models import Teacher
 from src.utils.custom_responses import Unauthorized, BadRequest
@@ -12,29 +12,29 @@ from src.utils.token_utils import verify_student_approval_token
 router = APIRouter()
 
 
-@router.get("/courses")
-def list_accessible_courses(
-    current_teacher: Teacher = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    return list_accessible_courses(current_teacher, db)
-
-
-@router.get("/courses/{course_id}/sections")
-def list_sections(
-    course_id: UUID,
-    current_teacher: Teacher = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    return list_sections(course_id, current_teacher, db)
-
-
-@router.get("/")
-def view_profile(
-    current_teacher: Teacher = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    return view_profile(current_teacher, db)
+# @router.get("/courses")
+# def list_accessible_courses(
+#     current_teacher: Teacher = Depends(get_current_user),
+#     db: Session = Depends(get_db),
+# ):
+#     return list_accessible_courses(current_teacher, db)
+#
+#
+# @router.get("/courses/{course_id}/sections")
+# def list_sections(
+#     course_id: UUID,
+#     current_teacher: Teacher = Depends(get_current_user),
+#     db: Session = Depends(get_db),
+# ):
+#     return list_sections(course_id, current_teacher, db)
+#
+#
+# @router.get("/")
+# def view_profile(
+#     current_teacher: Teacher = Depends(get_current_user),
+#     db: Session = Depends(get_db),
+# ):
+#     return view_profile(current_teacher, db)
 
 
 @router.get("/teachers/approval")
