@@ -1,9 +1,9 @@
 from src.api.deps import get_current_user, get_db
-from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, CoursesRate, User
+from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, CoursesRate, User, StudentCourse
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
-from src.models.models import User, Role, StudentCourse, Course
+from src.models.models import User, Role, StudentCourse, Course, Teacher
 from typing import Optional
 
 def get_course(db: Session, title: str, current_user: Optional[User] = None):
@@ -41,11 +41,11 @@ def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None)
         if course.is_hidden:
             raise HTTPException(status_code=403, detail="This course is hidden")
         if course.is_premium:
-            enrolled_premium = db.query(StudentCourse).filterby(student_id == current_user.id, course_id = course.id).first()
+            enrolled_premium = db.query(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.course_id == course.id).first()
             if not enrolled_premium:
                 raise HTTPException(status_code=403, detail="You do not have enrolled in this premium course")
     elif current_user.role == Role.TEACHER:
-        if course.is_hidden and course.owner_id != current_user.id:
+        if course.is_hidden or course.owner_id != current_user.id:
             raise HTTPException(status_code=403, detail="Access denied")
     return course
 

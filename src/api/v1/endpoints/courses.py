@@ -16,8 +16,6 @@ def get_courses(title: Optional[str] = None, db: Session = Depends(get_db), curr
 
 @router.get("/{course_id}")
 def get_courses_by_id(course_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    if current_user.role != Role.TEACHER:
-        raise Unauthorized("Only teachers can create courses!")
     course = get_course_by_id(db, course_id, current_user = current_user)
     return course
 

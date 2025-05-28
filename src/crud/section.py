@@ -18,9 +18,12 @@ def information_about_section(db: Session, section_id: UUID):
     section = db.query(Section).filter(Section.id == section_id).first()
     return section
 
-def add_section_to_course(db: Session, payload: SectionCreate, course_id: UUID):
+def add_section_to_course(db: Session, payload: SectionCreate, course_id: UUID, current_user = User):
     course = get_course_by_id(db, course_id)
     existing_title = db.query(Section).filter(Section.title == payload.title).first()
+
+    # if course.owner_id != current_user.id:
+    #     raise Unauthorized("Access for owner only!")
     if existing_title:
         raise HTTPException(status_code=400, detail='Title already exists')
     if not course:

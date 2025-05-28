@@ -1,7 +1,4 @@
-from re import U
-from httpx import UnsupportedProtocol
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
 from src.core.config import settings
 from src.models.models import Admin, Role, User, Teacher, Student
 from src.schemas.all_models import AdminCreate, TeacherCreate, StudentCreate, LoginRequest
