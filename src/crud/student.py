@@ -78,7 +78,9 @@ def subscribe_to_course(
     return {"message": "Approval request sent to the course owner. Awaiting approval."}
 
 
-def unsubscribe_from_course(db: Session, course_id: UUID, student_id: UUID):
+def unsubscribe_from_course(student_id: UUID,
+                            course_id: UUID,
+                            db: Session=Depends(get_db)):
     student_course = db.query(StudentCourse).filter(
         StudentCourse.course_id == course_id,
         StudentCourse.student_id == student_id).first()
