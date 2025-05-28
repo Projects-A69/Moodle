@@ -20,8 +20,7 @@ def get_section_by_id(section_id: UUID, db: Session = Depends(get_db)):
 def add_section(course_id: UUID, payload: SectionCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     if current_user.role != Role.TEACHER:
         raise Unauthorized("Access for teacher only!")
-    section = add_section_to_course(db, payload, course_id)
-    return section
+    return add_section_to_course(db, payload, course_id, current_user = current_user)
 
 @router.delete("/sections/{section_id}")
 def delete_section(section_id: UUID, db: Session = Depends(get_db), current_user = Depends(get_current_user)):

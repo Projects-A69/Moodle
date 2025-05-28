@@ -1,9 +1,9 @@
 from src.api.deps import get_current_user, get_db
-from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, CoursesRate, User
+from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, CoursesRate, User, StudentCourse, Role
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
-from src.models.models import User, Role, StudentCourse, Course
+from src.models.models import User, Role, StudentCourse, Course, CourseTag
 from typing import Optional
 
 def get_course(db: Session, title: str, current_user: Optional[User] = None):
@@ -41,10 +41,10 @@ def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None)
         if course.is_hidden:
             raise HTTPException(status_code=403, detail="This course is hidden")
         if course.is_premium:
-            enrolled_premium = db.query(StudentCourse).filterby(student_id == current_user.id, course_id = course.id).first()
+            enrolled_premium = db.query(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.course_id == course.id).first()
             if not enrolled_premium:
                 raise HTTPException(status_code=403, detail="You do not have enrolled in this premium course")
-    elif current_user.role == Role.TEACHER:
+    if current_user.role == Role.TEACHER:
         if course.is_hidden and course.owner_id != current_user.id:
             raise HTTPException(status_code=403, detail="Access denied")
     return course
@@ -85,16 +85,22 @@ def update_specific_course(db: Session, id: UUID, payload: CoursesUpdate, curren
     else:
         raise HTTPException(status_code=403, detail="You dont have permission to edit this course")
 
-def rating_course(db: Session, id: UUID, payload: CoursesRate, user: User):
-    if payload.score is None:
-        raise HTTPException(status_code=404, detail="No score")
-    course = get_course_by_id(db, id)
-    student = db.query(StudentCourse).filter(StudentCourse.student_id==user.id, course_id = course.id).first()
+def rating_course(db: Session, id: UUID, user: User):
+    course = db.query(Course).filter(Course.id == id).first()
+    if not course:
+        raise HTTPException(status_code= 403, detail="Course not found")
+    student = db.query(StudentCourse).filter(StudentCourse.student_id==user.id, StudentCourse.course_id == course.id).first()
     if not student:
         raise HTTPException(status_code=404, detail="Student not enrolled in this course")
-    student.score = payload.score
+    if student.score is None:
+        raise HTTPException(status_code = 404, detail="You have not rate this course")
     ratings = db.query(StudentCourse).filter(StudentCourse.course_id == course.id, StudentCourse.score != None).all()
-    average_rating = sum(r.score for r in ratings) / len(ratings)
+    if not ratings:
+        average_rating = 0
+    else:
+        total_score = sum(r.score for r in ratings) / len(ratings)
+        max_score = len(ratings) * 10
+        average_rating = (total_score / max_score) * 10
     course.rating = average_rating
     db.commit()
     db.refresh(course)
