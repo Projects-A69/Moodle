@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.schemas.all_models import SectionCreate, SectionUpdate, SectionInDB, User
 from src.crud.section import get_all_sections, information_about_section, add_section_to_course, delete_section_from_course, update_info_about_section
 from src.api.deps import get_db, get_current_user
-from src.models.models import Role
+from src.models.models import Role, Course
 from uuid import UUID
 
 from src.utils.custom_responses import Unauthorized
@@ -11,8 +11,8 @@ from src.utils.custom_responses import Unauthorized
 router = APIRouter(prefix="/sections", tags=["sections"])
 
 @router.get("/sections")
-def get_sections(db: Session = Depends(get_db)):
-    return get_all_sections(db)
+def get_sections(course_id: UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return get_all_sections(db, course_id, current_user = current_user)
 
 @router.get("/courses/{section_id}")
 def get_section_by_id(section_id: UUID, db: Session = Depends(get_db)):
