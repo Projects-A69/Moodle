@@ -32,3 +32,13 @@ def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != Role.ADMIN:
         raise Unauthorized("Only admins can perform this action.")
     return current_user
+
+def get_teacher_user(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != Role.TEACHER:
+        raise Unauthorized("Only teachers can perform this action.")
+    return current_user
+
+def get_student_user(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != Role.STUDENT:
+        raise Unauthorized("Only students can perform this action.")
+    return current_user
