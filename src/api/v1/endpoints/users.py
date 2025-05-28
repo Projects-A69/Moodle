@@ -40,11 +40,20 @@ def get_current_user_info(current_user: UserModel = Depends(get_current_user),
     
     return user_crud.get_user_info(db, current_user)
 
-@router.put("/me")
-def update_user_info_endpoint(
-    payload: AdminUpdate | TeacherUpdate | StudentUpdate,db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user)):
-    return user_crud.update_user_info(db, current_user, payload)
+@router.put("/me/admin")
+def update_me_admin(payload: AdminUpdate, db: Session = Depends(get_db),
+                    current_user: UserModel = Depends(get_current_user)):
+    return user_crud.update_admin_info(db, current_user, payload)
+
+@router.put("/me/teacher")
+def update_me_teacher(payload: TeacherUpdate, db: Session = Depends(get_db),
+                      current_user: UserModel = Depends(get_current_user)):
+    return user_crud.update_teacher_info(db, current_user, payload)
+
+@router.put("/me/student")
+def update_me_student(payload: StudentUpdate, db: Session = Depends(get_db),
+                      current_user: UserModel = Depends(get_current_user)):
+    return user_crud.update_student_info(db, current_user, payload)
 
 @router.delete("/delete")
 def delete_own_account(db: Session = Depends(get_db),

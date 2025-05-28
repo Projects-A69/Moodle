@@ -38,15 +38,18 @@ def subscribe_to_course(
     if not course.is_premium:
         raise BadRequest("No need to subscribe to a public course")
 
-    # if course in current_student.courses:
-    #     raise BadRequest("Already subscribed to this course")
+    existing = db.query(StudentCourse).filter_by(
+        student_id=current_student.id, course_id=course.id
+    ).first()
+    if existing:
+        raise BadRequest("Already subscribed to this course")
 
     if current_student.is_approved:
-        current_student.courses.append(course)
+        db.add(StudentCourse(student_id=current_student.id, course_id=course.id))
         db.commit()
         return {"message": "Successfully subscribed to the course."}
 
-    token = generate_student_approval_token(str(current_student.id))
+    token = generate_student_approval_token(str(current_student.id), str(course.id))
     approve_link = f"{settings.APP_BASE_URL}/api/v1/teachers/teachers/approval?token={token}"
     owner = course.owner
     to_email = owner.user.email

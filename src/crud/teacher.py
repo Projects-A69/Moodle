@@ -66,27 +66,32 @@ def approve_student_by_token(token: str,
     """
     Approves student enrolling in the course.
     """
-    user_id_str = verify_student_approval_token(token)
     try:
-        user_id = UUID(user_id_str)
-    except ValueError:
-        raise BadRequest("Invalid user ID in token")
+        data = verify_student_approval_token(token)
+        student_id = UUID(data["student_id"])
+        course_id = UUID(data["course_id"])
+    except Exception:
+        raise BadRequest("Invalid or expired approval token.")
+    
+    user = get_by_id(db, student_id)
 
-    user = get_by_id(db, user_id)
+    if not user or user.role != Role.STUDENT:
+        raise NotFound("Student not found")
 
-    if not user:
-        raise NotFound("User not found")
-
-    if user.role != Role.STUDENT:
-        raise BadRequest("User is not a student")
-
-    if user.is_approved:
-        return {"message": "Student is already approved"}
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise NotFound("Course not found")
 
     user.is_approved = True
-    db.commit()
+    existing = db.query(StudentCourse).filter_by(
+        student_id=student_id, course_id=course_id
+    ).first()
+    if not existing:
+        db.add(StudentCourse(student_id=student_id, course_id=course_id))
 
-    return {"message": "Student approved successfully"}
+    db.commit()
+    
+    return {"message": f"Student approved and enrolled in '{course.title}'."}
 
 
 def remove_student_from_course(db: Session,
@@ -107,27 +112,36 @@ def remove_student_from_course(db: Session,
     return {"message": f"Student with ID: {student_id} removed from course with ID: {course_id} successfully."}
 
 
-def approve_student_by_id(db: Session,
-                          user_id: UUID):
+def approve_student_by_id(db: Session, student_id: UUID, course_id: UUID):
     """
-    Approves student enrolling in the course by ID.
+    Approves student enrolling in the course and subscribes them.
     """
-    user = get_by_id(db, user_id)
+    user = get_by_id(db, student_id)
 
     if not user:
-        raise NotFound(f"User with ID: {user_id} not found")
+        raise NotFound(f"User with ID: {student_id} not found")
 
     if user.role != Role.STUDENT:
         raise BadRequest("User is not a student")
 
-    if user.is_approved:
-        return {"message": "Student is already approved"}
+    if not user.is_approved:
+        user.is_approved = True
 
-    user.is_approved = True
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise NotFound("Course not found")
+
+    existing = db.query(StudentCourse).filter_by(
+        student_id=student_id, course_id=course_id
+    ).first()
+
+    if not existing:
+        db.add(StudentCourse(student_id=student_id, course_id=course_id))
 
     db.commit()
 
-    return {"message": "Student approved successfully"}
+    return {"message": f"Student approved and enrolled in '{course.title}'."}
+
 
 
 def list_pending_students(db: Session):

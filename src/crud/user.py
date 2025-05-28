@@ -91,8 +91,12 @@ def register_admin(db: Session, payload: AdminCreate) -> User:
 
     db.add(Admin(id=new_user.id, first_name=payload.first_name, last_name=payload.last_name))
     db.commit()
-    db.refresh(new_user)
-    return new_user
+    return {
+        "id": new_user.id,
+        "email": new_user.email,
+        "role": new_user.role,
+        "first_name": payload.first_name,
+        "last_name": payload.last_name}
 
 def register_teacher(db: Session, payload: TeacherCreate) -> User:
     
@@ -117,8 +121,15 @@ def register_teacher(db: Session, payload: TeacherCreate) -> User:
                    phone_number=payload.phone_number,
                    linked_in_acc=payload.linked_in_acc))
     db.commit()
-    db.refresh(new_user)
-    return new_user
+    return {
+        "id": new_user.id,
+        "email": new_user.email,
+        "role": new_user.role,
+        "first_name": payload.first_name,
+        "last_name": payload.last_name,
+        "profile_picture": payload.profile_picture if payload.profile_picture else None,
+        "phone_number": payload.phone_number,
+        "linked_in_acc": payload.linked_in_acc}
 
 def register_student(db: Session, payload: StudentCreate) -> User:
     
@@ -135,8 +146,13 @@ def register_student(db: Session, payload: StudentCreate) -> User:
                    last_name=payload.last_name,
                    profile_picture=payload.profile_picture))
     db.commit()
-    db.refresh(new_user)
-    return new_user
+    return {
+        "id": new_user.id,
+        "email": new_user.email,
+        "role": new_user.role,
+        "first_name": payload.first_name,
+        "last_name": payload.last_name,
+        "profile_picture": payload.profile_picture if payload.profile_picture else None}
 
 
 
@@ -164,53 +180,64 @@ def get_user_info(db: Session, current_user: User) -> dict:
 
     return base_info
 
-def update_user_info(db: Session, current_user: User, payload) -> User:
+def update_admin_info(db: Session, current_user: User, payload) -> User:
     if payload.password is not None:
         current_user.password = hash_password(payload.password)
 
-    if current_user.role == Role.ADMIN:
-        admin = db.query(Admin).filter(Admin.id == current_user.id).first()
-        if admin is None:
-            raise NotFound("Admin not found")
+    admin = db.query(Admin).filter(Admin.id == current_user.id).first()
+    if not admin:
+        raise NotFound("Admin not found")
 
-        if payload.first_name is not None:
-            admin.first_name = payload.first_name
-        if payload.last_name is not None:
-            admin.last_name = payload.last_name
-
-    elif current_user.role == Role.TEACHER:
-        teacher = db.query(Teacher).filter(Teacher.id == current_user.id).first()
-        if teacher is None:
-            raise NotFound("Teacher not found")
-
-        if payload.first_name is not None:
-            teacher.first_name = payload.first_name
-        if payload.last_name is not None:
-            teacher.last_name = payload.last_name
-        if payload.phone_number is not None:
-            teacher.phone_number = payload.phone_number
-        if payload.linked_in_acc is not None:
-            teacher.linked_in_acc = payload.linked_in_acc
-        if payload.profile_picture is not None:
-            teacher.profile_picture = payload.profile_picture
-
-    elif current_user.role == Role.STUDENT:
-        student = db.query(Student).filter(Student.id == current_user.id).first()
-        if student is None:
-            raise NotFound("Student not found")
-
-        if payload.first_name is not None:
-            student.first_name = payload.first_name
-        if payload.last_name is not None:
-            student.last_name = payload.last_name
-        if payload.profile_picture is not None:
-            student.profile_picture = payload.profile_picture
+    if payload.first_name is not None:
+        admin.first_name = payload.first_name
+    if payload.last_name is not None:
+        admin.last_name = payload.last_name
 
     db.commit()
     db.refresh(current_user)
     return current_user
 
+def update_teacher_info(db: Session, current_user: User, payload) -> User:
+    if payload.password is not None:
+        current_user.password = hash_password(payload.password)
 
+    teacher = db.query(Teacher).filter(Teacher.id == current_user.id).first()
+    if not teacher:
+        raise NotFound("Teacher not found")
+
+    if payload.first_name is not None:
+        teacher.first_name = payload.first_name
+    if payload.last_name is not None:
+        teacher.last_name = payload.last_name
+    if payload.phone_number is not None:
+        teacher.phone_number = payload.phone_number
+    if payload.linked_in_acc is not None:
+        teacher.linked_in_acc = payload.linked_in_acc
+    if payload.profile_picture is not None:
+        teacher.profile_picture = payload.profile_picture
+
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+def update_student_info(db: Session, current_user: User, payload) -> User:
+    if payload.password is not None:
+        current_user.password = hash_password(payload.password)
+
+    student = db.query(Student).filter(Student.id == current_user.id).first()
+    if not student:
+        raise NotFound("Student not found")
+
+    if payload.first_name is not None:
+        student.first_name = payload.first_name
+    if payload.last_name is not None:
+        student.last_name = payload.last_name
+    if payload.profile_picture is not None:
+        student.profile_picture = payload.profile_picture
+
+    db.commit()
+    db.refresh(current_user)
+    return current_user
 
 def delete_user(db: Session, user_id: UUID):
     user = get_by_id(db, user_id)

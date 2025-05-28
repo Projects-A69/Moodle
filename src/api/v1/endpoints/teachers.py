@@ -38,17 +38,19 @@ def view_profile(
 
 
 @router.get("/teachers/approval")
-def approve_student_by_token(token: str,
-                             db: Session = Depends(get_db)):
+def approve_student_by_token(token: str, db: Session = Depends(get_db)):
     try:
-        user_id = verify_student_approval_token(token)
+        data = verify_student_approval_token(token)
+        student_id = UUID(data["student_id"])
+        course_id = UUID(data["course_id"])
     except SignatureExpired:
         raise BadRequest("Token has expired.")
-
     except BadSignature:
         raise BadRequest("Invalid approval token.")
+    except Exception:
+        raise BadRequest("Invalid data in token.")
 
-    return approve_student_by_id(db, user_id)
+    return approve_student_by_id(db, student_id, course_id)
 
 
 @router.put("/teachers/{user_id}/approval")
