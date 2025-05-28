@@ -108,15 +108,3 @@ class CourseTag(Base):
     
     course = relationship("Course", backref="tag_associations")
     tag = relationship("Tag", backref="course_associations")
-
-
-# class CoursesRate(Base):
-#     __tablename__ = 'courses_ratings'
-#
-#     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-#     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
-#     course_id = Column(UUID(as_uuid=True), ForeignKey('courses.id'), nullable=False)
-#     rating = Column(Float, nullable=False)
-#
-#     user = relationship("User", backref="course_ratings")
-#     course = relationship("Course", backref="ratings")
