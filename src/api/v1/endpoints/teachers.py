@@ -64,7 +64,7 @@ def approve_student(user_id: UUID,
     return approve_student_by_id(db, user_id)
 
 
-@router.delete("/courses/{course_id}/students/{student_id}", tags=["courses"])
+@router.delete("/courses/{course_id}/students/{student_id}")
 def remove_student_from_course(course_id: UUID,
                                student_id: UUID,
                                db: Session = Depends(get_db),
@@ -74,7 +74,7 @@ def remove_student_from_course(course_id: UUID,
 
     return remove_student_from_course(db, course_id, student_id)
 
-@router.put("/courses/{course_id}/students/{student_id}", tags=["courses"])
+@router.put("/courses/{course_id}/students/{student_id}")
 def approve_student_by_ids(course_id: UUID,
                           student_id: UUID,
                           db: Session = Depends(get_db),

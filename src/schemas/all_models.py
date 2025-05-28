@@ -138,9 +138,9 @@ class SectionUpdate(BaseModel):
     information: str | None = None
     link: str | None = None
 
-class StudentCourse(BaseModel):
+class StudentCourseSchema(BaseModel):
     student_id: UUID
     course_id: UUID
     score: float
-    status: str
+    is_approved: bool
     progress: int

@@ -42,12 +42,18 @@ def subscribe_to_course(
         student_id=current_student.id, course_id=course.id
     ).first()
     if existing:
-        raise BadRequest("Already subscribed to this course")
+        if existing.is_approved:
+            raise BadRequest("You are already subscribed and approved.")
+        else:
+            raise BadRequest("Subscription request already sent. Awaiting approval.")
 
-    if current_student.is_approved:
-        db.add(StudentCourse(student_id=current_student.id, course_id=course.id))
-        db.commit()
-        return {"message": "Successfully subscribed to the course."}
+    new_subscription = StudentCourse(
+        student_id=current_student.id,
+        course_id=course.id,
+        is_approved=False
+    )
+    db.add(new_subscription)
+    db.commit()
 
     token = generate_student_approval_token(str(current_student.id), str(course.id))
     approve_link = f"{settings.APP_BASE_URL}/api/v1/teachers/teachers/approval?token={token}"

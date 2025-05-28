@@ -1,5 +1,6 @@
 from uuid import UUID
 from sqlalchemy.orm import Session
+from src.crud import student
 from src.utils.custom_responses import BadRequest
 from src.models.models import StudentCourse, User,Role, Admin, Teacher, Student,Course
 from src.utils.custom_responses import NotFound
@@ -171,7 +172,8 @@ def delete_course(db: Session, course_id: UUID):
                 subject="Course Deleted Notification",
                 body=f"The course '{course.title}' has been deleted by an administrator and is no longer available."
             )
-    
+    course.students.clear()
+    db.flush()
     db.delete(course)
     db.commit()
 
@@ -182,14 +184,15 @@ def remove_student_from_course(db: Session, course_id: UUID, student_id: UUID):
         StudentCourse.course_id == course_id,
         StudentCourse.student_id == student_id
     ).first()
-
+    student = db.query(Student).filter(Student.id == student_id).first()
+    course = db.query(Course).filter(Course.id == course_id).first()
     if not student_course:
-        raise NotFound(f"Student with ID: {student_id} not enrolled in course with ID: {course_id}")
+        raise NotFound(f"Student : {student_id} not enrolled in course with ID: {course_id}")
 
     db.delete(student_course)
     db.commit()
 
-    return {"message": f"Student with ID: {student_id} removed from course with ID: {course_id} successfully."}
+    return {"message": f"Student: {student.first_name} {student.last_name} removed from course: {course.title} successfully."}
 
 def get_course_ratings(db: Session, course_id: UUID):
     ratings = db.query(StudentCourse).filter(

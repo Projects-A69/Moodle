@@ -82,7 +82,7 @@ def view_profile(
 
 
 @router.post("/courses/{course_id}/rate")
-def rate_course(
+def rate_courses(
     course_id: UUID,
     payload: CoursesRate,
     current_student: Student = Depends(get_current_user),
