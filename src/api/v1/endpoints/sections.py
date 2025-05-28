@@ -15,8 +15,8 @@ def get_sections(course_id: UUID, db: Session = Depends(get_db), current_user: U
     return get_all_sections(db, course_id, current_user = current_user)
 
 @router.get("/courses/{section_id}")
-def get_section_by_id(section_id: UUID, db: Session = Depends(get_db)):
-    section = information_about_section(db, section_id)
+def get_section_by_id(section_id: UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    section = information_about_section(db, section_id, current_user)
     return section
 
 @router.post("/sections")

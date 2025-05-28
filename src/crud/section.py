@@ -1,3 +1,4 @@
+from sqlalchemy.sql.functions import current_user
 from src.crud import course
 from src.crud.course import get_course_by_id
 from src.models.models import Section, Course, User
@@ -20,8 +21,11 @@ def get_all_sections(db: Session, course_id: UUID, title: Optional[str] = None, 
         "content": section.content
     } for section in sections]
 
-def information_about_section(db: Session, section_id: UUID):
+def information_about_section(db: Session, section_id: UUID, current_user: Optional[User] = None):
     section = db.query(Section).filter(Section.id == section_id).first()
+    if not section:
+        raise HTTPException(status_code=403, detail='Section not found')
+    get_course_by_id(db, section.course_id, current_user)
     return section
 
 def add_section_to_course(db: Session, payload: SectionCreate, course_id: UUID, current_user: Optional[User] = None):

@@ -1,5 +1,5 @@
 from src.api.deps import get_current_user, get_db
-from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, CoursesRate, User, StudentCourse
+from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, CoursesRate, User
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
@@ -17,9 +17,37 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
             "title": course.title,
             "description": course.description} for course in read_courses.all()]
     if current_user.role == Role.STUDENT:
-        public_course = read_courses.filter(Course.is_hidden == False, Course.is_premium == False).all()
-        premium_courses = read_courses.join(StudentCourse).filter(Course.is_hidden == False, Course.is_premium == True, StudentCourse.student_id == current_user.id)
-        return public_course.all() + premium_courses.all()
+        read_courses = read_courses.filter(Course.is_hidden == False)
+
+        approved_student = read_courses.join(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.is_approved == True).all()
+
+        public_courses = read_courses.filter(Course.is_hidden == False, Course.is_premium == False).all()
+
+        premium_courses = read_courses.join(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.is_approved == True, Course.is_premium == True).all()
+
+        student_not_approved = read_courses.join(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.is_approved == False, Course.is_premium == True).all()
+
+        approved_courses = [course.id for course in approved_student + public_courses + premium_courses]
+        not_approved_courses = [course.id for course in student_not_approved]
+
+        all_courses = read_courses.all()
+        result = []
+        for course in all_courses:
+            if course.id in approved_courses:
+                result.append({
+                    "id": course.id,
+                    "title": course.title,
+                    "description": course.description,
+                    "objectives": course.objectives,
+                    "picture": course.picture,
+                    "owner_id": course.owner_id,
+                    "is_premium": course.is_premium,
+                    "is_hidden": course.is_hidden,
+                    "rating": course.rating
+                })
+            elif course.id in not_approved_courses:
+                result.append({"title": course.title, "description": course.description})
+        return result
     if current_user.role == Role.TEACHER:
         courses = []
         for course in read_courses.all():
