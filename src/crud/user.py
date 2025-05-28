@@ -29,51 +29,51 @@ def login_user(db: Session, payload: LoginRequest) -> User:
     return user
 
 
-def handle_registration(db: Session, payload):
-    if get_by_email(db, payload.email):
-        raise BadRequest("Email already registered")
+# def handle_registration(db: Session, payload):
+#     if get_by_email(db, payload.email):
+#         raise BadRequest("Email already registered")
         
-    role = payload.role
+#     role = payload.role
 
-    if role == Role.ADMIN:
-        if not payload.first_name or not payload.last_name:
-            raise UnprocessableEntity("Admins must provide first and last name")
-        new_user = register_admin(db, payload)
+#     if role == Role.ADMIN:
+#         if not payload.first_name or not payload.last_name:
+#             raise UnprocessableEntity("Admins must provide first and last name")
+#         new_user = register_admin(db, payload)
 
-    elif role == Role.TEACHER:
-        if not payload.first_name:
-            raise UnprocessableEntity("Teachers must provide first name")
-        if not payload.last_name:
-            raise UnprocessableEntity("Teachers must provide last name")
-        if not payload.phone_number:
-            raise UnprocessableEntity("Teachers must provide phone number")
-        if not payload.linked_in_acc:
-            raise UnprocessableEntity("Teachers must provide LinkedIn account")
-        new_user = register_teacher(db, payload)
+#     elif role == Role.TEACHER:
+#         if not payload.first_name:
+#             raise UnprocessableEntity("Teachers must provide first name")
+#         if not payload.last_name:
+#             raise UnprocessableEntity("Teachers must provide last name")
+#         if not payload.phone_number:
+#             raise UnprocessableEntity("Teachers must provide phone number")
+#         if not payload.linked_in_acc:
+#             raise UnprocessableEntity("Teachers must provide LinkedIn account")
+#         new_user = register_teacher(db, payload)
 
-        token = generate_approval_token(str(new_user.id))
-        approve_link = f"{settings.APP_BASE_URL}/api/v1/admins/teachers/approve?token={token}"
-        email_body = (
-            f"A new teacher has registered:\n\n"
-            f"Name: {payload.first_name} {payload.last_name}\n"
-            f"Email: {payload.email}\n\n"
-            f"Click the link below to approve this teacher:\n"
-            f"{approve_link}")
+#         token = generate_approval_token(str(new_user.id))
+#         approve_link = f"{settings.APP_BASE_URL}/api/v1/admins/teachers/approve?token={token}"
+#         email_body = (
+#             f"A new teacher has registered:\n\n"
+#             f"Name: {payload.first_name} {payload.last_name}\n"
+#             f"Email: {payload.email}\n\n"
+#             f"Click the link below to approve this teacher:\n"
+#             f"{approve_link}")
 
-        send_email(
-            to=settings.ADMIN_NOTIFICATION_EMAIL,
-            subject="New Teacher Registration - Approval Required",
-            body=email_body)
+#         send_email(
+#             to=settings.ADMIN_NOTIFICATION_EMAIL,
+#             subject="New Teacher Registration - Approval Required",
+#             body=email_body)
         
-    elif role == Role.STUDENT:
-        if not payload.first_name or not payload.last_name:
-            raise UnprocessableEntity("Students must provide first and last name")
-        new_user = register_student(db, payload)
+#     elif role == Role.STUDENT:
+#         if not payload.first_name or not payload.last_name:
+#             raise UnprocessableEntity("Students must provide first and last name")
+#         new_user = register_student(db, payload)
 
-    else:
-        raise BadRequest("Unsupported role")
+#     else:
+#         raise BadRequest("Unsupported role")
 
-    return {"message": f"User {payload.first_name} registered successfully", "user_id": str(new_user.id)}
+#     return {"message": f"User {payload.first_name} registered successfully", "user_id": str(new_user.id)}
 
 
 def register_admin(db: Session, payload: AdminCreate) -> User:
@@ -118,6 +118,20 @@ def register_teacher(db: Session, payload: TeacherCreate) -> User:
                    phone_number=payload.phone_number,
                    linked_in_acc=payload.linked_in_acc))
     db.commit()
+    token = generate_approval_token(str(new_user.id))
+    approve_link = f"{settings.APP_BASE_URL}/api/v1/admins/teachers/approval?token={token}"
+    email_body = (
+        f"A new teacher has registered:\n\n"
+        f"Name: {payload.first_name} {payload.last_name}\n"
+        f"Email: {payload.email}\n\n"
+        f"Click the link below to approve this teacher:\n"
+        f"{approve_link}")
+
+    send_email(
+        to=settings.ADMIN_NOTIFICATION_EMAIL,
+        subject="New Teacher Registration - Approval Required",
+        body=email_body)
+
     return {
         "id": new_user.id,
         "email": new_user.email,

@@ -44,7 +44,7 @@ def approve_teacher(user_id: UUID, db: Session = Depends(get_db), current_user: 
     
     return admin_crud.approve_teacher_by_id(db, user_id)
 
-@router.get("/teachers/approval")
+@router.get("/teachers/approval", include_in_schema=False)
 def approve_teacher_by_token(token: str, db: Session = Depends(get_db)):
     
     try:
@@ -82,7 +82,7 @@ def delete_course(course_id: UUID, db: Session = Depends(get_db), current_user: 
         raise Unauthorized("Only admins can delete courses.")
     return admin_crud.delete_course(db, course_id)
 
-@router.delete("/courses/{course_id}/students/{student_id}", tags=["courses"])
+@router.delete("/courses/{course_id}/students/{student_id}")
 def remove_student_from_course(course_id: UUID, student_id: UUID, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     
     if current_user.role != Role.ADMIN:
