@@ -78,27 +78,20 @@ def subscribe_to_course(
     return {"message": "Approval request sent to the course owner. Awaiting approval."}
 
 
-def unsubscribe_from_course(course_id: UUID, current_user: User, db: Session):
-    current_student = db.query(Student).filter(Student.user_id == current_user.id).first()
-    if not current_student:
-        raise HTTPException(status_code=404, detail="Student not found")
+def unsubscribe_from_course(db: Session, course_id: UUID, student_id: UUID):
+    student_course = db.query(StudentCourse).filter(
+        StudentCourse.course_id == course_id,
+        StudentCourse.student_id == student_id).first()
 
+    student = db.query(Student).filter(Student.id == student_id).first()
     course = db.query(Course).filter(Course.id == course_id).first()
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+    if not student_course:
+        raise NotFound(f"Student : {student_id} not enrolled in course with ID: {course_id}")
 
-    assoc = db.query(StudentCourse).filter(
-        StudentCourse.student_id == current_student.id,
-        StudentCourse.course_id == course.id
-    ).first()
-
-    if not assoc:
-        raise HTTPException(status_code=400, detail="You are not subscribed to this course")
-
-    db.delete(assoc)
+    db.delete(student_course)
     db.commit()
 
-    return {"message": "Successfully unsubscribed from course"}
+    return {"message": f"{student.first_name} {student.last_name} unsubscribed from {course.title} successfully"}
 
 
 # def view_course(course_id: UUID,

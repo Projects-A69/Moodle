@@ -33,12 +33,13 @@ def subscribe_to_courses(
 
 
 @router.post("/courses/{course_id}/unsubscribe")
-def unsubscribe_from_course_endpoint(
-    course_id: UUID,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    return unsubscribe_from_course(course_id=course_id, current_user=current_user, db=db)
+def unsubscribe_from_course_endpoint(db: Session,
+                                     course_id: UUID,
+                                     student_id: UUID):
+
+    return unsubscribe_from_course(course_id=course_id,
+                                   student_id=student_id,
+                                   db=db)
 
 # @router.get("/courses/{course_id}")
 # def view_course(
