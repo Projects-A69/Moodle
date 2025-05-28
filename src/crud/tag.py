@@ -2,7 +2,7 @@ from sys import prefix
 from typing import Optional
 
 from src.crud.course import get_course_by_id
-from src.models.models import Tag as TagModel, Course
+from src.models.models import Tag as TagModel, Course, CourseTag
 from src.schemas.all_models import Tag, CourseTag, CreateTag, User
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -59,5 +59,8 @@ def delete_tag_from_course(db: Session, course_id: UUID, tag_id: UUID):
     db.commit()
     return {"message": f"Tag {tag.name} removed from {course.title}"}
 
-def search_course_by_tag(db: Session, tag_id: UUID):
-    pass
+def search_course_by_tag(db: Session, tag_name: Optional[str]):
+    tag = db.query(TagModel).filter(TagModel.name.ilike(f"%{tag_name}%")).first()
+    if tag is None:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    return [{"title": course.title, "description": course.description, "objectives": course.objectives, "premium": course.is_premium} for course in tag.courses]
