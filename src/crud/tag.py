@@ -1,6 +1,5 @@
 from sys import prefix
 from typing import Optional
-
 from src.crud.course import get_course_by_id
 from src.models.models import Tag as TagModel, Course, CourseTag
 from src.schemas.all_models import Tag, CourseTag, CreateTag, User

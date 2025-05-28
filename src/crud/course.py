@@ -98,7 +98,7 @@ def rating_course(db: Session, id: UUID, user: User):
     if not ratings:
         average_rating = 0
     else:
-        total_score = sum(r.score for r in ratings) / len(ratings)
+        total_score = sum(rating.score for rating in ratings) / len(ratings)
         max_score = len(ratings) * 10
         average_rating = (total_score / max_score) * 10
     course.rating = average_rating
