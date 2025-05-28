@@ -1,38 +1,35 @@
-from typing import Generator
-from fastapi import Depends, HTTPException,Header
-from src.core.authentication import from_token, is_authenticated
-from src.database.session import SessionLocal
+from typing import Generator, Optional
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from typing import Optional
+
+from src.core.authentication import from_token
+from src.database.session import SessionLocal
+from src.models.models import Role, User
+from src.utils.custom_responses import Unauthorized
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/users/login")
 
 def get_db() -> Generator:
-    """
-    Get a database connection from the connection pool and return it
-    to the pool when the request is finished.
-    """
+    db = SessionLocal()
     try:
-        db = SessionLocal()
         yield db
     finally:
         db.close()
 
-
-def get_current_user(token: str = Header(...), db: Session = Depends(get_db)):
-    if not is_authenticated(db,token):
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    user = from_token(db,token)
-    if user is None:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+    user = from_token(db, token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
     return user
 
-def optional_user(token: Optional[str] = Header(default= None), db: Session = Depends(get_db)):
+def optional_user(token: Optional[str] = None, db: Session = Depends(get_db)) -> Optional[User]:
     if not token:
         return None
-    try:
-        return from_token(db,token)
-    except:
-        return None
+    return from_token(db, token)
 
 
+def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != Role.ADMIN:
+        raise Unauthorized("Only admins can perform this action.")
+    return current_user

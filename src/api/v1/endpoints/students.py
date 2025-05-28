@@ -33,9 +33,9 @@ def subscribe_to_courses(
 
 
 @router.post("/courses/{course_id}/unsubscribe")
-def unsubscribe_from_course_endpoint(student_id: UUID,
-                                     course_id: UUID,
-                                     db: Session=Depends(get_db)):
+def unsubscribe_from_course_endpoint(course_id: UUID,
+                                     student_id: UUID,
+                                     db: Session = Depends(get_db)):
 
     return unsubscribe_from_course(course_id=course_id,
                                    student_id=student_id,
