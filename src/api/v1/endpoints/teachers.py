@@ -5,10 +5,9 @@ from sqlalchemy.orm import Session
 from src.api.deps import get_teacher_user
 from src.models.models import User as UserModel
 from src.api.deps import get_db
-from src.crud.teacher import approve_student_by_id, remove_student_from_course, list_pending_students
+from src.crud.teacher import approve_student_by_id, remove_student_from_course, list_pending_students, toggle_course_visibility_by_teacher
 from src.utils.custom_responses import BadRequest
 from src.utils.token_utils import verify_student_approval_token
-
 
 router = APIRouter()
 
@@ -17,8 +16,8 @@ router = APIRouter()
 def list_pending_students_endpoint(
     course_id: UUID,
     db: Session = Depends(get_db),
-    current_teacher: UserModel = Depends(get_teacher_user)
-):
+    current_teacher: UserModel = Depends(get_teacher_user)):
+
     return list_pending_students(db=db, current_teacher=current_teacher, course_id=course_id)
 
 
@@ -54,7 +53,7 @@ def remove_student_from_course_endpoint(course_id: UUID,
     return remove_student_from_course(db, course_id, student_id)
 
 
-from src.crud.teacher import toggle_course_visibility_by_teacher
+
 
 @router.put("/courses/{course_id}/visibility")
 def toggle_course_visibility(course_id: UUID,

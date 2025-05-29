@@ -104,7 +104,7 @@ def rate_course(db: Session, course_id: UUID,
     if not student_course or current_student.id != student_course.student_id:
         raise HTTPException(status_code=403, detail="You are not enrolled in this course")
 
-    if not (1 <= payload.score <= 10):
+    if not (1 <= payload.score <= 5):
         raise HTTPException(status_code=400, detail="Rating must be between 1 and 10")
 
     student_course.score = payload.score
