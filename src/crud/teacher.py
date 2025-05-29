@@ -1,64 +1,11 @@
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from src.api.deps import get_db, get_current_user
-from src.models.models import Course, Teacher, Role, StudentCourse, User
+from src.api.deps import get_db
+from src.models.models import Course, Role, StudentCourse, User
 from src.crud.user import get_by_id
-from src.utils.custom_responses import NotFound, Forbidden, BadRequest
-from uuid import UUID
+from src.utils.custom_responses import NotFound, BadRequest
 from src.utils.token_utils import verify_student_approval_token
-
-# def list_accessible_courses(current_teacher: Teacher = Depends(get_current_user),
-#                              db: Session = Depends(get_db)):
-#     """
-#     Lists all public and premium courses the teacher is owner of.
-#     """
-#     public_courses = db.query(Course).filter(Course.is_premium == False).all()
-#     owned_courses = current_teacher.courses
-#
-#     return {
-#         "public_courses": public_courses,
-#         "owned_courses": owned_courses
-#     }
-
-
-# def list_sections(course_id: str,
-#                   current_teacher: Teacher = Depends(get_current_user),
-#                   db: Session = Depends(get_db)):
-#     """
-#     List all sections for a course owned by the current teacher.
-#     """
-#     course = db.query(Course).filter(Course.id == course_id, Course.owner_id == current_teacher.id).first()
-#     if not course:
-#         raise NotFound("Course not found")
-#
-#     sections = course.sections
-#     return {"sections": sections}
-#
-#
-# def view_profile(current_teacher: Teacher = Depends(get_current_user), db: Session = Depends(get_db)):
-#     """
-#     View teacher's profile info.
-#     """
-#     teacher = get_by_id(db, current_teacher.id)
-#
-#     return teacher
-#
-
-# def view_course(course_id: UUID,
-#                 current_teacher: Teacher,
-#                 db: Session):
-#     """
-#     View a single course if it is public or the teacher is its owner.
-#     """
-#     course = db.query(Course).filter(Course.id == course_id).first()
-#
-#     if not course:
-#         raise NotFound("Course not found")
-#
-#     if course.owner_id != current_teacher.id:
-#         raise Forbidden("You can only view your own courses")
-#
-#     return course
+from uuid import UUID
 
 
 def approve_student_by_token(token: str, db: Session = Depends(get_db)):
@@ -151,8 +98,6 @@ def approve_student_by_id(db: Session, student_id: UUID, course_id: UUID):
     return {"message": f"Student approved and enrolled in '{course.title}'."}
 
 
-
-
 def list_pending_students(db: Session):
     """
     List all pending students in the course.
@@ -173,26 +118,3 @@ def list_pending_students(db: Session):
             "is_approved": user.is_approved})
 
     return result
-
-
-# def edit_profile(first_name: str = None,
-#                  last_name: str = None,
-#                  phone_number: str = None,
-#                  linked_in_acc: str = None,
-#                  current_teacher: Teacher = Depends(get_current_user),
-#                  db: Session = Depends(get_db)):
-#     """
-#     Edit teacher profile details.
-#     """
-#     if first_name:
-#         current_teacher.first_name = first_name
-#     if last_name:
-#         current_teacher.last_name = last_name
-#     if phone_number:
-#         current_teacher.phone_number = phone_number
-#     if linked_in_acc:
-#         current_teacher.linked_in_acc = linked_in_acc
-#
-#     db.commit()
-#     db.refresh(current_teacher)
-#     return current_teacher
