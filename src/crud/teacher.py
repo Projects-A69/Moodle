@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.api.deps import get_db
 from src.models.models import Course, Role, StudentCourse, User
 from src.crud.user import get_by_id
-from src.utils.custom_responses import NotFound, BadRequest
+from src.utils.custom_responses import NotFound, BadRequest, Unauthorized
 from src.utils.token_utils import verify_student_approval_token
 from uuid import UUID
 
@@ -98,23 +98,53 @@ def approve_student_by_id(db: Session, student_id: UUID, course_id: UUID):
     return {"message": f"Student approved and enrolled in '{course.title}'."}
 
 
-def list_pending_students(db: Session):
+def list_pending_students(db: Session, current_teacher: User, course_id: UUID):
     """
     List all pending students in the course.
     """
-    users = db.query(User).filter(User.role == Role.STUDENT,
-                                           User.is_approved == False).all()
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise NotFound("Course not found.")
 
+    if course.owner_id != current_teacher.id:
+        raise Unauthorized("You do not have permission to view this course's students.")
+
+    pending_students = db.query(StudentCourse).filter(
+        StudentCourse.course_id == course_id,
+        StudentCourse.is_approved == False).all()
     result = []
-    for user in users:
-        student = user.student
+    for sc in pending_students:
+        student = sc.student
         result.append({
-            "id": str(user.id),
-            "email": user.email,
-            "first_name": student.first_name if student else None,
-            "last_name": student.last_name if student else None,
-            "is_active": user.is_active,
-            "profile_picture": student.profile_picture if student else None,
-            "is_approved": user.is_approved})
+            "id": str(student.id),
+            "email": student.user.email,
+            "first_name": student.first_name,
+            "last_name": student.last_name,
+            "profile_picture": student.profile_picture
+        })
 
     return result
+
+
+
+def toggle_course_visibility_by_teacher(db: Session, course_id: UUID, current_user: User):
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+
+    if not course:
+        raise NotFound(f"Course with ID: {course_id} not found")
+
+    if course.owner_id != current_user.id:
+        raise Unauthorized("You are not the owner of this course.")
+
+    if course.is_hidden:
+        course.is_hidden = False
+        db.commit()
+        return {"message": f"Course '{course.title}' is now visible."}
+
+    if course.students:
+        raise BadRequest("You cannot hide a course that has enrolled students.")
+
+    course.is_hidden = True
+    db.commit()
+    return {"message": f"Course '{course.title}' has been hidden successfully."}
