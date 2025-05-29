@@ -128,4 +128,4 @@ def rating_course(db: Session, id: UUID):
     course.rating = average_rating_score
     db.commit()
     db.refresh(course)
-    return {"rating": average_rating_score}
+    return {"title": course.title, "rating": average_rating_score}
