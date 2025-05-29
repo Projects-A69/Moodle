@@ -17,7 +17,7 @@ router = APIRouter()
 def list_pending_students_endpoint(
     course_id: UUID,
     db: Session = Depends(get_db),
-    current_teacher: UserModel = Depends(get_teacher_user())
+    current_teacher: UserModel = Depends(get_teacher_user)
 ):
     return list_pending_students(db=db, current_teacher=current_teacher, course_id=course_id)
 
