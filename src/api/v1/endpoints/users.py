@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_current_user
 from src.core.authentication import create_token
 from src.models.models import User as UserModel
-from src.schemas.all_models import AdminCreate, TeacherCreate, StudentCreate, AdminUpdate, TeacherUpdate, StudentUpdate, LoginRequest
+from src.schemas.all_models import AdminCreate, TeacherCreate, StudentCreate, AdminUpdate, TeacherUpdate, StudentUpdate
 from src.crud import user as user_crud
 from src.utils.custom_responses import BadRequest
 router = APIRouter()

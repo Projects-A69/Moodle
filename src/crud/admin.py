@@ -1,6 +1,5 @@
 from uuid import UUID
 from sqlalchemy.orm import Session
-from src.crud import student
 from src.utils.custom_responses import BadRequest
 from src.models.models import StudentCourse, User,Role, Admin, Teacher, Student,Course
 from src.utils.custom_responses import NotFound

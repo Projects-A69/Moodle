@@ -78,6 +78,7 @@ class Section(Base):
     description = Column(Text)
     information = Column(Text)
     link = Column(String(255))
+    is_visited = Column(Boolean, default=False)
     course_id = Column(UUID(as_uuid=True), ForeignKey('courses.id'))
 
     course = relationship("Course", back_populates="sections")
