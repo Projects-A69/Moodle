@@ -38,7 +38,4 @@ def rate_course_endpoint(
     current_student: UserModel = Depends(get_student_user),
     db: Session = Depends(get_db)):
 
-    return rate_course(course_id,
-                       payload,
-                       current_student,
-                       db)
+    return rate_course(db, course_id, payload, current_student)

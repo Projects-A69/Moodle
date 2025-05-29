@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from src.api.deps import get_db, get_student_user
-from src.models.models import Course, Student, Role, StudentCourse, User, Section, StudentSection
+from src.models.models import Course, Student, Role, StudentCourse, User, Section
 from src.schemas.all_models import CoursesRate
 from uuid import UUID
 from src.utils.custom_responses import NotFound, BadRequest
@@ -88,10 +88,9 @@ def unsubscribe_from_course(student_id: UUID,
     return {"message": f"{student.first_name} {student.last_name} unsubscribed from {course.title} successfully"}
 
 
-def rate_course(course_id: UUID,
+def rate_course(db: Session, course_id: UUID,
                 payload: CoursesRate,
-                current_student: UserModel = Depends(get_student_user),
-                db: Session = Depends(get_db)):
+                current_student: UserModel):
     """
     Allows a student to rate a course from 1 to 10.
     """
@@ -105,13 +104,10 @@ def rate_course(course_id: UUID,
     if not student_course or current_student.id != student_course.student_id:
         raise HTTPException(status_code=403, detail="You are not enrolled in this course")
 
-    if not (1 <= payload.rating <= 10):
+    if not (1 <= payload.score <= 10):
         raise HTTPException(status_code=400, detail="Rating must be between 1 and 10")
 
-    if student_course.score is not None:
-        raise HTTPException(status_code=400, detail="You have already rated this course")
-
-    student_course.score = payload.rating
+    student_course.score = payload.score
     db.commit()
     db.refresh(student_course)
 
