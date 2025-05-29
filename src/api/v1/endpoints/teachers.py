@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.get("/teachers/{course_id}/pending")
-def list_pending_students_endpoint(db: Session):
+def list_pending_students_endpoint(db: Session = Depends(get_db)):
     return list_pending_students(db)
 
 
