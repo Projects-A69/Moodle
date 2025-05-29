@@ -12,7 +12,7 @@ from src.utils.token_utils import verify_student_approval_token
 router = APIRouter()
 
 
-@router.post("/teachers/approval")
+@router.get("/teachers/approval", include_in_schema=False)
 def approve_student_by_token(token: str, db: Session = Depends(get_db)):
     try:
         data = verify_student_approval_token(token)
@@ -33,9 +33,6 @@ def approve_student(user_id: UUID,
                     db: Session = Depends(get_db),
                     current_user: UserModel = Depends(get_teacher_user)):
 
-    if current_user.role != Role.TEACHER:
-        raise Unauthorized("Only teachers can approve students.")
-
     return approve_student_by_id(db, user_id)
 
 
@@ -44,18 +41,14 @@ def remove_student_from_course(course_id: UUID,
                                student_id: UUID,
                                db: Session = Depends(get_db),
                                current_user: UserModel = Depends(get_teacher_user)):
-    if current_user.role != Role.TEACHER:
-        raise Unauthorized("Only teachers can remove students from courses.")
 
     return remove_student_from_course(db, course_id, student_id)
 
-@router.post("/courses/{course_id}/students/{student_id}")
-def approve_student_by_ids(course_id: UUID,
-                          student_id: UUID,
-                          db: Session = Depends(get_db),
-                          current_user: UserModel = Depends(get_teacher_user)):
+# @router.post("/courses/{course_id}/students/{student_id}")
+# def approve_student_by_ids(course_id: UUID,
+#                           student_id: UUID,
+#                           db: Session = Depends(get_db),
+#                           current_user: UserModel = Depends(get_teacher_user)):
 
-    if current_user.role != Role.TEACHER:
-        raise Unauthorized("Only teachers can approve students from courses.")
 
-    return approve_student_by_id(db, course_id, student_id, current_user)
+#     return approve_student_by_id(db, course_id, student_id, current_user)
