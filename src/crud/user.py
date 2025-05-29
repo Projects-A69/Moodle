@@ -28,54 +28,6 @@ def login_user(db: Session, payload: LoginRequest) -> User:
         raise BadRequest("User account is deactivated. Please contact support.")
     return user
 
-
-# def handle_registration(db: Session, payload):
-#     if get_by_email(db, payload.email):
-#         raise BadRequest("Email already registered")
-        
-#     role = payload.role
-
-#     if role == Role.ADMIN:
-#         if not payload.first_name or not payload.last_name:
-#             raise UnprocessableEntity("Admins must provide first and last name")
-#         new_user = register_admin(db, payload)
-
-#     elif role == Role.TEACHER:
-#         if not payload.first_name:
-#             raise UnprocessableEntity("Teachers must provide first name")
-#         if not payload.last_name:
-#             raise UnprocessableEntity("Teachers must provide last name")
-#         if not payload.phone_number:
-#             raise UnprocessableEntity("Teachers must provide phone number")
-#         if not payload.linked_in_acc:
-#             raise UnprocessableEntity("Teachers must provide LinkedIn account")
-#         new_user = register_teacher(db, payload)
-
-#         token = generate_approval_token(str(new_user.id))
-#         approve_link = f"{settings.APP_BASE_URL}/api/v1/admins/teachers/approve?token={token}"
-#         email_body = (
-#             f"A new teacher has registered:\n\n"
-#             f"Name: {payload.first_name} {payload.last_name}\n"
-#             f"Email: {payload.email}\n\n"
-#             f"Click the link below to approve this teacher:\n"
-#             f"{approve_link}")
-
-#         send_email(
-#             to=settings.ADMIN_NOTIFICATION_EMAIL,
-#             subject="New Teacher Registration - Approval Required",
-#             body=email_body)
-        
-#     elif role == Role.STUDENT:
-#         if not payload.first_name or not payload.last_name:
-#             raise UnprocessableEntity("Students must provide first and last name")
-#         new_user = register_student(db, payload)
-
-#     else:
-#         raise BadRequest("Unsupported role")
-
-#     return {"message": f"User {payload.first_name} registered successfully", "user_id": str(new_user.id)}
-
-
 def register_admin(db: Session, payload: AdminCreate) -> User:
     
     if not payload.first_name or not payload.last_name:
@@ -191,7 +143,7 @@ def get_user_info(db: Session, current_user: User) -> dict:
 
     return base_info
 
-def update_admin_info(db: Session, current_user: User, payload) -> User:
+def update_admin_info(db: Session, current_user: User, payload):
     if payload.password is not None:
         current_user.password = hash_password(payload.password)
 
@@ -199,16 +151,18 @@ def update_admin_info(db: Session, current_user: User, payload) -> User:
     if not admin:
         raise NotFound("Admin not found")
 
-    if payload.first_name is not None:
+    if payload.first_name and payload.first_name.strip():
         admin.first_name = payload.first_name
-    if payload.last_name is not None:
+    if payload.last_name and payload.last_name.strip():
         admin.last_name = payload.last_name
 
     db.commit()
-    db.refresh(current_user)
-    return current_user
+    return {
+        "first_name": admin.first_name,
+        "last_name": admin.last_name,
+        "email": current_user.email}
 
-def update_teacher_info(db: Session, current_user: User, payload) -> User:
+def update_teacher_info(db: Session, current_user: User, payload):
     if payload.password is not None:
         current_user.password = hash_password(payload.password)
 
@@ -216,22 +170,27 @@ def update_teacher_info(db: Session, current_user: User, payload) -> User:
     if not teacher:
         raise NotFound("Teacher not found")
 
-    if payload.first_name is not None:
+    if payload.first_name and payload.first_name.strip():
         teacher.first_name = payload.first_name
-    if payload.last_name is not None:
+    if payload.last_name and payload.last_name.strip():
         teacher.last_name = payload.last_name
-    if payload.phone_number is not None:
+    if payload.phone_number and payload.phone_number.strip():
         teacher.phone_number = payload.phone_number
-    if payload.linked_in_acc is not None:
+    if payload.linked_in_acc and payload.linked_in_acc.strip():
         teacher.linked_in_acc = payload.linked_in_acc
-    if payload.profile_picture is not None:
+    if payload.profile_picture and payload.profile_picture.strip():
         teacher.profile_picture = payload.profile_picture
 
     db.commit()
-    db.refresh(current_user)
-    return current_user
+    return {
+        "first_name": teacher.first_name,
+        "last_name": teacher.last_name,
+        "email": current_user.email,
+        "phone_number": teacher.phone_number,
+        "linked_in_acc": teacher.linked_in_acc,
+        "profile_picture": teacher.profile_picture}
 
-def update_student_info(db: Session, current_user: User, payload) -> User:
+def update_student_info(db: Session, current_user: User, payload):
     if payload.password is not None:
         current_user.password = hash_password(payload.password)
 
@@ -239,16 +198,20 @@ def update_student_info(db: Session, current_user: User, payload) -> User:
     if not student:
         raise NotFound("Student not found")
 
-    if payload.first_name is not None:
+    if payload.first_name and payload.first_name.strip():
         student.first_name = payload.first_name
-    if payload.last_name is not None:
+    if payload.last_name and payload.last_name.strip():
         student.last_name = payload.last_name
-    if payload.profile_picture is not None:
+    if payload.profile_picture and payload.profile_picture.strip():
         student.profile_picture = payload.profile_picture
 
     db.commit()
-    db.refresh(current_user)
-    return current_user
+    return {
+        "first_name": student.first_name,
+        "last_name": student.last_name,
+        "email": current_user.email,
+        "profile_picture": student.profile_picture,
+        "user_id": student.id}
 
 def delete_user(db: Session, user_id: UUID):
     user = get_by_id(db, user_id)
