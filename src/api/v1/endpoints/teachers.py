@@ -2,10 +2,8 @@ from fastapi import APIRouter, Depends
 from uuid import UUID
 from itsdangerous import BadSignature, SignatureExpired
 from sqlalchemy.orm import Session
-from src.api.deps import get_db, get_teacher_user
-from src.crud.teacher import approve_student_by_id, remove_student_from_course
+from src.api.deps import get_teacher_user
 from src.models.models import User as UserModel
-from src.utils.custom_responses import BadRequest
 from src.api.deps import get_db
 from src.crud.teacher import approve_student_by_id, remove_student_from_course, list_pending_students
 from src.utils.custom_responses import BadRequest
