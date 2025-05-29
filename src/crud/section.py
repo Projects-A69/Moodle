@@ -23,13 +23,20 @@ def get_all_sections(db: Session, course_id: UUID, title: Optional[str] = None, 
 def information_about_section(db: Session, section_id: UUID, current_user: Optional[User] = None):
     section = db.query(Section).filter(Section.id == section_id).first()
     get_course_by_id(db, section.course_id, current_user)
+    course = section.course
     if not section:
         raise HTTPException(status_code=403, detail='Section not found')
     if current_user.role in [Role.TEACHER, Role.ADMIN]:
         return section
     student_course = db.query(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.course_id == section.course_id).first()
-    if not student_course:
-        raise HTTPException(status_code=403, detail="Student is not enrolled in this course")
+    if not student_course and not course.is_premium:
+        student_course = StudentCourse(student_id=current_user.id, course_id=course.id, is_approved=True, progress = 0, is_visited=False)
+        db.add(student_course)
+        db.commit()
+        db.refresh(student_course)
+    if course.is_premium:
+        if not student_course or not student_course.is_approved:
+            raise HTTPException(status_code=403, detail='You are not approved for this course!')
     if not student_course.is_visited:
         student_course.is_visited = True
         total_section = db.query(Section).filter(Section.course_id == section.course_id).count()
