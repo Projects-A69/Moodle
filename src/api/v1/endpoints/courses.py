@@ -29,8 +29,8 @@ def create_course(payload: CoursesCreate, db: Session = Depends(get_db), current
 def update_course(course_id: UUID, payload: CoursesUpdate, db: Session = Depends(get_db), current_user = Depends(get_teacher_user)):
     return update_specific_course(db, course_id, payload, current_user= current_user)
 
-@router.post("/courses/{course_id}")
-def get_rating_course(course_id: UUID, db: Session = Depends(get_db), current_user: User = Depends(get_teacher_user)):
-    return rating_course(db, course_id, current_user)
+@router.get("/courses/{course_id}")
+def get_rating_course(course_id: UUID, db: Session = Depends(get_db)):
+    return rating_course(db, course_id)
 
 

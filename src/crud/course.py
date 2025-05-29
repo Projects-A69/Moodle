@@ -113,23 +113,19 @@ def update_specific_course(db: Session, id: UUID, payload: CoursesUpdate, curren
     else:
         raise HTTPException(status_code=403, detail="You dont have permission to edit this course")
 
-def rating_course(db: Session, id: UUID, user: User):
+def rating_course(db: Session, id: UUID):
     course = db.query(Course).filter(Course.id == id).first()
     if not course:
         raise HTTPException(status_code= 403, detail="Course not found")
-    student = db.query(StudentCourse).filter(StudentCourse.student_id==user.id, StudentCourse.course_id == course.id).first()
-    if not student:
-        raise HTTPException(status_code=404, detail="Student not enrolled in this course")
-    if student.score is None:
-        raise HTTPException(status_code = 404, detail="You have not rate this course")
     ratings = db.query(StudentCourse).filter(StudentCourse.course_id == course.id, StudentCourse.score != None).all()
     if not ratings:
-        average_rating = 0
+        average_rating_score = 0.0
     else:
-        total_score = sum(rating.score for rating in ratings) / len(ratings)
+        total_score = sum(rating.score for rating in ratings)
         max_score = len(ratings) * 10
-        average_rating = (total_score / max_score) * 10
-    course.rating = average_rating
+        avg_rating = total_score / max_score
+        average_rating_score = avg_rating * 10
+    course.rating = average_rating_score
     db.commit()
     db.refresh(course)
-    return {"course_id": course.id, "rating": average_rating}
+    return {"rating": average_rating_score}
