@@ -98,22 +98,30 @@ def approve_student_by_id(db: Session, student_id: UUID, course_id: UUID):
     return {"message": f"Student approved and enrolled in '{course.title}'."}
 
 
-def list_pending_students(db: Session):
+def list_pending_students(db: Session, current_teacher: User, course_id: UUID):
     """
     List all pending students in the course.
     """
-    students = db.query(StudentCourse).filter(
-        StudentCourse.is_approved == False
-    ).all()
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise NotFound("Course not found.")
+
+    if course.owner_id != current_teacher.id:
+        raise Unauthorized("You do not have permission to view this course's students.")
+
+    pending_students = db.query(StudentCourse).filter(
+        StudentCourse.course_id == course_id,
+        StudentCourse.is_approved == False).all()
     result = []
-    for user in students:
-        student = user.student
+    for sc in pending_students:
+        student = sc.student
         result.append({
-            "id": str(user.student_id),})
-            # "email": student.email,
-            # "first_name": student.first_name if student else None,
-            # "last_name": student.last_name if student else None,
-            # "profile_picture": student.profile_picture if student else None,})
+            "id": str(student.id),
+            "email": student.user.email,
+            "first_name": student.first_name,
+            "last_name": student.last_name,
+            "profile_picture": student.profile_picture
+        })
 
     return result
 
