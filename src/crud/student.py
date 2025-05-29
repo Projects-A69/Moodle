@@ -89,7 +89,6 @@ def unsubscribe_from_course(student_id: UUID,
 
 
 def rate_course(course_id: UUID,
-                student_id: UUID,
                 payload: CoursesRate,
                 current_student: UserModel = Depends(get_student_user),
                 db: Session = Depends(get_db)):
@@ -102,7 +101,7 @@ def rate_course(course_id: UUID,
 
     student_course = db.query(StudentCourse).filter(
         StudentCourse.course_id == course_id,
-        StudentCourse.student_id == student_id).first()
+        StudentCourse.student_id == current_student.id).first()
     if not student_course or current_student.id != student_course.student_id:
         raise HTTPException(status_code=403, detail="You are not enrolled in this course")
 
