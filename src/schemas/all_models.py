@@ -122,6 +122,7 @@ class SectionInDB(BaseModel):
     description: str | None = None
     information: str | None = None
     link: str | None = None
+    is_visited: bool = False
     course_id: UUID
 
 class SectionCreate(BaseModel):
