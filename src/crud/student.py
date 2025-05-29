@@ -1,40 +1,21 @@
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-from src.api.deps import get_db, get_current_user
-from src.models.models import Course, Student, Section, Role, StudentCourse, User
+from sqlalchemy import func
+from src.api.deps import get_db, get_student_user
+from src.models.models import Course, Student, Role, StudentCourse, User
 from src.schemas.all_models import CoursesRate
 from uuid import UUID
-from src.crud.user import get_by_id
 from src.utils.custom_responses import NotFound, BadRequest
 from src.utils.email_utils import send_email
 from src.utils.token_utils import generate_student_approval_token
 from src.core.config import settings
+from src.models.models import User as UserModel
 
-# def list_accessible_courses(current_user: User = Depends(get_current_user),
-#                              db: Session = Depends(get_db)):
-#     """
-#     Lists all public courses and premium courses the student is subscribed to.
-#     """
-#
-#     student = db.query(Student).options(joinedload(Student.courses))\
-#         .filter(Student.id == current_user.student.id)\
-#         .first()
-#
-#     public_courses = db.query(Course).filter(Course.is_premium == False).all()
-#     subscribed_courses = student.courses
-#
-#     return {
-#         "public_courses": public_courses,
-#         "subscribed_courses": subscribed_courses
-#     }
-
-
-def subscribe_to_course(
-    course_id: UUID,
-    current_student: Student = Depends(get_current_user),
-    db: Session = Depends(get_db)):
+def subscribe_to_course(course_id: UUID,
+                        current_student: UserModel = Depends(get_student_user),
+                        db: Session = Depends(get_db)):
     """
-    Allows a student to subscribe to a premium course, if the Teacher who owns the Course approves him.
+    Allows a student to subscribe to a premium course when the Teacher who owns the Course approves him.
     """
     course = db.query(Course).filter(Course.id == course_id).first()
     if not course:
@@ -43,9 +24,17 @@ def subscribe_to_course(
     if not course.is_premium:
         raise BadRequest("No need to subscribe to a public course")
 
-    existing = db.query(StudentCourse).filter_by(
-        student_id=current_student.id, course_id=course.id
-    ).first()
+    premium_courses_count = (
+        db.query(func.count(StudentCourse.course_id))
+        .join(Course, StudentCourse.course_id == Course.id)
+        .filter
+        (StudentCourse.student_id == current_student.id,
+                  Course.is_premium == True,
+                  StudentCourse.is_approved == True).scalar())
+    if premium_courses_count >=5:
+        raise BadRequest("You can only be subscribed up to 5 premium courses")
+
+    existing = db.query(StudentCourse).filter_by(student_id=current_student.id, course_id=course.id).first()
     if existing:
         if existing.is_approved:
             raise BadRequest("You are already subscribed and approved.")
@@ -81,6 +70,9 @@ def subscribe_to_course(
 def unsubscribe_from_course(student_id: UUID,
                             course_id: UUID,
                             db: Session=Depends(get_db)):
+    """
+    Unsubscribe a student from a course.
+    """
     student_course = db.query(StudentCourse).filter(
         StudentCourse.course_id == course_id,
         StudentCourse.student_id == student_id).first()
@@ -96,73 +88,14 @@ def unsubscribe_from_course(student_id: UUID,
     return {"message": f"{student.first_name} {student.last_name} unsubscribed from {course.title} successfully"}
 
 
-# def view_course(course_id: UUID,
-#                 current_student: Student = Depends(get_current_user),
-#                 db: Session = Depends(get_db)):
-#     """
-#     View a single course if it is public or the student is subscribed.
-#     """
-#     course = db.query(Course).filter(Course.id == course_id).first()
-#
-#     if not course:
-#         raise NotFound("Course not found")
-#
-#     if course.is_premium and course not in current_student.courses:
-#         raise HTTPException(status_code=403, detail="You are not subscribed to this course")
-#
-#     return course
-
-
-# def list_sections(course_id: UUID,
-#                   current_student: Student = Depends(get_current_user),
-#                   db: Session = Depends(get_db)):
-#     """
-#     Lists all sections of a course if accessible by the student.
-#     """
-#     course = db.query(Course).filter(Course.id == course_id).first()
-#
-#     if not course:
-#         raise NotFound("Course not found")
-#
-#     if course.is_premium and course not in current_student.courses:
-#         raise HTTPException(status_code=403, detail="You are not subscribed to this course")
-#
-#     return {
-#         "sections": course.sections
-#     }
-
-
-# def view_section(course_id: UUID,
-#                  section_id: UUID,
-#                  current_student: Student = Depends(get_current_user),
-#                  db: Session = Depends(get_db)):
-#     """
-#     View a single section of a course if accessible by the student.
-#     """
-#     course = db.query(Course).filter(Course.id == course_id).first()
-#     if not course:
-#         raise NotFound("Course not found")
-#
-#     if course.is_premium and course not in current_student.courses:
-#         raise HTTPException(status_code=403, detail="You are not subscribed to this course")
-#
-#     section = db.query(Section).filter(Section.id == section_id, Section.course_id == course_id).first()
-#     if not section:
-#         raise NotFound("Section not found")
-#
-#     return section
-
-
-def view_profile(current_student: Student = Depends(get_current_user),
-                 db: Session = Depends(get_db)):
-
-    student = get_by_id(db, current_student.id)
-    return student
-
-
-def rate_course(course_id: UUID, payload: CoursesRate, current_user: User, db: Session):
+def rate_course(course_id: UUID,
+                payload: CoursesRate,
+                current_user: User,
+                db: Session):
+    """
+    Allows a student to rate a course.
+    """
     course = db.query(Course).filter_by(id=course_id).first()
-
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
