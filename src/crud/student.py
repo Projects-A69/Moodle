@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from src.api.deps import get_db, get_student_user
-from src.models.models import Course, Student, Role, StudentCourse, User
+from src.models.models import Course, Student, Role, StudentCourse, User, Section, StudentSection
 from src.schemas.all_models import CoursesRate
 from uuid import UUID
 from src.utils.custom_responses import NotFound, BadRequest
@@ -89,23 +89,31 @@ def unsubscribe_from_course(student_id: UUID,
 
 
 def rate_course(course_id: UUID,
+                student_id: UUID,
                 payload: CoursesRate,
-                current_user: User,
-                db: Session):
+                current_student: UserModel = Depends(get_student_user),
+                db: Session = Depends(get_db)):
     """
-    Allows a student to rate a course.
+    Allows a student to rate a course from 1 to 10.
     """
-    course = db.query(Course).filter_by(id=course_id).first()
+    course = db.query(Course).filter(Course.id == course_id).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    if current_user.role == Role.STUDENT:
-        student = db.query(Student).filter_by(id=current_user.id).first()
-        if student not in course.students:
-            raise HTTPException(status_code=403, detail="You are not enrolled in this course")
+    student_course = db.query(StudentCourse).filter(
+        StudentCourse.course_id == course_id,
+        StudentCourse.student_id == student_id).first()
+    if not student_course or current_student.id != student_course.student_id:
+        raise HTTPException(status_code=403, detail="You are not enrolled in this course")
 
-    course.rating = payload.rating
+    if not (1 <= payload.rating <= 10):
+        raise HTTPException(status_code=400, detail="Rating must be between 1 and 10")
+
+    if student_course.score is not None:
+        raise HTTPException(status_code=400, detail="You have already rated this course")
+
+    student_course.score = payload.rating
     db.commit()
-    db.refresh(course)
+    db.refresh(student_course)
 
-    return {"message": "Course rating updated successfully", "rating": course.rating}
+    return {"message": "Course rated successfully", "score": student_course.score}

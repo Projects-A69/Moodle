@@ -31,16 +31,16 @@ def unsubscribe_from_course_endpoint(course_id: UUID,
                                    db=db)
 
 
-@router.put("/courses/{course_id}/rate")
-def rate_courses(
+@router.post("/{course_id}/students/{student_id}/rate")
+def rate_course_endpoint(
     course_id: UUID,
+    student_id: UUID,
     payload: CoursesRate,
-    current_user: UserModel = Depends(get_student_user),
-    db: Session = Depends(get_db),
-):
-    return rate_course(
-        course_id=course_id,
-        payload=payload,
-        current_user=current_user,
-        db=db
-    )
+    current_student: UserModel = Depends(get_student_user),
+    db: Session = Depends(get_db)):
+
+    return rate_course(course_id,
+                       student_id,
+                       payload,
+                       current_student,
+                       db)
