@@ -102,11 +102,11 @@ def list_pending_students(db: Session):
     """
     List all pending students in the course.
     """
-    users = db.query(User).filter(User.role == Role.STUDENT,
+    students = db.query(User).filter(User.role == Role.STUDENT,
                                            User.is_approved == False).all()
 
     result = []
-    for user in users:
+    for user in students:
         student = user.student
         result.append({
             "id": str(user.id),

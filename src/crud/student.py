@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from src.api.deps import get_db, get_student_user
-from src.models.models import Course, Student, Role, StudentCourse, User, Section
+from src.models.models import Course, Student, StudentCourse
 from src.schemas.all_models import CoursesRate
 from uuid import UUID
 from src.utils.custom_responses import NotFound, BadRequest
