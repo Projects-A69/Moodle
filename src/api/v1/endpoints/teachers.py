@@ -31,7 +31,7 @@ def approve_student_by_token(token: str, db: Session = Depends(get_db)):
 @router.post("/teachers/{user_id}/approvals")
 def approve_student(user_id: UUID,
                     db: Session = Depends(get_db),
-                    current_user: UserModel = Depends(get_teacher_user())):
+                    current_user: UserModel = Depends(get_teacher_user)):
 
     if current_user.role != Role.TEACHER:
         raise Unauthorized("Only teachers can approve students.")
@@ -43,7 +43,7 @@ def approve_student(user_id: UUID,
 def remove_student_from_course(course_id: UUID,
                                student_id: UUID,
                                db: Session = Depends(get_db),
-                               current_user: UserModel = Depends(get_teacher_user())):
+                               current_user: UserModel = Depends(get_teacher_user)):
     if current_user.role != Role.TEACHER:
         raise Unauthorized("Only teachers can remove students from courses.")
 
@@ -53,7 +53,7 @@ def remove_student_from_course(course_id: UUID,
 def approve_student_by_ids(course_id: UUID,
                           student_id: UUID,
                           db: Session = Depends(get_db),
-                          current_user: UserModel = Depends(get_teacher_user())):
+                          current_user: UserModel = Depends(get_teacher_user)):
 
     if current_user.role != Role.TEACHER:
         raise Unauthorized("Only teachers can approve students from courses.")

@@ -12,7 +12,7 @@ router = APIRouter()
 @router.post("/courses/{course_id}/subscribe")
 def subscribe_to_courses(
     course_id: UUID,
-    current_student: Student = Depends(get_student_user()),
+    current_student: Student = Depends(get_student_user),
     db: Session = Depends(get_db),
 ):
     return subscribe_to_course(
@@ -35,7 +35,7 @@ def unsubscribe_from_course_endpoint(course_id: UUID,
 def rate_courses(
     course_id: UUID,
     payload: CoursesRate,
-    current_user: UserModel = Depends(get_student_user()),
+    current_user: UserModel = Depends(get_student_user),
     db: Session = Depends(get_db),
 ):
     return rate_course(

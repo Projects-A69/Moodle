@@ -12,7 +12,7 @@ from src.core.config import settings
 from src.models.models import User as UserModel
 
 def subscribe_to_course(course_id: UUID,
-                        current_student: UserModel = Depends(get_student_user()),
+                        current_student: UserModel = Depends(get_student_user),
                         db: Session = Depends(get_db)):
     """
     Allows a student to subscribe to a premium course when the Teacher who owns the Course approves him.
