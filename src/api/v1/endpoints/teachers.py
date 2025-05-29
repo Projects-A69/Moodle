@@ -1,3 +1,4 @@
+from calendar import c
 from fastapi import APIRouter, Depends
 from uuid import UUID
 from itsdangerous import BadSignature, SignatureExpired
@@ -30,10 +31,11 @@ def approve_student_by_token(token: str, db: Session = Depends(get_db)):
 
 @router.post("/teachers/{user_id}/approvals")
 def approve_student(user_id: UUID,
+                    course_id: UUID,
                     db: Session = Depends(get_db),
                     current_user: UserModel = Depends(get_teacher_user)):
 
-    return approve_student_by_id(db, user_id)
+    return approve_student_by_id(db, user_id,course_id)
 
 
 @router.delete("/courses/{course_id}/students/{student_id}")
@@ -44,11 +46,3 @@ def remove_student_from_course(course_id: UUID,
 
     return remove_student_from_course(db, course_id, student_id)
 
-# @router.post("/courses/{course_id}/students/{student_id}")
-# def approve_student_by_ids(course_id: UUID,
-#                           student_id: UUID,
-#                           db: Session = Depends(get_db),
-#                           current_user: UserModel = Depends(get_teacher_user)):
-
-
-#     return approve_student_by_id(db, course_id, student_id, current_user)
