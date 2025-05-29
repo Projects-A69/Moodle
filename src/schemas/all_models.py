@@ -102,8 +102,6 @@ class CoursesUpdate(BaseModel):
     is_hidden: bool | None = None
 
 class CoursesRate(BaseModel):
-    id: UUID
-    user_id: UUID
     score: float
 
 class Tag(BaseModel):
