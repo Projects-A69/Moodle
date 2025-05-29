@@ -22,20 +22,28 @@ def get_all_sections(db: Session, course_id: UUID, title: Optional[str] = None, 
 
 def information_about_section(db: Session, section_id: UUID, current_user: Optional[User] = None):
     section = db.query(Section).filter(Section.id == section_id).first()
+    get_course_by_id(db, section.course_id, current_user)
     if not section:
         raise HTTPException(status_code=403, detail='Section not found')
+    if current_user.role in [Role.TEACHER, Role.ADMIN]:
+        return section
     student_course = db.query(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.course_id == section.course_id).first()
     if not student_course:
         raise HTTPException(status_code=403, detail="Student is not enrolled in this course")
-    get_course_by_id(db, section.course_id, current_user)
-    total_section = db.query(Section).filter(Section.course_id == section.course_id).count()
-    if student_course.is_visited == False:
-        student_course.is_visited =+ 1
-        if student_course.progress <= 100:
-            student_course.progress += student_course.is_visited / total_section * 100 + 1
+    if not student_course.is_visited:
+        student_course.is_visited = True
+        total_section = db.query(Section).filter(Section.course_id == section.course_id).count()
+        if student_course.progress < 100:
+            formula_progress = 100/ total_section
+            sum_progress = formula_progress + student_course.progress
+            if sum_progress > 100:
+                student_course.progress = 100
+            else:
+                student_course.progress = sum_progress
+        student_course.is_visited = False
         db.commit()
         db.refresh(student_course)
-        student_course.is_visited = False
+        return {"progress": student_course.progress}
     return section
 
 def add_section_to_course(db: Session, payload: SectionCreate, course_id: UUID, current_user: Optional[User] = None):
