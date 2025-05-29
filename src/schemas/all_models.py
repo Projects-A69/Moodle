@@ -139,9 +139,14 @@ class SectionUpdate(BaseModel):
     information: str | None = None
     link: str | None = None
 
+class SectionVisit(BaseModel):
+    student_id: UUID
+    section_id: UUID
+
 class StudentCourse(BaseModel):
     student_id: UUID
     course_id: UUID
     score: float
+    is_visited: bool = False
     is_approved: bool
     progress: int

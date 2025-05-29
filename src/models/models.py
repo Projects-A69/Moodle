@@ -96,6 +96,7 @@ class StudentCourse(Base):
     student_id = Column(UUID(as_uuid=True), ForeignKey('students.id'), primary_key=True)
     course_id = Column(UUID(as_uuid=True), ForeignKey('courses.id'), primary_key=True)
     is_approved = Column(Boolean, default=False)
+    is_visited = Column(Boolean, default=False)
     progress = Column(Integer, default=0)
     score = Column(Float, nullable=True)
     
