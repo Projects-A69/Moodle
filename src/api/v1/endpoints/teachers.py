@@ -1,13 +1,11 @@
-from calendar import c
 from fastapi import APIRouter, Depends
 from uuid import UUID
 from itsdangerous import BadSignature, SignatureExpired
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, get_teacher_user
 from src.crud.teacher import approve_student_by_id, remove_student_from_course
-from src.models.models import Role
 from src.models.models import User as UserModel
-from src.utils.custom_responses import Unauthorized, BadRequest
+from src.utils.custom_responses import BadRequest
 from src.utils.token_utils import verify_student_approval_token
 
 router = APIRouter()
@@ -46,3 +44,11 @@ def remove_student_from_course(course_id: UUID,
 
     return remove_student_from_course(db, course_id, student_id)
 
+
+from src.crud.teacher import toggle_course_visibility_by_teacher
+
+@router.put("/courses/{course_id}/visibility")
+def toggle_course_visibility(course_id: UUID,
+                             db: Session = Depends(get_db),
+                             current_user: UserModel = Depends(get_teacher_user)):
+    return toggle_course_visibility_by_teacher(db, course_id, current_user)

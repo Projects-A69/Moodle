@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.api.deps import get_db
 from src.models.models import Course, Role, StudentCourse, User
 from src.crud.user import get_by_id
-from src.utils.custom_responses import NotFound, BadRequest
+from src.utils.custom_responses import NotFound, BadRequest, Unauthorized
 from src.utils.token_utils import verify_student_approval_token
 from uuid import UUID
 
@@ -118,3 +118,27 @@ def list_pending_students(db: Session):
             "is_approved": user.is_approved})
 
     return result
+
+
+
+def toggle_course_visibility_by_teacher(db: Session, course_id: UUID, current_user: User):
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+
+    if not course:
+        raise NotFound(f"Course with ID: {course_id} not found")
+
+    if course.owner_id != current_user.id:
+        raise Unauthorized("You are not the owner of this course.")
+
+    if course.is_hidden:
+        course.is_hidden = False
+        db.commit()
+        return {"message": f"Course '{course.title}' is now visible."}
+
+    if course.students:
+        raise BadRequest("You cannot hide a course that has enrolled students.")
+
+    course.is_hidden = True
+    db.commit()
+    return {"message": f"Course '{course.title}' has been hidden successfully."}
