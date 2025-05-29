@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.schemas.all_models import SectionCreate, SectionUpdate, SectionInDB, User
 from src.crud.section import get_all_sections, information_about_section, add_section_to_course, delete_section_from_course, update_info_about_section
-from src.api.deps import get_db, get_current_user, get_teacher_user
+from src.api.deps import get_db, get_current_user, get_teacher_user, get_student_user
 from src.models.models import Role, Course
 from uuid import UUID
 
@@ -15,7 +15,7 @@ def get_sections(course_id: UUID, db: Session = Depends(get_db), current_user: U
     return get_all_sections(db, course_id, current_user = current_user)
 
 @router.get("/courses/{section_id}")
-def get_section_by_id(section_id: UUID, db: Session = Depends(get_db), current_user: User = Depends(get_teacher_user)):
+def get_section_by_id(section_id: UUID, db: Session = Depends(get_db), current_user: User = Depends(get_student_user)):
     section = information_about_section(db, section_id, current_user)
     return section
 

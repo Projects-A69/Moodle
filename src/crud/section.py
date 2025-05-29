@@ -1,8 +1,7 @@
-from sqlalchemy.sql.functions import current_user
 from src.crud import course
 from src.crud.course import get_course_by_id
-from src.models.models import Section, Course, User
-from src.schemas.all_models import SectionInDB, SectionCreate, SectionUpdate, CourseInDB, Role, User
+from src.models.models import Section, Course, User, StudentCourse
+from src.schemas.all_models import SectionInDB, SectionCreate, SectionUpdate, CourseInDB, Role, User, SectionVisit
 from fastapi import HTTPException
 from src.utils.custom_responses import Unauthorized
 from sqlalchemy.orm import Session
@@ -25,7 +24,18 @@ def information_about_section(db: Session, section_id: UUID, current_user: Optio
     section = db.query(Section).filter(Section.id == section_id).first()
     if not section:
         raise HTTPException(status_code=403, detail='Section not found')
+    student_course = db.query(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.course_id == section.course_id).first()
+    if not student_course:
+        raise HTTPException(status_code=403, detail="Student is not enrolled in this course")
     get_course_by_id(db, section.course_id, current_user)
+    total_section = db.query(Section).filter(Section.course_id == section.course_id).count()
+    if student_course.is_visited == False:
+        student_course.is_visited =+ 1
+        if student_course.progress <= 100:
+            student_course.progress += student_course.is_visited / total_section * 100 + 1
+        db.commit()
+        db.refresh(student_course)
+        student_course.is_visited = False
     return section
 
 def add_section_to_course(db: Session, payload: SectionCreate, course_id: UUID, current_user: Optional[User] = None):
