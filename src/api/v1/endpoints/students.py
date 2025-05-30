@@ -47,3 +47,16 @@ def get_favorite_courses(
     db: Session = Depends(get_db)):
     pass
 
+@router.put("/courses/favorites/{course_id}")
+def add_favorite_course(
+    course_id: UUID,
+    current_student: UserModel = Depends(get_student_user),
+    db: Session = Depends(get_db)):
+    pass
+
+@router.delete("/courses/favorites/{course_id}")
+def remove_favorite_course(
+    course_id: UUID,
+    current_student: UserModel = Depends(get_student_user),
+    db: Session = Depends(get_db)):
+    pass

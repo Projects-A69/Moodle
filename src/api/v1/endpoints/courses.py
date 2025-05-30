@@ -32,10 +32,3 @@ def update_course(course_id: UUID, payload: CoursesUpdate, db: Session = Depends
 def get_rating_course(course_id: UUID, db: Session = Depends(get_db)):
     return rating_course(db, course_id)
 
-
-@router.put("/courses/favorites/{course_id}")
-def toggle_favorite_course(
-    course_id: UUID,
-    current_student: UserModel = Depends(get_student_user),
-    db: Session = Depends(get_db)):
-    pass
