@@ -99,6 +99,7 @@ class StudentCourse(Base):
     is_visited = Column(Boolean, default=False)
     progress = Column(Integer, default=0)
     score = Column(Float, nullable=True)
+    is_favorite = Column(Boolean, default=False)
     
     student = relationship("Student", backref="course_associations")
     course = relationship("Course", backref="student_associations")

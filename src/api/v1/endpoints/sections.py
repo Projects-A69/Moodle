@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from src.schemas.all_models import SectionCreate, SectionUpdate, SectionInDB, User
+from src.schemas.all_models import SectionCreate, SectionUpdate, User
 from src.crud.section import get_all_sections, information_about_section, add_section_to_course, delete_section_from_course, update_info_about_section
-from src.api.deps import get_db, get_current_user, get_teacher_user, get_student_user
-from src.models.models import Role, Course
+from src.api.deps import get_db, get_teacher_user, get_student_user
 from uuid import UUID
 
 from src.utils.custom_responses import Unauthorized

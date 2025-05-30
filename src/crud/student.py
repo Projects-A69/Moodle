@@ -103,9 +103,11 @@ def rate_course(db: Session, course_id: UUID,
         StudentCourse.student_id == current_student.id).first()
     if not student_course or current_student.id != student_course.student_id:
         raise HTTPException(status_code=403, detail="You are not enrolled in this course")
-
-    if not (1 <= payload.score <= 10):
-        raise HTTPException(status_code=400, detail="Rating must be between 1 and 10")
+    if student_course.progress == 0:
+        raise HTTPException(status_code=403, detail="You must see the course before rating it")
+        
+    if not (0 <= payload.score <= 5):
+        raise HTTPException(status_code=400, detail="Rating must be between 0 and 5")
 
     student_course.score = payload.score
     db.commit()

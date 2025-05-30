@@ -1,9 +1,9 @@
 from src.api.deps import get_current_user, get_db
-from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, CoursesRate, User
+from src.schemas.all_models import CoursesUpdate, User
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
-from src.models.models import User, Role, StudentCourse, Course, Teacher
+from src.models.models import User, Role, StudentCourse, Course
 from typing import Optional
 
 def get_course(db: Session, title: str, current_user: Optional[User] = None):

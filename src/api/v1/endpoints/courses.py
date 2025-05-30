@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.functions import current_user
-from src.api.deps import get_db, get_current_user, optional_user, get_teacher_user
+from src.api.deps import get_db, get_student_user, optional_user, get_teacher_user
 from src.crud.course import create_courses, get_course, get_course_by_id, update_specific_course, rating_course
-from src.schemas.all_models import CourseInDB, CoursesCreate, CoursesUpdate, User, CoursesRate, Role
-from src.utils.custom_responses import Unauthorized
+from src.schemas.all_models import CoursesCreate, CoursesUpdate, User
 from uuid import UUID
 from typing import Optional
+from src.models.models import User as UserModel 
 
 router = APIRouter(prefix="/courses", tags=["courses"])
 
@@ -34,3 +33,9 @@ def get_rating_course(course_id: UUID, db: Session = Depends(get_db)):
     return rating_course(db, course_id)
 
 
+@router.put("/courses/favorites/{course_id}")
+def toggle_favorite_course(
+    course_id: UUID,
+    current_student: UserModel = Depends(get_student_user),
+    db: Session = Depends(get_db)):
+    pass

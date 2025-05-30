@@ -148,3 +148,4 @@ class StudentCourse(BaseModel):
     is_visited: bool = False
     is_approved: bool
     progress: int
+    is_favorite: bool = False

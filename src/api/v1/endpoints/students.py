@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from uuid import UUID
 from src.api.deps import get_db, get_student_user
-from src.models.models import Student
+from src.models.models import Student, User
 from src.models.models import User as UserModel
 from src.schemas.all_models import CoursesRate
 from src.crud.student import subscribe_to_course, rate_course, unsubscribe_from_course
@@ -39,3 +39,11 @@ def rate_course_endpoint(
     db: Session = Depends(get_db)):
 
     return rate_course(db, course_id, payload, current_student)
+
+
+@router.get("/courses/favorites")
+def get_favorite_courses(
+    current_student: UserModel = Depends(get_student_user),
+    db: Session = Depends(get_db)):
+    pass
+
