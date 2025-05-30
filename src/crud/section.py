@@ -48,7 +48,12 @@ def information_about_section(db: Session, section_id: UUID, current_user: Optio
         student_course.is_visited = False
         db.commit()
         db.refresh(student_course)
-        return {"progress": student_course.progress}
+        return {"title": course.title,
+                "description": course.description,
+                "objectives": course.objectives,
+                "picture": course.picture,
+                "rating": course.rating,
+                "progress": student_course.progress}
     return section
 
 def add_section_to_course(db: Session, payload: SectionCreate, course_id: UUID, current_user: Optional[User] = None):
