@@ -114,3 +114,16 @@ def rate_course(db: Session, course_id: UUID,
     db.refresh(student_course)
 
     return {"message": "Course rated successfully", "score": student_course.score}
+
+def get_all_favorite_courses(db: Session, current_student: UserModel):
+    read_courses = db.query(Course)
+    favorites_course = read_courses.join(StudentCourse).filter(StudentCourse.student_id == current_student.id, StudentCourse.is_favorite == True).all()
+    if not favorites_course:
+        return {'message': 'No favorite courses found.', "favorites_courses": []}
+    my_courses = []
+    for favourite in favorites_course:
+        my_courses.append({"title": favorite.title,
+                           "description": favorite.description,
+                           "objectives": favorite.objectives,
+                           "picture": favorite.picture})
+    return my_courses

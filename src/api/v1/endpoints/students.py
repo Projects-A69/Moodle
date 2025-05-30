@@ -5,7 +5,7 @@ from src.api.deps import get_db, get_student_user
 from src.models.models import Student, User
 from src.models.models import User as UserModel
 from src.schemas.all_models import CoursesRate
-from src.crud.student import subscribe_to_course, rate_course, unsubscribe_from_course
+from src.crud.student import subscribe_to_course, rate_course, unsubscribe_from_course, get_all_favorite_courses
 
 router = APIRouter()
 
@@ -45,7 +45,7 @@ def rate_course_endpoint(
 def get_favorite_courses(
     current_student: UserModel = Depends(get_student_user),
     db: Session = Depends(get_db)):
-    pass
+    return get_all_favorite_courses(db, current_student)
 
 @router.put("/courses/favorites/{course_id}")
 def add_favorite_course(
