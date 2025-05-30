@@ -36,7 +36,6 @@ def information_about_section(db: Session, section_id: UUID, current_user: Optio
         if not student_course or not student_course.is_approved:
             raise HTTPException(status_code=403, detail='You are not approved for this course!')
     if not student_course.is_visited:
-        student_course.is_visited = True
         total_section = db.query(Section).filter(Section.course_id == section.course_id).count()
         if student_course.progress < 100:
             formula_progress = 100/ total_section
@@ -45,16 +44,14 @@ def information_about_section(db: Session, section_id: UUID, current_user: Optio
                 student_course.progress = 100
             else:
                 student_course.progress = sum_progress
-        student_course.is_visited = False
+        student_course.is_visited = True
         db.commit()
         db.refresh(student_course)
-        return {"title": course.title,
-                "description": course.description,
-                "objectives": course.objectives,
-                "picture": course.picture,
-                "rating": course.rating,
+    return {"title": section.title,
+                "content": section.content,
+                "description": section.description,
+                "information": section.information,
                 "progress": student_course.progress}
-    return section
 
 def add_section_to_course(db: Session, payload: SectionCreate, course_id: UUID, current_user: Optional[User] = None):
     course = db.query(Course).filter(Course.id == course_id).first()

@@ -81,8 +81,8 @@ class CourseInDB(BaseModel):
     description: str
     objectives: str
     owner_id: UUID
-    is_premium: bool
-    is_hidden: bool
+    is_premium: bool = False
+    is_hidden: bool = False
     picture: str
     rating: float
 
@@ -91,7 +91,7 @@ class CoursesCreate(BaseModel):
     description: str
     objectives: str
     picture: str
-    is_premium: bool
+    is_premium: bool = False
 
 class CoursesUpdate(BaseModel):
     title: str | None = None
