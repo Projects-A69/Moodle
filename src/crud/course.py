@@ -19,41 +19,30 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
     if current_user.role == Role.STUDENT:
         read_courses = read_courses.filter(Course.is_hidden == False)
 
-        approved_student = read_courses.join(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.is_approved == True).all()
+        approved_student = db.query(Course).join(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.is_approved == True).all()
 
-        public_courses = read_courses.filter(Course.is_hidden == False, Course.is_premium == False).all()
+        approved_courses = [course.id for course in approved_student]
 
-        premium_courses = read_courses.join(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.is_approved == True, Course.is_premium == True).all()
-
-        student_not_approved = read_courses.join(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.is_approved == False, Course.is_premium == True).all()
-
-        approved_courses = [course.id for course in approved_student + public_courses + premium_courses]
-        not_approved_courses = [course.id for course in student_not_approved]
-
-        all_courses = read_courses.all()
         result = []
-        for course in all_courses:
-            if course.id in approved_courses:
+        for course in read_courses.all():
+            if not course.is_premium or course.id in approved_courses:
                 result.append({
                     "id": course.id,
                     "title": course.title,
                     "description": course.description,
                     "objectives": course.objectives,
                     "picture": course.picture,
-                    "owner_id": course.owner_id,
-                    "is_premium": course.is_premium,
-                    "is_hidden": course.is_hidden,
                     "rating": course.rating
                 })
-            elif course.id in not_approved_courses:
-                result.append({"title": course.title, "description": course.description})
+            else:
+                result.append({"title": course.title, "description": course.description, "picture": course.picture})
         return result
     if current_user.role == Role.TEACHER:
         courses = []
         for course in read_courses.all():
             if course.owner_id == current_user.id:
                 courses.append(course)
-            elif not course.is_hidden:
+            if not course.is_hidden:
                 courses.append({"title": course.title, "description": course.description})
         return courses
     return read_courses.all()
