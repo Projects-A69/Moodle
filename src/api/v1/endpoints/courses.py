@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from src.api.deps import get_db, get_student_user, optional_user, get_teacher_user
+from src.api.deps import get_db, optional_user, get_teacher_user
 from src.crud.course import create_courses, get_course, get_course_by_id, update_specific_course, rating_course
 from src.schemas.all_models import CoursesCreate, CoursesUpdate, User
 from uuid import UUID
 from typing import Optional
-from src.models.models import User as UserModel 
 
 router = APIRouter(prefix="/courses", tags=["courses"])
 

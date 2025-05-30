@@ -1,3 +1,4 @@
+import re
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -121,9 +122,46 @@ def get_all_favorite_courses(db: Session, current_student: UserModel):
     if not favorites_course:
         return {'message': 'No favorite courses found.', "favorites_courses": []}
     my_courses = []
-    for favourite in favorites_course:
+    for favorite in favorites_course:
         my_courses.append({"title": favorite.title,
                            "description": favorite.description,
                            "objectives": favorite.objectives,
                            "picture": favorite.picture})
     return my_courses
+
+def add_favorite_courses(
+    course_id: UUID,
+    current_student: UserModel = Depends(get_student_user),
+    db: Session = Depends(get_db)):
+    
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise NotFound("Course not found")
+    
+    student_course = db.query(StudentCourse).filter_by(student_id=current_student.id, course_id=course.id).first()
+    
+    if student_course:
+        if student_course.is_favorite:
+            raise BadRequest("This course is already in your favorites")
+        student_course.is_favorite = True
+    else:
+        student_course = StudentCourse(
+            student_id=current_student.id,
+            course_id=course.id,
+            is_favorite=True,
+            is_approved=False)
+        db.add(student_course)
+    db.commit()
+    return {"message": "Course added to favorites."}
+
+def remove_favorite_courses(course_id: UUID,
+                           current_student: UserModel = Depends(get_student_user),
+                           db: Session = Depends(get_db)):
+    student_course = db.query(StudentCourse).filter_by(
+        student_id=current_student.id, course_id=course_id).first()
+    if not student_course or not student_course.is_favorite:
+        raise NotFound("This course is not in your favorites")
+    
+    student_course.is_favorite = False
+    db.commit()
+    return {"message": "Course removed from favorites."}
