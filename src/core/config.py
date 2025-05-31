@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY")
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM")
     JWT_EXPIRATION: int = os.getenv("JWT_EXPIRATION")
+    
     DATABASE_URL: str = os.getenv("DATABASE_URL")
     SMTP_HOST: str = os.getenv("SMTP_HOST")
     SMTP_PORT: int = os.getenv("SMTP_PORT")
@@ -29,6 +30,10 @@ class Settings(BaseSettings):
     EMAIL_PASSWORD: str = os.getenv("EMAIL_PASSWORD")
     APP_BASE_URL: str = os.getenv("APP_BASE_URL")
     ADMIN_NOTIFICATION_EMAIL: str = os.getenv("ADMIN_NOTIFICATION_EMAIL")
+    AWS_ACCESS_KEY_ID: str = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY: str = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_REGION: str = os.getenv("AWS_REGION")
+    AWS_BUCKET_NAME: str = os.getenv("AWS_BUCKET_NAME")
 
 
     class Config:
