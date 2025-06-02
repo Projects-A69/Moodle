@@ -1,11 +1,13 @@
+from uuid import UUID
+
 from fastapi import Depends
 from sqlalchemy.orm import Session
+
 from src.api.deps import get_db
-from src.models.models import Course, Role, StudentCourse, User
 from src.crud.user import get_by_id
-from src.utils.custom_responses import NotFound, BadRequest, Unauthorized
+from src.models.models import Course, Role, StudentCourse, User
+from src.utils.custom_responses import BadRequest, NotFound, Unauthorized
 from src.utils.token_utils import verify_student_approval_token
-from uuid import UUID
 
 
 def approve_student_by_token(token: str, db: Session = Depends(get_db)):
@@ -27,15 +29,16 @@ def approve_student_by_token(token: str, db: Session = Depends(get_db)):
     if not course:
         raise NotFound("Course not found")
 
-    enrollment = db.query(StudentCourse).filter_by(
-        student_id=student_id, course_id=course_id
-    ).first()
+    enrollment = (
+        db.query(StudentCourse)
+        .filter_by(student_id=student_id, course_id=course_id)
+        .first()
+    )
 
     if not enrollment:
         enrollment = StudentCourse(
-            student_id=student_id,
-            course_id=course_id,
-            is_approved=True)
+            student_id=student_id, course_id=course_id, is_approved=True
+        )
         db.add(enrollment)
     else:
         enrollment.is_approved = True
@@ -45,22 +48,29 @@ def approve_student_by_token(token: str, db: Session = Depends(get_db)):
     return {"message": f"Student approved and enrolled in '{course.title}'."}
 
 
-def remove_student_from_course(db: Session,
-                               course_id: UUID,
-                               student_id: UUID):
+def remove_student_from_course(db: Session, course_id: UUID, student_id: UUID):
     """
     Removes a student from the course.
     """
-    student_course = db.query(StudentCourse).filter(StudentCourse.course_id == course_id,
-                              StudentCourse.student_id == student_id).first()
+    student_course = (
+        db.query(StudentCourse)
+        .filter(
+            StudentCourse.course_id == course_id, StudentCourse.student_id == student_id
+        )
+        .first()
+    )
 
     if not student_course:
-        raise NotFound(f"Student with ID: {student_id} is not enrolled in course with ID: {course_id}")
+        raise NotFound(
+            f"Student with ID: {student_id} is not enrolled in course with ID: {course_id}"
+        )
 
     db.delete(student_course)
     db.commit()
 
-    return {"message": f"Student with ID: {student_id} removed from course with ID: {course_id} successfully."}
+    return {
+        "message": f"Student with ID: {student_id} removed from course with ID: {course_id} successfully."
+    }
 
 
 def approve_student_by_id(db: Session, student_id: UUID, course_id: UUID):
@@ -79,15 +89,15 @@ def approve_student_by_id(db: Session, student_id: UUID, course_id: UUID):
     if not course:
         raise NotFound("Course not found")
 
-    existing = db.query(StudentCourse).filter_by(
-        student_id=student_id, course_id=course_id
-    ).first()
+    existing = (
+        db.query(StudentCourse)
+        .filter_by(student_id=student_id, course_id=course_id)
+        .first()
+    )
 
     if not existing:
         existing = StudentCourse(
-            student_id=student_id,
-            course_id=course_id,
-            is_approved=True
+            student_id=student_id, course_id=course_id, is_approved=True
         )
         db.add(existing)
     else:
@@ -109,26 +119,32 @@ def list_pending_students(db: Session, current_teacher: User, course_id: UUID):
     if course.owner_id != current_teacher.id:
         raise Unauthorized("You do not have permission to view this course's students.")
 
-    pending_students = db.query(StudentCourse).filter(
-        StudentCourse.course_id == course_id,
-        StudentCourse.is_approved == False).all()
+    pending_students = (
+        db.query(StudentCourse)
+        .filter(
+            StudentCourse.course_id == course_id, StudentCourse.is_approved is False
+        )
+        .all()
+    )
     result = []
     for sc in pending_students:
         student = sc.student
-        result.append({
-            "id": str(student.id),
-            "email": student.user.email,
-            "first_name": student.first_name,
-            "last_name": student.last_name,
-            "profile_picture": student.profile_picture
-        })
+        result.append(
+            {
+                "id": str(student.id),
+                "email": student.user.email,
+                "first_name": student.first_name,
+                "last_name": student.last_name,
+                "profile_picture": student.profile_picture,
+            }
+        )
 
     return result
 
 
-
-def toggle_course_visibility_by_teacher(db: Session, course_id: UUID, current_user: User):
-
+def toggle_course_visibility_by_teacher(
+    db: Session, course_id: UUID, current_user: User
+):
     course = db.query(Course).filter(Course.id == course_id).first()
 
     if not course:

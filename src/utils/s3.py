@@ -1,8 +1,11 @@
-import boto3
 import uuid
-from PIL import Image
 from io import BytesIO
+
+import boto3
+from PIL import Image
+
 from src.core.config import settings
+
 
 def upload_image_to_s3(file, folder="profile_pictures"):
     s3 = boto3.client(
