@@ -159,9 +159,11 @@ def list_all_courses(
                 "description": course.description,
                 "objectives": course.objectives,
                 "owner_id": str(course.owner_id),
-                "teacher_name": f"{course.owner.first_name} {course.owner.last_name}"
-                if course.owner
-                else None,
+                "teacher_name": (
+                    f"{course.owner.first_name} {course.owner.last_name}"
+                    if course.owner
+                    else None
+                ),
                 "is_premium": course.is_premium,
                 "is_hidden": course.is_hidden,
                 "picture": course.picture,
@@ -258,9 +260,9 @@ def get_course_ratings(db: Session, course_id: UUID):
             result.append(
                 {
                     "student_id": str(rating.student.id),
-                    "student_name": f"{student.first_name} {student.last_name}"
-                    if student
-                    else None,
+                    "student_name": (
+                        f"{student.first_name} {student.last_name}" if student else None
+                    ),
                     "score": rating.score,
                 }
             )

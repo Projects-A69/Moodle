@@ -59,7 +59,6 @@ def remove_student_from_course_endpoint(
     return remove_student_from_course(db, course_id, student_id)
 
 
-
 @router.put("/courses/{course_id}/visibility")
 def toggle_course_visibility(
     course_id: UUID,
