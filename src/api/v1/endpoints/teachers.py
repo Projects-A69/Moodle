@@ -9,6 +9,7 @@ from src.crud.teacher import (
     approve_student_by_id,
     list_pending_students,
     remove_student_from_course,
+    toggle_course_visibility_by_teacher,
 )
 from src.models.models import User as UserModel
 from src.utils.custom_responses import BadRequest
@@ -57,8 +58,6 @@ def remove_student_from_course_endpoint(
 ):
     return remove_student_from_course(db, course_id, student_id)
 
-
-from src.crud.teacher import toggle_course_visibility_by_teacher
 
 
 @router.put("/courses/{course_id}/visibility")
