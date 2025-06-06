@@ -12,6 +12,7 @@ def create_token(user: User) -> str:
     payload = {
         "user_id": str(user.id),
         "email": user.email,
+        "role": user.role.value,
         "exp": datetime.now(timezone.utc) + timedelta(minutes=settings.JWT_EXPIRATION),
     }
     return jwt.encode(
