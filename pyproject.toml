@@ -1,0 +1,22 @@
+[project]
+name = "moodle"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "bcrypt>=4.3.0",
+    "boto3>=1.38.27",
+    "fastapi>=0.115.12",
+    "itsdangerous>=2.2.0",
+    "pillow>=11.2.1",
+    "pip>=25.1.1",
+    "psycopg2-binary>=2.9.10",
+    "pydantic-settings>=2.9.1",
+    "pydantic[email]>=2.11.5",
+    "python-jose>=3.5.0",
+    "python-multipart>=0.0.20",
+    "ruff>=0.11.12",
+    "sqlalchemy>=2.0.41",
+    "uvicorn>=0.34.2",
+]
