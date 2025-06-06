@@ -12,10 +12,10 @@ from src.schemas.all_models import CoursesCreate, CoursesUpdate, User
 from uuid import UUID
 from typing import Optional
 
-router = APIRouter(prefix="/courses", tags=["courses"])
+router = APIRouter(tags=["courses"])
 
 
-@router.get("")
+@router.get("/")
 def get_courses(
     title: Optional[str] = None,
     db: Session = Depends(get_db),

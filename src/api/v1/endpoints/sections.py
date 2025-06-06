@@ -12,10 +12,10 @@ from src.api.deps import get_db, get_teacher_user, get_student_user
 from uuid import UUID
 
 
-router = APIRouter(prefix="/sections", tags=["sections"])
+router = APIRouter(tags=["sections"])
 
 
-@router.get("/sections")
+@router.get("/")
 def get_sections(
     course_id: UUID,
     db: Session = Depends(get_db),

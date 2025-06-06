@@ -16,7 +16,7 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
     if current_user is None:
         read_courses = read_courses.filter(Course.is_hidden is False)
         return [
-            {"title": course.title, "description": course.description}
+            {"id": course.id, "title": course.title, "description": course.description}
             for course in read_courses.all()
         ]
     if current_user.role == Role.STUDENT:
