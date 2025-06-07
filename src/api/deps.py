@@ -29,12 +29,15 @@ def get_current_user(
     return user
 
 
-def optional_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
-) -> Optional[User]:
-    if not token:
+from fastapi import Request
+
+def optional_user(request: Request, db: Session = Depends(get_db)) -> Optional[User]:
+    auth: str = request.headers.get("Authorization")
+    if not auth or not auth.startswith("Bearer "):
         return None
+    token = auth.split(" ")[1]
     return from_token(db, token)
+
 
 
 def get_admin_user(current_user: User = Depends(get_current_user)) -> User:

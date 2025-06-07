@@ -22,7 +22,13 @@ def get_all_sections(
         sections = db.query(Section).filter(Section.title.ilike(f"%{title}%"))
     sections = sections1.all()
     return [
-        {"title": section.title, "content": section.content} for section in sections
+        {
+            "id": section.id,
+            "title": section.title,
+            "description": section.description,
+            "content": section.content,
+        }
+        for section in sections
     ]
 
 
