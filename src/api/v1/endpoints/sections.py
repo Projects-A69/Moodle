@@ -8,7 +8,7 @@ from src.crud.section import (
     delete_section_from_course,
     update_info_about_section,
 )
-from src.api.deps import get_db, get_teacher_user, get_student_user
+from src.api.deps import get_db, get_teacher_user, get_student_user, optional_user
 from uuid import UUID
 
 
@@ -19,7 +19,7 @@ router = APIRouter(tags=["sections"])
 def get_sections(
     course_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_teacher_user),
+    current_user: User = Depends(optional_user),
 ):
     return get_all_sections(db, course_id, current_user=current_user)
 
