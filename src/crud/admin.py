@@ -86,7 +86,7 @@ def update_user_active(db: Session, user_id: UUID):
 def list_pending_teachers(db: Session):
     users = (
         db.query(User)
-        .filter(User.role == Role.TEACHER, User.is_approved is False)
+        .filter(User.role == Role.TEACHER, User.is_approved == False)  # noqa: E712
         .all()
     )
 
@@ -168,7 +168,16 @@ def list_all_courses(
                 "is_hidden": course.is_hidden,
                 "picture": course.picture,
                 "rating": course.rating,
-                "student_count": len(course.students),
+                "students": [
+                    {
+                        "id": str(student.id),
+                        "first_name": student.first_name,
+                        "last_name": student.last_name,
+                        "email": student.user.email if student.user else None,
+                        "profile_picture": student.profile_picture,
+                    }
+                    for student in course.students
+                ],
             }
         )
 
@@ -181,21 +190,22 @@ def toggle_course_visability(db: Session, course_id: UUID):
     if not course:
         raise NotFound(f"Course with ID: {course_id} not found")
 
-    if course.is_hidden:
-        raise BadRequest(f"Course {course.title} is already hidden.")
-
-    course.is_hidden = True
+    course.is_hidden = not course.is_hidden
     db.commit()
-    for student in course.students:
-        user = db.query(User).filter(User.id == student.id).first()
-        if user and user.email:
-            send_email(
-                to=user.email,
-                subject="Course Hidden Notification",
-                body=f"The course '{course.title}' has been temporarily hidden by an administrator and is currently unavailable.",
-            )
 
-    return {"message": f"Course {course.title} hidden successfully."}
+    if course.is_hidden:
+        for student in course.students:
+            user = db.query(User).filter(User.id == student.id).first()
+            if user and user.email:
+                send_email(
+                    to=user.email,
+                    subject="Course Hidden Notification",
+                    body=f"The course '{course.title}' has been temporarily hidden by an administrator and is currently unavailable.",
+                )
+
+        return {"message": f"Course '{course.title}' hidden successfully."}
+
+    return {"message": f"Course '{course.title}' is now visible again."}
 
 
 def delete_course(db: Session, course_id: UUID):
