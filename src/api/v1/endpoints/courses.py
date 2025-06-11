@@ -34,7 +34,7 @@ def get_courses_by_id(
     return course
 
 
-@router.post("")
+@router.post("/")
 def create_course(
     payload: CoursesCreate,
     db: Session = Depends(get_db),
