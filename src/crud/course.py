@@ -14,7 +14,6 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
         read_courses = read_courses.filter(Course.title.ilike(f"%{title}%"))
 
     if current_user is None:
-        read_courses = read_courses.filter(Course.is_hidden is False)
         return [
             {"id": course.id,
              "title": course.title,
@@ -47,7 +46,6 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
                         "id": course.id,
                         "title": course.title,
                         "description": course.description,
-                        "objectives": course.objectives,
                         "picture": course.picture,
                         "rating": course.rating,
                     }
