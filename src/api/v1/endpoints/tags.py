@@ -7,7 +7,7 @@ from src.api.deps import get_db, get_teacher_user
 from src.crud import tag as crud_tag
 from src.schemas.all_models import CreateTag
 
-router = APIRouter(prefix="/tags", tags=["tags"])
+router = APIRouter(tags=["tags"])
 
 
 @router.get("")
