@@ -1,6 +1,6 @@
 from typing import Generator, Optional
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
@@ -27,9 +27,6 @@ def get_current_user(
     if not user:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     return user
-
-
-from fastapi import Request
 
 def optional_user(request: Request, db: Session = Depends(get_db)) -> Optional[User]:
     auth: str = request.headers.get("Authorization")
