@@ -53,7 +53,7 @@ def create_course(
     return new_courses
 
 
-@router.put("/courses/{course_id}")
+@router.put("/{course_id}")
 def update_course(
     course_id: UUID,
     payload: CoursesUpdate,

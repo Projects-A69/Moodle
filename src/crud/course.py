@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from src.models.models import Course, Role, StudentCourse, User
 from src.schemas.all_models import CoursesUpdate
 
-
 def get_course(db: Session, title: str, current_user: Optional[User] = None):
     read_courses = db.query(Course)
     if title:
@@ -15,23 +14,27 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
 
     if current_user is None:
         return [
-            {"id": course.id,
-             "title": course.title,
-             "description": course.description,
-             "picture": course.picture,
-             "rating": course.rating,
-             "is_premium": course.is_premium}
-            for course in read_courses.all()
+            {
+                "id": course.id,
+                "title": course.title,
+                "description": course.description,
+                "picture": course.picture,
+                "rating": course.rating,
+                "is_premium": course.is_premium,
+                "owner_id": course.owner_id,
+            }
+            for course in read_courses.filter(Course.is_hidden == False).all()
         ]
+
     if current_user.role == Role.STUDENT:
-        read_courses = read_courses.filter(Course.is_hidden is False)
+        read_courses = read_courses.filter(Course.is_hidden == False)
 
         approved_student = (
             db.query(Course)
             .join(StudentCourse)
             .filter(
                 StudentCourse.student_id == current_user.id,
-                StudentCourse.is_approved is True,
+                StudentCourse.is_approved == True,
             )
             .all()
         )
@@ -48,6 +51,8 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
                         "description": course.description,
                         "picture": course.picture,
                         "rating": course.rating,
+                        "is_premium": course.is_premium,
+                        "owner_id": course.owner_id,
                     }
                 )
             else:
@@ -56,21 +61,55 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
                         "title": course.title,
                         "description": course.description,
                         "picture": course.picture,
+                        "is_premium": course.is_premium,
+                        "owner_id": course.owner_id,
                     }
                 )
         return result
+
     if current_user.role == Role.TEACHER:
-        courses = []
+        result = []
         for course in read_courses.all():
             if course.owner_id == current_user.id:
-                courses.append(course)
-            if not course.is_hidden:
-                courses.append(
-                    {"title": course.title, "description": course.description}
+                result.append(
+                    {
+                        "id": course.id,
+                        "title": course.title,
+                        "description": course.description,
+                        "picture": course.picture,
+                        "rating": course.rating,
+                        "is_premium": course.is_premium,
+                        "owner_id": course.owner_id,
+                    }
                 )
-        return courses
-    return read_courses.all()
+            elif not course.is_hidden:
+                result.append(
+                    {
+                        "id": course.id,
+                        "title": course.title,
+                        "description": course.description,
+                        "picture": course.picture,
+                        "rating": course.rating,
+                        "is_premium": course.is_premium,
+                        "owner_id": course.owner_id,
+                    }
+                )
+        return result
+    if current_user.role == Role.ADMIN:
+        return [
+            {
+                "id": course.id,
+                "title": course.title,
+                "description": course.description,
+                "picture": course.picture,
+                "rating": course.rating,
+                "is_premium": course.is_premium,
+                "owner_id": course.owner_id,
+            }
+            for course in read_courses.all()
+        ]
 
+    return []
 
 def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None):
     course = db.query(Course).filter(Course.id == id).first()
@@ -79,6 +118,7 @@ def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None)
     if current_user is None:
         if course.is_hidden or course.is_premium:
             raise HTTPException(status_code=403, detail="Access denied")
+        return course
     if current_user.role == Role.STUDENT:
         if course.is_hidden:
             raise HTTPException(status_code=403, detail="This course is hidden")
@@ -96,9 +136,10 @@ def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None)
                     status_code=403,
                     detail="You do not have enrolled in this premium course",
                 )
-    elif current_user.role == Role.TEACHER:
+    if current_user.role == Role.TEACHER:
         if course.is_hidden or course.owner_id != current_user.id:
             raise HTTPException(status_code=403, detail="Access denied")
+        return course
     return course
 
 
@@ -134,7 +175,7 @@ def update_specific_course(
     if current_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    course = get_course_by_id(db, id)
+    course = get_course_by_id(db, id, current_user = current_user)
 
     if course.owner_id == current_user.id or current_user.role == Role.ADMIN:
         if payload.title is not None:
