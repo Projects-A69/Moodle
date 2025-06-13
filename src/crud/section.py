@@ -86,6 +86,20 @@ def information_about_section(
         "description": section.description,
         "information": section.information,
         "progress": student_course.progress,
+        "course_id": section.course_id,
+    }
+
+def leave_section(db: Session, section_id: UUID, current_user: User):
+    section = db.query(Section).filter(Section.id == section_id).first()
+    if not section:
+        raise HTTPException(status_code=403, detail="Section not found")
+    student_course = db.query(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.course_id == section.course_id).first()
+    if student_course:
+        student_course.is_visited = False
+        db.commit()
+
+    return {
+        "message": "You left this section"
     }
 
 
