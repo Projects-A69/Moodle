@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from src.models.models import Course, Role, StudentCourse, User
+from src.models.models import Tag as TagModel, Course
 from src.schemas.all_models import CoursesUpdate
 
 def get_course(db: Session, title: str, current_user: Optional[User] = None):
@@ -224,3 +225,39 @@ def rating_course(db: Session, id: UUID):
     db.commit()
     db.refresh(course)
     return {"title": course.title, "rating": average_rating_score}
+
+
+
+def get_courses_by_tag_id(db: Session, tag_id: UUID, current_user: Optional[User] = None):
+    tag = db.query(TagModel).filter(TagModel.id == tag_id).first()
+    if tag is None:
+        raise HTTPException(status_code=404, detail="Tag not found")
+
+    courses = tag.courses
+    result = []
+
+    for course in courses:
+        if current_user is None:
+            if course.is_hidden is False:
+                result.append(course)
+        elif current_user.role == Role.STUDENT:
+            if not course.is_hidden and (not course.is_premium or any(c.id == course.id for c in current_user.courses)):
+                result.append(course)
+        elif current_user.role == Role.TEACHER:
+            if course.owner_id == current_user.id or not course.is_hidden:
+                result.append(course)
+        elif current_user.role == Role.ADMIN:
+            result.append(course)
+
+    return [
+        {
+            "id": course.id,
+            "title": course.title,
+            "description": course.description,
+            "picture": course.picture,
+            "rating": course.rating,
+            "is_premium": course.is_premium,
+            "owner_id": course.owner_id,
+        }
+        for course in result
+    ]

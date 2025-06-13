@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path
 from sqlalchemy.orm import Session
 from src.schemas.all_models import SectionCreate, SectionUpdate, User
 from src.crud.section import (
@@ -24,17 +24,17 @@ def get_sections(
     return get_all_sections(db, course_id, current_user=current_user)
 
 
-@router.get("/courses/{section_id}")
+@router.get("/{section_id}")
 def get_section_by_id(
     section_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_student_user),
+    current_user: User = Depends(optional_user),
 ):
     section = information_about_section(db, section_id, current_user)
     return section
 
 
-@router.post("/sections")
+@router.post("/courses/{course_id}/sections")
 def add_section(
     course_id: UUID,
     payload: SectionCreate,
@@ -44,20 +44,20 @@ def add_section(
     return add_section_to_course(db, payload, course_id, current_user)
 
 
-@router.delete("/sections/{section_id}")
+@router.delete("/{section_id}")
 def delete_section(
     section_id: UUID,
     db: Session = Depends(get_db),
     current_user=Depends(get_teacher_user),
 ):
-    section = information_about_section(db, section_id)
+    section = information_about_section(db, section_id, current_user)
     return delete_section_from_course(db, section, current_user)
 
 
-@router.put("/sections/{section_id}")
+@router.put("/{section_id}")
 def update_section(
-    section: UUID,
     payload: SectionUpdate,
+    section: UUID = Path(..., alias="section_id"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_teacher_user),
 ):
