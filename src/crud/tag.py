@@ -49,6 +49,8 @@ def add_tag_to_course(
         raise HTTPException(status_code=404, detail="Course not found")
     if tag is None:
         raise HTTPException(status_code=404, detail="Tag not found")
+    if tag in course.tags:
+        raise HTTPException(status_code=404, detail="Tag already attached to course")
     course.tags.append(tag)
     db.commit()
     db.refresh(course)
@@ -78,3 +80,10 @@ def search_course_by_tag(db: Session, tag_name: Optional[str]):
         }
         for course in tag.courses
     ]
+
+def return_all_tags(db: Session):
+    course_tags = db.query(Course).filter(Course.tags.any()).all()
+    result = {}
+    for course in course_tags:
+        result[str(course.id)] = [tag.name for tag in course.tags]
+    return result

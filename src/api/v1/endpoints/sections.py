@@ -8,6 +8,7 @@ from src.crud.section import (
     delete_section_from_course,
     update_info_about_section,
     leave_section,
+    mark_as_completed
 )
 from src.api.deps import get_db, get_teacher_user, get_student_user, optional_user
 from uuid import UUID
@@ -33,6 +34,10 @@ def get_section_by_id(
 ):
     section = information_about_section(db, section_id, current_user)
     return section
+
+@router.post("/{section_id}/complete")
+def complete_section(section_id: UUID, db: Session = Depends(get_db), current_user: User = Depends(optional_user)):
+    return mark_as_completed(db, section_id, current_user)
 
 
 @router.post("/courses/{course_id}/sections")
