@@ -257,7 +257,7 @@ def get_courses_by_tag_id(db: Session, tag_id: UUID, current_user: Optional[User
             if course.is_hidden is False:
                 result.append(course)
         elif current_user.role == Role.STUDENT:
-            if not course.is_hidden and (not course.is_premium or any(c.id == course.id for c in current_user.courses)):
+            if not course.is_hidden and (not course.is_premium or any(c.id == course.id for c in current_user.student.courses)):
                 result.append(course)
         elif current_user.role == Role.TEACHER:
             if course.owner_id == current_user.id or not course.is_hidden:

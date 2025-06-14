@@ -66,20 +66,6 @@ def information_about_section(
             raise HTTPException(
                 status_code=403, detail="You are not approved for this course!"
             )
-    if not student_course.is_visited:
-        total_section = (
-            db.query(Section).filter(Section.course_id == section.course_id).count()
-        )
-        if student_course.progress < 100:
-            formula_progress = 100 / total_section
-            sum_progress = formula_progress + student_course.progress
-            if sum_progress > 100:
-                student_course.progress = 100
-            else:
-                student_course.progress = sum_progress
-        student_course.is_visited = True
-        db.commit()
-        db.refresh(student_course)
     return {
         "title": section.title,
         "content": section.content,
@@ -88,6 +74,32 @@ def information_about_section(
         "progress": student_course.progress,
         "course_id": section.course_id,
     }
+
+def mark_as_completed(db: Session, section_id: UUID, current_user: User):
+    section = db.query(Section).filter(Section.id == section_id).first()
+    if not section:
+        raise HTTPException(status_code=403, detail="Section not found")
+    course = db.query(Course).filter(Course.id == section.course_id).first()
+    if not course:
+        raise HTTPException(status_code=403, detail="Course not found")
+    student_course = db.query(StudentCourse).filter_by(student_id=current_user.id, course_id=course.id).first()
+    if not student_course:
+        if course.is_premium:
+            raise HTTPException(status_code=403, detail="You are not approved for this course!")
+        student_course = StudentCourse(student_id=current_user.id, course_id=course.id, is_approved=True, progress=0, is_visited=False)
+        db.add(student_course)
+        db.commit()
+        db.refresh(student_course)
+    total_sections = db.query(Section).filter(Section.course_id == course.id).count()
+    if total_sections == 0:
+        raise HTTPException(status_code=403, detail="No sections in this course")
+    formula = 100 / total_sections
+    if student_course.progress < 100:
+        student_course.progress = min(100, student_course.progress + formula)
+        db.commit()
+        db.refresh(student_course)
+
+    return {"progress": student_course.progress}
 
 def leave_section(db: Session, section_id: UUID, current_user: User):
     section = db.query(Section).filter(Section.id == section_id).first()

@@ -4,6 +4,8 @@ from pydantic import BaseModel, EmailStr
 
 from src.models.models import Role
 
+from typing import Optional
+
 
 class User(BaseModel):
     email: EmailStr
@@ -148,10 +150,10 @@ class SectionInDB(BaseModel):
 
 class SectionCreate(BaseModel):
     title: str
-    content: str
-    description: str
-    information: str
-    link: str
+    content: Optional[str] = ""
+    description: Optional[str] = ""
+    information: Optional[str] = ""
+    link: Optional[str] = ""
 
 
 class SectionUpdate(BaseModel):
