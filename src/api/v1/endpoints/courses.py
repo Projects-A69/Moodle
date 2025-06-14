@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, Form, File
 from sqlalchemy.orm import Session
 from src.api.deps import get_db, optional_user, get_teacher_user
 from src.crud.course import (
@@ -37,19 +37,23 @@ def get_courses_by_id(
 
 @router.post("/")
 def create_course(
-    payload: CoursesCreate,
+    title: str = Form(...),
+    description: str = Form(...),
+    objectives: str = Form(""),
+    is_premium: bool = Form(...),
+    picture: UploadFile = File(None),
     db: Session = Depends(get_db),
     current_user=Depends(get_teacher_user),
 ):
     owner_id = current_user.id
     new_courses = create_courses(
         db,
-        payload.title,
-        payload.description,
-        payload.objectives,
-        payload.picture,
-        payload.is_premium,
+        title,
+        description,
+        objectives,
+        is_premium,
         owner_id,
+        picture,
     )
     return new_courses
 
@@ -57,11 +61,16 @@ def create_course(
 @router.put("/{course_id}")
 def update_course(
     course_id: UUID,
-    payload: CoursesUpdate,
+    title: str = Form(None),
+    description: str = Form(None),
+    objectives: str = Form(None),
+    is_premium: bool = Form(None),
+    picture: UploadFile = File(None),
     db: Session = Depends(get_db),
     current_user=Depends(get_teacher_user),
 ):
-    return update_specific_course(db, course_id, payload, current_user=current_user)
+    return update_specific_course(db = db, id = course_id, current_user=current_user,
+                                  title = title, description = description, objectives = objectives, is_premium = is_premium, picture = picture,)
 
 
 @router.get("/courses/{course_id}")

@@ -1,7 +1,10 @@
+import shutil
 from typing import Optional
 from uuid import UUID
+from src.utils.s3 import upload_image_to_s3
 
-from fastapi import HTTPException
+
+from fastapi import HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
 from src.models.models import Course, Role, StudentCourse, User
@@ -146,13 +149,19 @@ def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None)
 
 def create_courses(
     db: Session,
+
     title: str,
     description: str,
     objectives: str,
-    picture: str,
     is_premium: bool,
     owner_id: UUID,
+    picture: UploadFile = File(None)
 ):
+    if picture:
+        picture_path = upload_image_to_s3(picture)
+    else:
+        picture_path = None
+
     existing_title = db.query(Course).filter(Course.title == title).first()
     if existing_title:
         raise HTTPException(status_code=400, detail="Title already exists")
@@ -160,7 +169,7 @@ def create_courses(
         title=title,
         description=description,
         objectives=objectives,
-        picture=picture,
+        picture=picture_path,
         is_premium=is_premium,
         owner_id=owner_id,
     )
@@ -171,7 +180,14 @@ def create_courses(
 
 
 def update_specific_course(
-    db: Session, id: UUID, payload: CoursesUpdate, current_user: Optional[User] = None
+    db: Session,
+    id: UUID,
+    current_user: Optional[User] = None,
+    title: str = None,
+    description: str = None,
+    objectives: str = None,
+    is_premium: bool = None,
+    picture: UploadFile = None,
 ):
     if current_user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -179,23 +195,23 @@ def update_specific_course(
     course = get_course_by_id(db, id, current_user = current_user)
 
     if course.owner_id == current_user.id or current_user.role == Role.ADMIN:
-        if payload.title is not None:
+        if title is not None:
             existing = (
                 db.query(Course)
-                .filter(Course.title == payload.title, Course.id != id)
+                .filter(Course.title == title, Course.id != id)
                 .first()
             )
             if existing:
                 raise HTTPException(status_code=400, detail="Course already exists")
-            course.title = payload.title
-        if payload.description is not None:
-            course.description = payload.description
-        if payload.objectives is not None:
-            course.objectives = payload.objectives
-        if payload.picture is not None:
-            course.picture = payload.picture
-        if payload.is_premium is not None:
-            course.is_premium = payload.is_premium
+            course.title = title
+        if description is not None:
+            course.description = description
+        if objectives is not None:
+            course.objectives = objectives
+        if is_premium is not None:
+            course.is_premium = is_premium
+        if picture:
+            course.picture = upload_image_to_s3(picture)
         db.commit()
         db.refresh(course)
         return course
