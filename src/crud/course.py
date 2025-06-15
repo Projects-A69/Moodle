@@ -119,7 +119,6 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
 
     return []
 
-
 def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None):
     course = db.query(Course).filter(Course.id == id).first()
     if not course:
@@ -154,12 +153,13 @@ def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None)
 
 def create_courses(
     db: Session,
+
     title: str,
     description: str,
     objectives: str,
     is_premium: bool,
     owner_id: UUID,
-    picture: UploadFile = File(None),
+    picture: UploadFile = File(None)
 ):
     if picture:
         picture_path = upload_image_to_s3(picture)
