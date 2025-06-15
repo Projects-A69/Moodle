@@ -28,18 +28,18 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
                 "is_premium": course.is_premium,
                 "owner_id": course.owner_id,
             }
-            for course in read_courses.filter(Course.is_hidden == False).all()
+            for course in read_courses.filter(not Course.is_hidden).all()
         ]
 
     if current_user.role == Role.STUDENT:
-        read_courses = read_courses.filter(Course.is_hidden == False)
+        read_courses = read_courses.filter(not Course.is_hidden)
 
         approved_student = (
             db.query(Course)
             .join(StudentCourse)
             .filter(
                 StudentCourse.student_id == current_user.id,
-                StudentCourse.is_approved == True,
+                StudentCourse.is_approved,
             )
             .all()
         )
