@@ -51,7 +51,7 @@ def delete_tag_from_course(
     return crud_tag.delete_tag_from_course(db, course_id, tag_id)
 
 
-@router.get("/courses/{course_id}/tags")
+@router.get("/courses")
 def found_course_tags(
     tag_name: str, db: Session = Depends(get_db), current_user=Depends(get_teacher_user)
 ):
