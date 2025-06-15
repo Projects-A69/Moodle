@@ -176,7 +176,7 @@ def get_all_favorite_courses(db: Session, current_student: UserModel):
     return my_courses
 
 
-def add_favorite_courses(
+def toggle_favorite_course(
     course_id: UUID,
     current_student: UserModel = Depends(get_student_user),
     db: Session = Depends(get_db),
@@ -192,9 +192,13 @@ def add_favorite_courses(
     )
 
     if student_course:
-        if student_course.is_favorite:
-            raise BadRequest("This course is already in your favorites")
-        student_course.is_favorite = True
+        student_course.is_favorite = not student_course.is_favorite
+        db.commit()
+        return {
+            "message": "Course added to favorites."
+            if student_course.is_favorite
+            else "Course removed from favorites."
+        }
     else:
         student_course = StudentCourse(
             student_id=current_student.id,
@@ -203,23 +207,5 @@ def add_favorite_courses(
             is_approved=False,
         )
         db.add(student_course)
-    db.commit()
-    return {"message": "Course added to favorites."}
-
-
-def remove_favorite_courses(
-    course_id: UUID,
-    current_student: UserModel = Depends(get_student_user),
-    db: Session = Depends(get_db),
-):
-    student_course = (
-        db.query(StudentCourse)
-        .filter_by(student_id=current_student.id, course_id=course_id)
-        .first()
-    )
-    if not student_course or not student_course.is_favorite:
-        raise NotFound("This course is not in your favorites")
-
-    student_course.is_favorite = False
-    db.commit()
-    return {"message": "Course removed from favorites."}
+        db.commit()
+        return {"message": "Course added to favorites."}

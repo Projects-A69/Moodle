@@ -1,18 +1,19 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from uuid import UUID
+
 from src.api.deps import get_db, get_student_user
+from src.crud.student import (
+    get_all_favorite_courses,
+    rate_course,
+    subscribe_to_course,
+    toggle_favorite_course,
+    unsubscribe_from_course,
+)
 from src.models.models import Student
 from src.models.models import User as UserModel
 from src.schemas.all_models import CoursesRate
-from src.crud.student import (
-    subscribe_to_course,
-    rate_course,
-    unsubscribe_from_course,
-    get_all_favorite_courses,
-    add_favorite_courses,
-    remove_favorite_courses,
-)
 
 router = APIRouter()
 
@@ -58,20 +59,9 @@ def get_favorite_courses(
 
 
 @router.put("/courses/favorites/{course_id}")
-def add_favorite_course(
+def toggle_favorite_course_route(
     course_id: UUID,
     current_student: UserModel = Depends(get_student_user),
     db: Session = Depends(get_db),
 ):
-
-    return add_favorite_courses(course_id, current_student, db)
-
-
-@router.delete("/courses/favorites/{course_id}")
-def remove_favorite_course(
-    course_id: UUID,
-    current_student: UserModel = Depends(get_student_user),
-    db: Session = Depends(get_db),
-):
-
-    return remove_favorite_courses(course_id, current_student, db)
+    return toggle_favorite_course(course_id, current_student, db)
