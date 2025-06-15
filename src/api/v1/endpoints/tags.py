@@ -57,6 +57,9 @@ def found_course_tags(
 ):
     return crud_tag.search_course_by_tag(db, tag_name)
 
+
 @router.get("/map")
-def return_course_tag(db: Session = Depends(get_db), current_user=Depends(get_teacher_user)):
+def return_course_tag(
+    db: Session = Depends(get_db), current_user=Depends(get_teacher_user)
+):
     return crud_tag.return_all_tags(db)

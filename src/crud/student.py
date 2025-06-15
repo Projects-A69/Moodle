@@ -195,9 +195,11 @@ def toggle_favorite_course(
         student_course.is_favorite = not student_course.is_favorite
         db.commit()
         return {
-            "message": "Course added to favorites."
-            if student_course.is_favorite
-            else "Course removed from favorites."
+            "message": (
+                "Course added to favorites."
+                if student_course.is_favorite
+                else "Course removed from favorites."
+            )
         }
     else:
         student_course = StudentCourse(

@@ -75,6 +75,7 @@ def information_about_section(
         "course_id": section.course_id,
     }
 
+
 def mark_as_completed(db: Session, section_id: UUID, current_user: User):
     section = db.query(Section).filter(Section.id == section_id).first()
     if not section:
@@ -82,11 +83,23 @@ def mark_as_completed(db: Session, section_id: UUID, current_user: User):
     course = db.query(Course).filter(Course.id == section.course_id).first()
     if not course:
         raise HTTPException(status_code=403, detail="Course not found")
-    student_course = db.query(StudentCourse).filter_by(student_id=current_user.id, course_id=course.id).first()
+    student_course = (
+        db.query(StudentCourse)
+        .filter_by(student_id=current_user.id, course_id=course.id)
+        .first()
+    )
     if not student_course:
         if course.is_premium:
-            raise HTTPException(status_code=403, detail="You are not approved for this course!")
-        student_course = StudentCourse(student_id=current_user.id, course_id=course.id, is_approved=True, progress=0, is_visited=False)
+            raise HTTPException(
+                status_code=403, detail="You are not approved for this course!"
+            )
+        student_course = StudentCourse(
+            student_id=current_user.id,
+            course_id=course.id,
+            is_approved=True,
+            progress=0,
+            is_visited=False,
+        )
         db.add(student_course)
         db.commit()
         db.refresh(student_course)
@@ -101,18 +114,24 @@ def mark_as_completed(db: Session, section_id: UUID, current_user: User):
 
     return {"progress": student_course.progress}
 
+
 def leave_section(db: Session, section_id: UUID, current_user: User):
     section = db.query(Section).filter(Section.id == section_id).first()
     if not section:
         raise HTTPException(status_code=403, detail="Section not found")
-    student_course = db.query(StudentCourse).filter(StudentCourse.student_id == current_user.id, StudentCourse.course_id == section.course_id).first()
+    student_course = (
+        db.query(StudentCourse)
+        .filter(
+            StudentCourse.student_id == current_user.id,
+            StudentCourse.course_id == section.course_id,
+        )
+        .first()
+    )
     if student_course:
         student_course.is_visited = False
         db.commit()
 
-    return {
-        "message": "You left this section"
-    }
+    return {"message": "You left this section"}
 
 
 def add_section_to_course(

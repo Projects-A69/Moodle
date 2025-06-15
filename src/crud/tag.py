@@ -81,6 +81,7 @@ def search_course_by_tag(db: Session, tag_name: Optional[str]):
         for course in tag.courses
     ]
 
+
 def return_all_tags(db: Session):
     course_tags = db.query(Course).filter(Course.tags.any()).all()
     result = {}

@@ -1,4 +1,3 @@
-import shutil
 from typing import Optional
 from uuid import UUID
 from src.utils.s3 import upload_image_to_s3
@@ -8,8 +7,8 @@ from fastapi import HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
 from src.models.models import Course, Role, StudentCourse, User
-from src.models.models import Tag as TagModel, Course
-from src.schemas.all_models import CoursesUpdate
+from src.models.models import Tag as TagModel
+
 
 def get_course(db: Session, title: str, current_user: Optional[User] = None):
     read_courses = db.query(Course)
@@ -121,6 +120,7 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
 
     return []
 
+
 def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None):
     course = db.query(Course).filter(Course.id == id).first()
     if not course:
@@ -155,13 +155,12 @@ def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None)
 
 def create_courses(
     db: Session,
-
     title: str,
     description: str,
     objectives: str,
     is_premium: bool,
     owner_id: UUID,
-    picture: UploadFile = File(None)
+    picture: UploadFile = File(None),
 ):
     if picture:
         picture_path = upload_image_to_s3(picture)
@@ -198,14 +197,12 @@ def update_specific_course(
     if current_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    course = get_course_by_id(db, id, current_user = current_user)
+    course = get_course_by_id(db, id, current_user=current_user)
 
     if course.owner_id == current_user.id or current_user.role == Role.ADMIN:
         if title is not None:
             existing = (
-                db.query(Course)
-                .filter(Course.title == title, Course.id != id)
-                .first()
+                db.query(Course).filter(Course.title == title, Course.id != id).first()
             )
             if existing:
                 raise HTTPException(status_code=400, detail="Course already exists")
@@ -249,8 +246,9 @@ def rating_course(db: Session, id: UUID):
     return {"title": course.title, "rating": average_rating_score}
 
 
-
-def get_courses_by_tag_id(db: Session, tag_id: UUID, current_user: Optional[User] = None):
+def get_courses_by_tag_id(
+    db: Session, tag_id: UUID, current_user: Optional[User] = None
+):
     tag = db.query(TagModel).filter(TagModel.id == tag_id).first()
     if tag is None:
         raise HTTPException(status_code=404, detail="Tag not found")
@@ -263,7 +261,10 @@ def get_courses_by_tag_id(db: Session, tag_id: UUID, current_user: Optional[User
             if course.is_hidden is False:
                 result.append(course)
         elif current_user.role == Role.STUDENT:
-            if not course.is_hidden and (not course.is_premium or any(c.id == course.id for c in current_user.student.courses)):
+            if not course.is_hidden and (
+                not course.is_premium
+                or any(c.id == course.id for c in current_user.student.courses)
+            ):
                 result.append(course)
         elif current_user.role == Role.TEACHER:
             if course.owner_id == current_user.id or not course.is_hidden:

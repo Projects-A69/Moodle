@@ -16,7 +16,13 @@ class TestUserCrud(unittest.TestCase):
     def setUp(self):
         self.mock_db = MagicMock()
         self.user_id = uuid4()
-        self.mock_user = User(id=self.user_id, email="test@example.com", password="hashed", role=Role.ADMIN, is_active=True)
+        self.mock_user = User(
+            id=self.user_id,
+            email="test@example.com",
+            password="hashed",
+            role=Role.ADMIN,
+            is_active=True,
+        )
 
     def test_get_by_id_success(self):
         self.mock_db.query().filter().first.return_value = self.mock_user
@@ -58,7 +64,12 @@ class TestUserCrud(unittest.TestCase):
             user_crud.login_user(self.mock_db, payload)
 
     def test_login_user_inactive(self):
-        inactive_user = User(email="test@example.com", password="hashed", role=Role.ADMIN, is_active=False)
+        inactive_user = User(
+            email="test@example.com",
+            password="hashed",
+            role=Role.ADMIN,
+            is_active=False,
+        )
         self.mock_db.query().filter().first.return_value = inactive_user
         payload = LoginRequest(email="test@example.com", password="123")
         with patch("src.crud.user.verify_password", return_value=True):
@@ -75,14 +86,18 @@ class TestUserCrud(unittest.TestCase):
 
     @patch("src.crud.user.hash_password", return_value="hashed")
     def test_register_admin(self, mock_hash):
-        payload = AdminCreate(email="admin@example.com", password="123", first_name="A", last_name="B")
+        payload = AdminCreate(
+            email="admin@example.com", password="123", first_name="A", last_name="B"
+        )
         self.mock_db.flush = MagicMock()
         self.mock_db.commit = MagicMock()
         result = user_crud.register_admin(self.mock_db, payload)
         self.assertEqual(result["role"], Role.ADMIN)
 
     def test_register_admin_missing_fields(self):
-        payload = AdminCreate(email="admin@example.com", password="123", first_name="", last_name="")
+        payload = AdminCreate(
+            email="admin@example.com", password="123", first_name="", last_name=""
+        )
         with self.assertRaises(Exception):
             user_crud.register_admin(self.mock_db, payload)
 
@@ -120,7 +135,9 @@ class TestUserCrud(unittest.TestCase):
     @patch("src.crud.user.hash_password", return_value="hashed")
     @patch("src.crud.user.send_email")
     @patch("src.crud.user.generate_approval_token", return_value="abc123")
-    def test_register_teacher_email_contains_token(self, mock_token, mock_email, mock_hash):
+    def test_register_teacher_email_contains_token(
+        self, mock_token, mock_email, mock_hash
+    ):
         payload = TeacherCreate(
             email="teacher@example.com",
             password="123",
@@ -170,14 +187,23 @@ class TestUserCrud(unittest.TestCase):
 
     def test_get_user_info_teacher(self):
         self.mock_user.role = Role.TEACHER
-        teacher = Teacher(id=self.user_id, first_name="T", last_name="T", phone_number="123", linked_in_acc="acc", profile_picture=None)
+        teacher = Teacher(
+            id=self.user_id,
+            first_name="T",
+            last_name="T",
+            phone_number="123",
+            linked_in_acc="acc",
+            profile_picture=None,
+        )
         self.mock_db.query().filter().first.return_value = teacher
         info = user_crud.get_user_info(self.mock_db, self.mock_user)
         self.assertEqual(info["phone_number"], "123")
 
     def test_get_user_info_student(self):
         self.mock_user.role = Role.STUDENT
-        student = Student(id=self.user_id, first_name="S", last_name="S", profile_picture=None)
+        student = Student(
+            id=self.user_id, first_name="S", last_name="S", profile_picture=None
+        )
         self.mock_db.query().filter().first.return_value = student
         info = user_crud.get_user_info(self.mock_db, self.mock_user)
         self.assertEqual(info["last_name"], "S")
@@ -200,8 +226,22 @@ class TestUserCrud(unittest.TestCase):
     @patch("src.crud.user.hash_password", return_value="hashed")
     def test_update_teacher_info(self, mock_hash):
         self.mock_user.role = Role.TEACHER
-        payload = MagicMock(password="new", first_name="T", last_name="T", phone_number="123", linked_in_acc="acc", profile_picture="pic")
-        teacher = Teacher(id=self.user_id, first_name="X", last_name="Y", phone_number="000", linked_in_acc="link", profile_picture="old")
+        payload = MagicMock(
+            password="new",
+            first_name="T",
+            last_name="T",
+            phone_number="123",
+            linked_in_acc="acc",
+            profile_picture="pic",
+        )
+        teacher = Teacher(
+            id=self.user_id,
+            first_name="X",
+            last_name="Y",
+            phone_number="000",
+            linked_in_acc="link",
+            profile_picture="old",
+        )
         self.mock_db.query().filter().first.return_value = teacher
         self.mock_db.commit = MagicMock()
         result = user_crud.update_teacher_info(self.mock_db, self.mock_user, payload)
@@ -209,15 +249,26 @@ class TestUserCrud(unittest.TestCase):
 
     def test_update_teacher_info_not_found(self):
         self.mock_db.query().filter().first.return_value = None
-        payload = MagicMock(password=None, first_name="T", last_name="T", phone_number="123", linked_in_acc="acc", profile_picture="pic")
+        payload = MagicMock(
+            password=None,
+            first_name="T",
+            last_name="T",
+            phone_number="123",
+            linked_in_acc="acc",
+            profile_picture="pic",
+        )
         with self.assertRaises(Exception):
             user_crud.update_teacher_info(self.mock_db, self.mock_user, payload)
 
     @patch("src.crud.user.hash_password", return_value="hashed")
     def test_update_student_info(self, mock_hash):
         self.mock_user.role = Role.STUDENT
-        payload = MagicMock(password="new", first_name="S", last_name="S", profile_picture="pic")
-        student = Student(id=self.user_id, first_name="X", last_name="Y", profile_picture="old")
+        payload = MagicMock(
+            password="new", first_name="S", last_name="S", profile_picture="pic"
+        )
+        student = Student(
+            id=self.user_id, first_name="X", last_name="Y", profile_picture="old"
+        )
         self.mock_db.query().filter().first.return_value = student
         self.mock_db.commit = MagicMock()
         result = user_crud.update_student_info(self.mock_db, self.mock_user, payload)
@@ -225,7 +276,9 @@ class TestUserCrud(unittest.TestCase):
 
     def test_update_student_info_not_found(self):
         self.mock_db.query().filter().first.return_value = None
-        payload = MagicMock(password="new", first_name="S", last_name="S", profile_picture="pic")
+        payload = MagicMock(
+            password="new", first_name="S", last_name="S", profile_picture="pic"
+        )
         with self.assertRaises(Exception):
             user_crud.update_student_info(self.mock_db, self.mock_user, payload)
 

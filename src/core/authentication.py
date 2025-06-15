@@ -13,7 +13,8 @@ def create_token(user: User) -> str:
         "user_id": str(user.id),
         "email": user.email,
         "role": user.role.value,
-        "exp": datetime.now(timezone.utc) + timedelta(seconds=int(settings.JWT_EXPIRATION)),
+        "exp": datetime.now(timezone.utc)
+        + timedelta(seconds=int(settings.JWT_EXPIRATION)),
     }
     return jwt.encode(
         payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM

@@ -9,7 +9,7 @@ from src.crud.course import (
     rating_course,
     get_courses_by_tag_id,
 )
-from src.schemas.all_models import CoursesCreate, CoursesUpdate, User
+from src.schemas.all_models import User
 from uuid import UUID
 from typing import Optional
 
@@ -69,13 +69,22 @@ def update_course(
     db: Session = Depends(get_db),
     current_user=Depends(get_teacher_user),
 ):
-    return update_specific_course(db = db, id = course_id, current_user=current_user,
-                                  title = title, description = description, objectives = objectives, is_premium = is_premium, picture = picture,)
+    return update_specific_course(
+        db=db,
+        id=course_id,
+        current_user=current_user,
+        title=title,
+        description=description,
+        objectives=objectives,
+        is_premium=is_premium,
+        picture=picture,
+    )
 
 
 @router.get("/courses/{course_id}")
 def get_rating_course(course_id: UUID, db: Session = Depends(get_db)):
     return rating_course(db, course_id)
+
 
 @router.get("/by-tag/{tag_id}")
 def get_courses_by_tag(
