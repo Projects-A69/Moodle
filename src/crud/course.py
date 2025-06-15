@@ -1,13 +1,12 @@
 from typing import Optional
 from uuid import UUID
-from src.utils.s3 import upload_image_to_s3
 
-
-from fastapi import HTTPException, UploadFile, File
+from fastapi import File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from src.models.models import Course, Role, StudentCourse, User
 from src.models.models import Tag as TagModel
+from src.utils.s3 import upload_image_to_s3
 
 
 def get_course(db: Session, title: str, current_user: Optional[User] = None):
@@ -27,18 +26,18 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
                 "is_premium": course.is_premium,
                 "owner_id": course.owner_id,
             }
-            for course in read_courses.filter(not Course.is_hidden).all()
+            for course in read_courses.filter(Course.is_hidden == False).all()  # noqa: E712
         ]
 
     if current_user.role == Role.STUDENT:
-        read_courses = read_courses.filter(not Course.is_hidden)
+        read_courses = read_courses.filter(Course.is_hidden == False)  # noqa: E712
 
         approved_student = (
             db.query(Course)
             .join(StudentCourse)
             .filter(
                 StudentCourse.student_id == current_user.id,
-                StudentCourse.is_approved,
+                StudentCourse.is_approved == True,  # noqa: E712
             )
             .all()
         )

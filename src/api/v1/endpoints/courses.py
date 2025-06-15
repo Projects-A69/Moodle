@@ -1,17 +1,19 @@
-from fastapi import APIRouter, Depends, UploadFile, Form, File
+from typing import Optional
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.orm import Session
-from src.api.deps import get_db, optional_user, get_teacher_user
+
+from src.api.deps import get_db, get_teacher_user, optional_user
 from src.crud.course import (
     create_courses,
     get_course,
     get_course_by_id,
-    update_specific_course,
-    rating_course,
     get_courses_by_tag_id,
+    rating_course,
+    update_specific_course,
 )
 from src.schemas.all_models import User
-from uuid import UUID
-from typing import Optional
 
 router = APIRouter(tags=["courses"])
 
