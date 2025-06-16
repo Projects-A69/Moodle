@@ -152,15 +152,18 @@ def toggle_course_visibility_by_teacher(
 
     if course.owner_id != current_user.id:
         raise Unauthorized("You are not the owner of this course.")
+    print(f"[DEBUG] current_user.id: {current_user.id}")
+    print(f"[DEBUG] course.owner_id: {course.owner_id}")
+    print(f"[DEBUG] course.students = {course.students}")
 
     if course.is_hidden:
         course.is_hidden = False
         db.commit()
-        return {"message": f"Course '{course.title}' is now visible."}
+        return {"message": f"Course '{course.title}' is now visible.", "is_locked": False}
 
     if course.students:
         raise BadRequest("You cannot hide a course that has enrolled students.")
 
     course.is_hidden = True
     db.commit()
-    return {"message": f"Course '{course.title}' has been hidden successfully."}
+    return {"message": f"Course '{course.title}' has been hidden successfully.", "is_locked": True}
