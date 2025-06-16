@@ -11,12 +11,15 @@ from src.crud.student import (
     toggle_favorite_course,
     unsubscribe_from_course,
 )
-from src.models.models import Student
+from src.models.models import Student, StudentCourse
 from src.models.models import User as UserModel
 from src.schemas.all_models import CoursesRate
 
 router = APIRouter()
 
+@router.get("/courses")
+def get_student_courses(current_student: Student = Depends(get_student_user), db: Session = Depends(get_db)):
+    return (db.query(StudentCourse).filter(StudentCourse.student_id == current_student.id).all())
 
 @router.post("/courses/{course_id}/subscribe")
 def subscribe_to_courses(

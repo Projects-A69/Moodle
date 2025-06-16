@@ -62,6 +62,7 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
             else:
                 result.append(
                     {
+                        "id": course.id,
                         "title": course.title,
                         "description": course.description,
                         "objectives": course.objectives,
