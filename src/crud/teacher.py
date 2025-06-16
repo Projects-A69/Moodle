@@ -122,7 +122,7 @@ def list_pending_students(db: Session, current_teacher: User, course_id: UUID):
     pending_students = (
         db.query(StudentCourse)
         .filter(
-            StudentCourse.course_id == course_id, StudentCourse.is_approved is False
+            StudentCourse.course_id == course_id, StudentCourse.is_approved.is_(False)
         )
         .all()
     )
@@ -132,7 +132,7 @@ def list_pending_students(db: Session, current_teacher: User, course_id: UUID):
         result.append(
             {
                 "id": str(student.id),
-                "email": student.user.email,
+                "email": student.user.email if student.user else None,
                 "first_name": student.first_name,
                 "last_name": student.last_name,
                 "profile_picture": student.profile_picture,
