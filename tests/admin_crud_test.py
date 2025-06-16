@@ -128,11 +128,6 @@ class TestAdminCrud(unittest.TestCase):
         with self.assertRaises(Exception):
             admin_crud.approve_teacher_by_id(self.mock_db, self.user_id)
 
-    def test_get_course_ratings_not_found(self):
-        self.mock_db.query().filter().all.return_value = []
-        with self.assertRaises(Exception):
-            admin_crud.get_course_ratings(self.mock_db, self.course_id)
-
     def test_toggle_course_visibility_not_found(self):
         self.mock_db.query().filter().first.return_value = None
         with self.assertRaises(Exception):

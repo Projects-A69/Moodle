@@ -11,7 +11,6 @@ from src.schemas.all_models import (
 )
 from src.models.models import Role, User, Admin, Student, Teacher
 
-
 class TestUserCrud(unittest.TestCase):
     def setUp(self):
         self.mock_db = MagicMock()
