@@ -18,7 +18,7 @@ from src.utils.token_utils import verify_student_approval_token
 router = APIRouter()
 
 
-@router.get("/teachers/{course_id}/pending")
+@router.get("/{course_id}/pending")
 def list_pending_students_endpoint(
     course_id: UUID,
     db: Session = Depends(get_db),
@@ -29,7 +29,7 @@ def list_pending_students_endpoint(
     )
 
 
-@router.get("/teachers/approval", include_in_schema=False)
+@router.get("/approval", include_in_schema=False)
 def approve_student_by_token(token: str, db: Session = Depends(get_db)):
     try:
         data = verify_student_approval_token(token)
@@ -45,7 +45,7 @@ def approve_student_by_token(token: str, db: Session = Depends(get_db)):
     return approve_student_by_id(db, student_id, course_id)
 
 
-@router.post("/teachers/{user_id}/approvals")
+@router.post("/{user_id}/approvals")
 def approve_student_endpoint(
     user_id: UUID, course_id: UUID, db: Session = Depends(get_db)
 ):
