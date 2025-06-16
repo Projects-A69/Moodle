@@ -260,9 +260,6 @@ def get_course_ratings(db: Session, course_id: UUID):
         .all()
     )
 
-    if not ratings:
-        raise NotFound(f"No ratings found for course with ID: {course_id}")
-
     result = []
     for rating in ratings:
         student = db.query(Student).filter(Student.id == rating.student_id).first()
