@@ -19,4 +19,5 @@ dependencies = [
     "ruff>=0.11.12",
     "sqlalchemy>=2.0.41",
     "uvicorn>=0.34.2",
+    "typing_extensions>=4.10.0",
 ]
