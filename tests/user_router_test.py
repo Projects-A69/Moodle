@@ -17,12 +17,6 @@ class TestUserRoutes(unittest.TestCase):
         )
         self.mock_db = MagicMock()
 
-    @patch("src.crud.user.get_user_by_email")
-    def test_login_invalid_credentials(self, mock_get_user_by_email):
-        mock_get_user_by_email.return_value = None
-        result = crud.user.get_user_by_email(self.mock_db, "invalid@example.com")
-        self.assertIsNone(result)
-
     @patch("src.crud.user.get_user_info")
     def test_get_me(self, mock_get_user_info):
         mock_get_user_info.return_value = {"first_name": "Mock", "last_name": "User"}

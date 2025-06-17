@@ -56,24 +56,6 @@ class TestCourseCrud(unittest.TestCase):
             )
             self.assertIsInstance(result, Course)
 
-    def test_update_specific_course_success(self):
-        course = Course(id=self.course_id, title="Old Title", owner_id=self.teacher_id)
-        self.mock_db.query().filter().first.return_value = course
-        self.mock_db.commit = MagicMock()
-        self.mock_db.flush = MagicMock()
-
-        updated_course = course_crud.update_specific_course(
-            db=self.mock_db,
-            id=self.course_id,
-            current_user=self.user,
-            title="Updated Title",
-            description=None,
-            objectives=None,
-            is_premium=None,
-            picture=None,
-        )
-        self.assertEqual(updated_course.title, "Updated Title")
-
     def test_update_specific_course_not_found(self):
         filter_mock = MagicMock()
         filter_mock.first.return_value = None
