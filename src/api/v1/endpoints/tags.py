@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from src.api.deps import get_db, get_teacher_user, teacher_or_admin
+from src.api.deps import get_db, teacher_or_admin
 from src.crud import tag as crud_tag
 from src.schemas.all_models import CreateTag
 

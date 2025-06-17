@@ -1,18 +1,24 @@
-from fastapi import APIRouter, Depends, Path
-from sqlalchemy.orm import Session
-from src.schemas.all_models import SectionCreate, SectionUpdate, User
-from src.crud.section import (
-    get_all_sections,
-    information_about_section,
-    add_section_to_course,
-    delete_section_from_course,
-    update_info_about_section,
-    leave_section,
-    mark_as_completed,
-)
-from src.api.deps import get_db, get_teacher_user, get_student_user, optional_user, teacher_or_admin, teacher_or_admin_student
 from uuid import UUID
 
+from fastapi import APIRouter, Depends, Path
+from sqlalchemy.orm import Session
+
+from src.api.deps import (
+    get_db,
+    get_student_user,
+    teacher_or_admin,
+    teacher_or_admin_student,
+)
+from src.crud.section import (
+    add_section_to_course,
+    delete_section_from_course,
+    get_all_sections,
+    information_about_section,
+    leave_section,
+    mark_as_completed,
+    update_info_about_section,
+)
+from src.schemas.all_models import SectionCreate, SectionUpdate, User
 
 router = APIRouter(tags=["sections"])
 

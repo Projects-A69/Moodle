@@ -12,7 +12,7 @@ def get_tags(db: Session):
 
 
 def get_courses_by_tag_id(db: Session, tag_id: UUID, current_user: Optional[User] = None):
-    tag = get_tag_by_id(db, tag_id)
+    tag = search_course_by_tag(db, tag_id)
     if not tag:
         raise HTTPException(status_code=404, detail="Tag not found")
 
@@ -71,7 +71,7 @@ def delete_tag_from_course(db: Session, course_id: UUID, tag_id: UUID):
         raise HTTPException(status_code=404, detail="Tag not found on course")
     db.delete(link)
     db.commit()
-    return {"message": f"Tag removed from course"}
+    return {"message": "Tag removed from course"}
 
 
 def search_course_by_tag(db: Session, tag_name: Optional[str]):

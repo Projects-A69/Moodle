@@ -12,10 +12,10 @@ RUN pip install --upgrade pip \
  && pip install uv
 
 WORKDIR /app
-ENV UV_VENV_MODE=off
 
 COPY pyproject.toml pyproject.lock* ./
 
+ENV UV_USE_VENV=0
 RUN uv sync
 
 COPY . .
