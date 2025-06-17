@@ -11,9 +11,12 @@ def get_tags(db: Session):
     return tag
 
 
-def get_tag_by_id(db: Session, tag_id: UUID):
-    tag = db.query(TagModel).filter(TagModel.id == tag_id).first()
-    return tag
+def get_courses_by_tag_id(db: Session, tag_id: UUID, current_user: Optional[User] = None):
+    tag = get_tag_by_id(db, tag_id)
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+
+    return [ct.course for ct in tag.course_tags]
 
 
 def create_tags(db: Session, payload: CreateTag):
@@ -92,5 +95,5 @@ def return_all_tags(db: Session):
     course_tags = db.query(Course).filter(Course.tags.any()).all()
     result = {}
     for course in course_tags:
-        result[str(course.id)] = [tag.name for tag in course.tags]
+        result[str(course.id)] = [ct.tag.name for ct in course.tags]
     return result

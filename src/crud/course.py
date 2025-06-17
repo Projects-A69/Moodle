@@ -253,12 +253,14 @@ def get_courses_by_tag_id(
     if tag is None:
         raise HTTPException(status_code=404, detail="Tag not found")
 
-    courses = tag.courses
+    course_tags = tag.course_tags
+    courses = [ct.course for ct in course_tags if ct.course is not None]
+
     result = []
 
     for course in courses:
         if current_user is None:
-            if course.is_hidden is False:
+            if not course.is_hidden:
                 result.append(course)
         elif current_user.role == Role.STUDENT:
             if not course.is_hidden and (
