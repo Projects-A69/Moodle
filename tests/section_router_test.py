@@ -3,7 +3,6 @@ from unittest.mock import MagicMock
 from uuid import uuid4
 
 from src.models.models import User, Role, Section
-from src.crud import section as section_crud
 
 
 class TestSectionCrud(unittest.TestCase):

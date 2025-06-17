@@ -18,13 +18,11 @@ class TestStudentCrud(unittest.TestCase):
         self.course.id = self.course_id
         self.course.title = "Math 101"
         self.course.is_premium = True
-        self.course.owner.first_name = "Alice"
-        self.course.owner.user.email = "alice@example.com"
-        self.current_student.student.first_name = "Bob"
-        self.current_student.student.last_name = "Smith"
+        self.course.owner = MagicMock(first_name="Alice", user=MagicMock(email="alice@example.com"))
+        self.current_student.student = MagicMock(first_name="Bob", last_name="Smith")
 
-    @patch("src.crud.student_crud.send_email")
-    @patch("src.crud.student_crud.generate_student_approval_token")
+    @patch("src.crud.student.send_email")
+    @patch("src.crud.student.generate_student_approval_token")
     def test_subscribe_to_course_success(self, mock_generate_token, mock_send_email):
         self.db.query().filter().first.side_effect = [self.course, None]
         self.db.query().join().filter().scalar.return_value = 0
