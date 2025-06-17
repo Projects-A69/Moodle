@@ -15,6 +15,7 @@ from src.schemas.all_models import (
     TeacherUpdate,
 )
 from src.utils.custom_responses import BadRequest
+from src.utils.s3 import upload_image_to_s3
 
 router = APIRouter()
 
