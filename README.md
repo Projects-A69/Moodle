@@ -160,7 +160,7 @@ docker compose up --build
 ## 🗃️ Database Schema
 
 <p align="center">
-  <img src="public/diagram.png" alt="Database Schema" width="700"/>
+  <img src="src/utils/diagram.png" alt="Database Schema" width="700"/>
 </p>
 
 ---
