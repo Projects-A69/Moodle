@@ -2,8 +2,7 @@
   <img src="https://i.imgur.com/ulm5ykC.png" alt="UDI Platform Logo" width="150"/>
 </p>
 
-<h1 align="center">UDI – Unified Digital Instruction Platform</h1>
-<p align="center"><i>Created by Uasim, Dimitar, and Ivan</i></p>
+<h1 align="center">UDI – Platform created by Uasim, Dimitar, and Ivan</h1>
 
 ---
 
