@@ -7,15 +7,15 @@
 
 ---
 
-## 🧭 Introduction
+## Introduction
 
 **UDI** is a full-stack e-learning platform developed by the Projects-A69 team, designed for students, teachers, and administrators. It combines clean architecture, role-based access, a responsive interface, and secure user authentication to manage digital education in an intuitive and scalable way.
 
 ---
 
-## ⚙️ Technologies Used
+## Technologies Used
 
-### 🔧 Backend – FastAPI (Python)
+### Backend – FastAPI (Python)
 
 * **Framework:** FastAPI, SQLAlchemy
 * **Database:** PostgreSQL (NeonDB hosted)
@@ -29,7 +29,7 @@
 * **Linting:** `ruff` (for PEP-8 code standards)
 * **Containerization:** Docker
 
-### 🎨 Frontend – Vue.js
+### Frontend – Vue.js
 
 * **Framework:** Vue 3 with Composition API
 * **Routing:** Vue Router (defined in `router/index.js`)
@@ -42,9 +42,9 @@
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-### 📦 Backend Setup (`Moodle` Repository)
+### Backend Setup (`Moodle` Repository)
 
 1. **Clone the Repository**
 
@@ -84,7 +84,7 @@ docker compose up --build
 
 ---
 
-### 🌐 Frontend Setup (`Moodle-frontend` Repository)
+### Frontend Setup (`Moodle-frontend` Repository)
 
 1. **Clone the Frontend Repository**
 
@@ -125,30 +125,30 @@ docker compose up --build
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 👨‍🎓 Students
+### Students
 
 * Register and manage profile
 * Enroll in public/premium courses
 * View course sections and rate courses
 * Track visited sections and favorite courses
 
-### 👩‍🏫 Teachers
+### Teachers
 
 * Register and await admin approval
 * Create/update/delete courses and sections
 * View course ratings and manage enrollment requests
 * Profile and LinkedIn support
 
-### 🛡️ Admins
+### Admins
 
 * Approve or reject pending teacher registrations
 * Manage all users and roles
 * Hide/delete courses, view ratings and enrollments
 * Full access to system resources
 
-### 🌍 General System Features
+### General System Features
 
 * Secure token-based login with expiration checks
 * Email notifications with timed approval links
@@ -158,7 +158,7 @@ docker compose up --build
 
 ---
 
-## 🗃️ Database Schema
+## Database Schema
 
 <p align="center"> 
     <img src="https://i.imgur.com/AXOalJh.png" alt="Database Schema" width="700"/>
@@ -166,7 +166,7 @@ docker compose up --build
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 ```bash
 python -m unittest discover tests
@@ -180,7 +180,7 @@ Test Suite Includes:
 
 ---
 
-## 📁 Project Structure Overview
+## Project Structure Overview
 
 ```
 Projects-A69/
@@ -219,15 +219,3 @@ Projects-A69/
 ```
 
 ---
-
-## 📌 Final Notes
-
-UDI reflects real-world architecture and teamwork, with full support for:
-
-* JWT authentication
-* Modular Vue + FastAPI architecture
-* Dockerized development
-* Responsive UI with theme support
-* Role-separated access and responsibility
-
-Made with ❤️ by Uasim, Dimitar, and Ivan for digital education excellence.
