@@ -20,7 +20,7 @@ def get_all_sections(
     sections1 = db.query(Section).filter(Section.course_id == course_id)
     if title:
         sections = db.query(Section).filter(Section.title.ilike(f"%{title}%"))
-    sections = sections1.order_by(Section.id).all()
+    sections = sections1.order_by(Section.id.asc()).all()
     return [
         {
             "id": section.id,
