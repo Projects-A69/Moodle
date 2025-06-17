@@ -4,7 +4,6 @@ from uuid import UUID
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from src.crud.course import get_course_by_id
 from src.models.models import Course, Section, StudentCourse, User
 from src.schemas.all_models import Role, SectionCreate, SectionUpdate
 from src.utils.custom_responses import Unauthorized

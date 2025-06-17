@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from src.models.models import Course, Role, StudentCourse, User
 from src.models.models import Tag as TagModel
-from src.utils.s3 import upload_image_to_s3
 
 
 def get_course(db: Session, title: str, current_user: Optional[User] = None):

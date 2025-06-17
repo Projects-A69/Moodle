@@ -1,8 +1,6 @@
 import uuid
 from io import BytesIO
 
-import boto3
-from PIL import Image
 
 from src.core.config import settings
 
