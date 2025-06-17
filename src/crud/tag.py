@@ -1,5 +1,5 @@
 from typing import Optional
-from src.models.models import Tag as TagModel, Course
+from src.models.models import Tag as TagModel, Course, CourseTag
 from src.schemas.all_models import CreateTag, User
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -45,40 +45,46 @@ def add_tag_to_course(
 ):
     course = db.query(Course).filter(Course.id == course_id).first()
     tag = db.query(TagModel).filter(TagModel.id == tag_id).first()
+
     if course is None:
         raise HTTPException(status_code=404, detail="Course not found")
     if tag is None:
         raise HTTPException(status_code=404, detail="Tag not found")
-    if tag in course.tags:
-        raise HTTPException(status_code=404, detail="Tag already attached to course")
-    course.tags.append(tag)
+
+    existing_link = db.query(CourseTag).filter_by(course_id=course.id, tag_id=tag.id).first()
+    if existing_link:
+        raise HTTPException(status_code=400, detail="Tag already attached to course")
+
+    link = CourseTag(course=course, tag=tag)
+    db.add(link)
     db.commit()
     db.refresh(course)
     return {"message": f"Tag {tag.name} added to {course.title}"}
 
 
 def delete_tag_from_course(db: Session, course_id: UUID, tag_id: UUID):
-    course = db.query(Course).filter(Course.id == course_id).first()
-    tag = db.query(TagModel).filter(TagModel.id == tag_id).first()
-    if tag not in course.tags:
-        raise HTTPException(status_code=404, detail="Tag not found")
-    course.tags.remove(tag)
+    link = db.query(CourseTag).filter_by(course_id=course_id, tag_id=tag_id).first()
+    if not link:
+        raise HTTPException(status_code=404, detail="Tag not found on course")
+    db.delete(link)
     db.commit()
-    return {"message": f"Tag {tag.name} removed from {course.title}"}
+    return {"message": f"Tag removed from course"}
 
 
 def search_course_by_tag(db: Session, tag_name: Optional[str]):
     tag = db.query(TagModel).filter(TagModel.name.ilike(f"%{tag_name}%")).first()
     if tag is None:
         raise HTTPException(status_code=404, detail="Tag not found")
+
     return [
         {
-            "title": course.title,
-            "description": course.description,
-            "objectives": course.objectives,
-            "premium": course.is_premium,
+            "title": ct.course.title,
+            "description": ct.course.description,
+            "objectives": ct.course.objectives,
+            "premium": ct.course.is_premium,
         }
-        for course in tag.courses
+        for ct in tag.course_tags
+        if ct.course is not None
     ]
 
 
