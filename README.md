@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/utils/UDI_logo.png" alt="UDI Platform Logo" width="150"/>
+  <img src="public/UDI_logo.png" alt="UDI Platform Logo" width="150"/>
 </p>
 
 <h1 align="center">UDI – Unified Digital Instruction Platform</h1>
@@ -24,19 +24,19 @@
 * **File Storage:** AWS S3 via Boto3
 * **Image Processing:** Pillow (PIL)
 * **Config Management:** `pydantic-settings`
-* **Dependency & Env Management:** `pyproject.toml`, `uv`, `.env.template`
-* **Testing:** `unittest`
+* **Dependency & Env Management:** `pyproject.toml`, `uv`, `.env.template`, `uv.lock`
+* **Testing:** `unittest` (with full CRUD + router test suite)
 * **Containerization:** Docker
 
 ### 🎨 Frontend – Vue.js
 
 * **Framework:** Vue 3 with Composition API
-* **Routing:** Vue Router (structured in `router/index.js`)
+* **Routing:** Vue Router (defined in `router/index.js`)
 * **Build Tool:** Vite
-* **Styling:** Base CSS Variables with Light/Dark theme support
-* **State & API Handling:** LocalStorage, Axios, JWT decode
-* **Components:** Dashboard layout, role-based dynamic views (Student, Teacher, Admin)
-* **Pages:** Login, Register, Course, Section, Profile, Admin Panels
+* **Styling:** CSS variables and transitions, dark/light mode support
+* **State/API Handling:** LocalStorage for roles, JWT decoding, Axios
+* **Component Layout:** Header, Sidebar, Responsive Dashboard (`App.vue`, `Dashboard.vue`)
+* **Views:** Pages for Home, Login, Register, Course, Section, Ratings, Profile, Tag management, Admin, Teacher, and Student panels
 * **Containerization:** Docker
 
 ---
@@ -49,7 +49,7 @@
 
    ```bash
    git clone https://github.com/Projects-A69/Moodle.git
-   cd Moodle/backend
+   cd Moodle
    ```
 
 2. **Sync Dependencies using `uv`**
@@ -65,9 +65,9 @@
    cp .env.template .env
    ```
 
-   Then configure:
+   Configure environment variables such as:
 
-   * `JWT_SECRET_KEY`, `DATABASE_URL`, `EMAIL_USERNAME`, `AWS_ACCESS_KEY_ID`, etc.
+   * `JWT_SECRET_KEY`, `DATABASE_URL`, `EMAIL_USERNAME`, `AWS_BUCKET_NAME`, etc.
 
 4. **Run the Backend Server**
 
@@ -75,7 +75,7 @@
    uvicorn src.main:app --reload
    ```
 
-Or use Docker Compose:
+Or using Docker Compose:
 
 ```bash
 docker compose up --build
@@ -98,25 +98,25 @@ docker compose up --build
    npm install
    ```
 
-3. **Environment Configuration**
+3. **Configure Environment**
 
    ```bash
    cp .env.template .env
    ```
 
-   Update:
+   Example:
 
    ```env
    VITE_API_URL=http://localhost:8000
    ```
 
-4. **Run the Dev Server**
+4. **Start Development Server**
 
    ```bash
    npm run dev
    ```
 
-Or run via Docker:
+Or via Docker Compose:
 
 ```bash
 docker compose up --build
@@ -128,39 +128,39 @@ docker compose up --build
 
 ### 👨‍🎓 Students
 
-* Browse and enroll in available courses
-* Track enrolled courses and progress
-* View sections and content
-* Rate completed courses
+* Register and manage profile
+* Enroll in public/premium courses
+* View course sections and rate courses
+* Track visited sections and favorite courses
 
 ### 👩‍🏫 Teachers
 
-* Register and wait for admin approval
-* Create and manage courses and sections
-* Approve student enrollment requests via email
-* View course feedback
+* Register and await admin approval
+* Create/update/delete courses and sections
+* View course ratings and manage enrollment requests
+* Profile and LinkedIn support
 
 ### 🛡️ Admins
 
-* Approve or reject teachers
-* Manage users and course visibility
-* Delete or hide courses
-* Access ratings and student enrollment data
+* Approve or reject pending teacher registrations
+* Manage all users and roles
+* Hide/delete courses, view ratings and enrollments
+* Full access to system resources
 
-### 🌐 Core System Features
+### 🌍 General System Features
 
-* Secure JWT authentication and auto-logout
-* Email notification system with approval tokens
-* Drag-and-drop image upload to AWS S3
-* Light/Dark mode UI with CSS variables
-* Fully Dockerized frontend/backend setup
+* Secure token-based login with expiration checks
+* Email notifications with timed approval links
+* S3 image storage for avatars and course covers
+* Mobile-responsive dashboard layout
+* Dark/light mode with CSS variable themes
 
 ---
 
 ## 🗃️ Database Schema
 
 <p align="center">
-  <img src="src/utils/diagram.png" alt="Database Schema" width="700"/>
+  <img src="public/diagram.png" alt="Database Schema" width="700"/>
 </p>
 
 ---
@@ -171,12 +171,11 @@ docker compose up --build
 python -m unittest discover tests
 ```
 
-**Test Coverage Includes:**
+Test Suite Includes:
 
-* User registration and login
-* Admin and teacher workflows
-* Email token generation and validation
-* Secure password handling and JWT
+* CRUD + route tests for each major model (Admin, Student, Teacher, Course, Section, Tag, User)
+* Email and token utilities
+* Role-based restrictions and logic
 
 ---
 
@@ -185,27 +184,36 @@ python -m unittest discover tests
 ```
 Projects-A69/
 ├── Moodle/                # Backend repo
-│   ├── backend/
-│   │   ├── src/
-│   │   │   ├── api/
-│   │   │   ├── core/
-│   │   │   ├── crud/
-│   │   │   ├── models/
-│   │   │   ├── schemas/
-│   │   │   ├── utils/
-│   │   │   └── main.py
-│   │   └── .env.template
+│   ├── src/
+│   │   ├── api/v1/endpoints/
+│   │   ├── core/
+│   │   ├── crud/
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   ├── utils/
+│   │   └── main.py
+│   ├── tests/
+│   ├── pyproject.toml
 │   ├── uv.lock
-│   └── pyproject.toml
-├── Moodle-frontend/      # Frontend repo
+│   ├── Dockerfile
+│   └── .env.template
+├── Moodle-frontend/       # Frontend repo
 │   ├── src/
 │   │   ├── views/
-│   │   ├── components/
-│   │   ├── router/
+│   │   ├── components/layout/
 │   │   ├── assets/
-│   │   └── App.vue
-│   ├── .env.template
-│   └── package.json
+│   │   ├── router/
+│   │   ├── App.vue
+│   │   └── main.js
+│   ├── public/
+│   │   ├── learnify.png
+│   │   ├── UDI_logo.png
+│   │   ├── default_pp.jpg
+│   │   └── hacker_video.mp4
+│   ├── Dockerfile
+│   ├── vite.config.mjs
+│   ├── package.json
+│   └── .env.template
 └── docker-compose.yml
 ```
 
@@ -213,10 +221,12 @@ Projects-A69/
 
 ## 📌 Final Notes
 
-UDI reflects best practices in modern full-stack development:
+UDI reflects real-world architecture and teamwork, with full support for:
 
-* Clean separation of concerns (FastAPI + Vue)
-* Real-world features like image upload, email workflows, and role-based dashboards
-* Modular, testable, and easy to extend
+* JWT authentication
+* Modular Vue + FastAPI architecture
+* Dockerized development
+* Responsive UI with theme support
+* Role-separated access and responsibility
 
-Built with ❤️ by Uasim, Dimitar, and Ivan to power the future of digital learning.
+Made with ❤️ by Uasim, Dimitar, and Ivan for digital education excellence.
