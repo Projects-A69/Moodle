@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/utils/UDI_logo.png" alt="UDI Platform Logo" width="150"/>
+  <img src="public/UDI_logo.png" alt="UDI Platform Logo" width="150"/>
 </p>
 
 <h1 align="center">UDI – Unified Digital Instruction Platform</h1>
@@ -26,6 +26,7 @@
 * **Config Management:** `pydantic-settings`
 * **Dependency & Env Management:** `pyproject.toml`, `uv`, `.env.template`, `uv.lock`
 * **Testing:** `unittest` (with full CRUD + router test suite)
+* **Linting:** `ruff` (for PEP-8 code standards)
 * **Containerization:** Docker
 
 ### 🎨 Frontend – Vue.js
@@ -160,7 +161,7 @@ docker compose up --build
 ## 🗃️ Database Schema
 
 <p align="center">
-  <img src="src/utils/diagram.png" alt="Database Schema" width="700"/>
+  <img src="public/diagram.png" alt="Database Schema" width="700"/>
 </p>
 
 ---
