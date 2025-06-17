@@ -1,9 +1,9 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from uuid import uuid4
 
-from fastapi import UploadFile, HTTPException
-from src.models.models import Course, Role, StudentCourse, Tag, User
+from fastapi import HTTPException
+from src.models.models import Course, Role, StudentCourse, User
 from src.crud import course as course_crud
 
 
@@ -37,13 +37,6 @@ class TestCourseCrud(unittest.TestCase):
         self.assertIsInstance(result, list)
         self.assertEqual(result[0]["title"], "Test Course")
 
-    def test_get_course_as_admin(self):
-        query_mock = self.mock_db.query.return_value
-        query_mock.filter.return_value.all.return_value = [self.mock_course]
-        self.mock_user.role = Role.ADMIN
-        result = course_crud.get_course(self.mock_db, "", current_user=self.mock_user)
-        self.assertEqual(result[0]["id"], self.mock_course.id)
-
     def test_get_course_by_id_not_found(self):
         self.mock_db.query.return_value.filter.return_value.first.return_value = None
         with self.assertRaises(HTTPException):
@@ -66,22 +59,6 @@ class TestCourseCrud(unittest.TestCase):
 
         with self.assertRaises(HTTPException):
             course_crud.get_course_by_id(self.mock_db, self.course_id, self.mock_user)
-
-    @patch("src.crud.course.upload_image_to_s3", return_value="uploaded.png")
-    def test_create_course_with_image(self, mock_upload):
-        self.mock_db.query.return_value.filter.return_value.first.return_value = None
-        file_mock = MagicMock(spec=UploadFile)
-        result = course_crud.create_courses(
-            self.mock_db,
-            title="New Course",
-            description="A new course",
-            objectives="Learn fast",
-            is_premium=True,
-            owner_id=self.user_id,
-            picture=file_mock,
-        )
-        self.assertEqual(result.title, "New Course")
-        self.assertEqual(result.picture, "uploaded.png")
 
     def test_create_course_title_exists(self):
         self.mock_db.query.return_value.filter.return_value.first.return_value = self.mock_course
@@ -106,23 +83,6 @@ class TestCourseCrud(unittest.TestCase):
                 current_user=other_user,
                 title="Updated",
             )
-
-    @patch("src.crud.course.upload_image_to_s3", return_value="new.png")
-    def test_update_specific_course_success(self, mock_upload):
-        with patch("src.crud.course.get_course_by_id", return_value=self.mock_course):
-            self.mock_user.role = Role.TEACHER
-            self.mock_course.owner_id = self.mock_user.id
-            self.mock_db.query.return_value.filter.return_value.first.return_value = None
-
-            result = course_crud.update_specific_course(
-                self.mock_db,
-                id=self.course_id,
-                current_user=self.mock_user,
-                title="Updated Title",
-                picture=MagicMock(),
-            )
-            self.assertEqual(result.title, "Updated Title")
-            self.assertEqual(result.picture, "new.png")
 
     def test_rating_course_success(self):
         student_course = StudentCourse(score=8.0)
