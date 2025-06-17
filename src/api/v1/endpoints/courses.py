@@ -13,7 +13,7 @@ from src.crud.course import (
     rating_course,
     update_specific_course,
 )
-from src.schemas.all_models import User
+from src.schemas.all_models import User, CourseWithRatings
 
 router = APIRouter(tags=["courses"])
 
@@ -26,6 +26,9 @@ def get_courses(
 ):
     return get_course(db, title=title, current_user=current_user)
 
+@router.get("/courses/{course_id}", response_model=CourseWithRatings)
+def get_rating_course(course_id: UUID, db: Session = Depends(get_db)):
+    return rating_course(db, course_id)
 
 @router.get("/{course_id}")
 def get_courses_by_id(
@@ -81,11 +84,6 @@ def update_course(
         is_premium=is_premium,
         picture=picture,
     )
-
-
-@router.get("/courses/{course_id}")
-def get_rating_course(course_id: UUID, db: Session = Depends(get_db)):
-    return rating_course(db, course_id)
 
 
 @router.get("/by-tag/{tag_id}")

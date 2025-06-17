@@ -177,3 +177,12 @@ class StudentCourse(BaseModel):
     is_approved: bool
     progress: int
     is_favorite: bool = False
+
+class RatingEntry(BaseModel):
+    student_name: str
+    score: float
+
+class CourseWithRatings(BaseModel):
+    title: str
+    rating: float
+    ratings: list[RatingEntry]

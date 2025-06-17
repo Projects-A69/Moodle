@@ -228,22 +228,35 @@ def rating_course(db: Session, id: UUID):
     course = db.query(Course).filter(Course.id == id).first()
     if not course:
         raise HTTPException(status_code=403, detail="Course not found")
+
     ratings = (
         db.query(StudentCourse)
-        .filter(StudentCourse.course_id == course.id, StudentCourse.score is not None)
+        .filter(StudentCourse.course_id == course.id, StudentCourse.score.isnot(None))
         .all()
     )
-    if not ratings:
-        average_rating_score = 0.0
-    else:
+
+    if ratings:
         total_score = sum(rating.score for rating in ratings)
         max_score = len(ratings) * 10
         avg_rating = total_score / max_score
-        average_rating_score = avg_rating * 10
-    course.rating = average_rating_score
+        course.rating = avg_rating * 10
+    else:
+        course.rating = 0.0
+
     db.commit()
     db.refresh(course)
-    return {"title": course.title, "rating": average_rating_score}
+
+    return {
+        "title": course.title,
+        "rating": course.rating,
+        "ratings": [
+            {
+                "student_name": rating.student.first_name if rating.student else "Anonymous",
+                "score": rating.score
+            }
+            for rating in ratings
+        ]
+    }
 
 
 def get_courses_by_tag_id(
