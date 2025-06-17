@@ -176,6 +176,7 @@ def get_user_info(db: Session, current_user: User) -> dict:
                     "phone_number": teacher.phone_number,
                     "linked_in_acc": teacher.linked_in_acc,
                     "profile_picture": teacher.profile_picture,
+                    "is_approved": current_user.is_approved,
                 }
             )
 
