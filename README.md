@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/UDI_logo.png" alt="UDI Platform Logo" width="150"/>
+  <img src="src/utils/UDI_logo.png" alt="UDI Platform Logo" width="150"/>
 </p>
 
 <h1 align="center">UDI – Unified Digital Instruction Platform</h1>
