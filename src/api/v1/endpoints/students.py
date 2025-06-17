@@ -11,7 +11,7 @@ from src.crud.student import (
     toggle_favorite_course,
     unsubscribe_from_course,
 )
-from src.models.models import Student, StudentCourse
+from src.models.models import Student, StudentCourse, User
 from src.models.models import User as UserModel
 from src.schemas.all_models import CoursesRate
 
@@ -36,10 +36,10 @@ def subscribe_to_courses(
 
 @router.delete("/courses/{course_id}/unsubscribe")
 def unsubscribe_from_course_endpoint(
-    course_id: UUID, student_id: UUID, db: Session = Depends(get_db)
+    course_id: UUID, db: Session = Depends(get_db), current_user: User =Depends(get_student_user)
 ):
 
-    return unsubscribe_from_course(course_id=course_id, student_id=student_id, db=db)
+    return unsubscribe_from_course(course_id=course_id, student_id=current_user.id, db=db)
 
 @router.get("/students/courses")
 def get_student_courses(
