@@ -17,9 +17,17 @@ from src.schemas.all_models import CoursesRate
 
 router = APIRouter()
 
+
 @router.get("/courses")
-def get_student_courses(current_student: Student = Depends(get_student_user), db: Session = Depends(get_db)):
-    return (db.query(StudentCourse).filter(StudentCourse.student_id == current_student.id).all())
+def get_student_courses(
+    current_student: Student = Depends(get_student_user), db: Session = Depends(get_db)
+):
+    return (
+        db.query(StudentCourse)
+        .filter(StudentCourse.student_id == current_student.id)
+        .all()
+    )
+
 
 @router.post("/courses/{course_id}/subscribe")
 def subscribe_to_courses(
@@ -38,17 +46,17 @@ def subscribe_to_courses(
 def unsubscribe_from_course_endpoint(
     course_id: UUID, student_id: UUID, db: Session = Depends(get_db)
 ):
-
     return unsubscribe_from_course(course_id=course_id, student_id=student_id, db=db)
 
+
 @router.get("/students/courses")
-def get_student_courses(
+def get_student_courses(  # noqa: F811
     current_student: Student = Depends(get_student_user),
     db: Session = Depends(get_db),
 ):
     return (
         db.query(StudentCourse)
-        .options(joinedload(StudentCourse.course))
+        .options(joinedload(StudentCourse.course))  # noqa: F821
         .filter(StudentCourse.student_id == current_student.id)
         .all()
     )
@@ -61,7 +69,6 @@ def rate_course_endpoint(
     current_student: UserModel = Depends(get_student_user),
     db: Session = Depends(get_db),
 ):
-
     return rate_course(db, course_id, payload, current_student)
 
 
