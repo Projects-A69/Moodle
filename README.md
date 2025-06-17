@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/UDI_logo.png" alt="UDI Platform Logo" width="150"/>
+  <img src="https://i.imgur.com/ulm5ykC.png" alt="UDI Platform Logo" width="150"/>
 </p>
 
 <h1 align="center">UDI – Unified Digital Instruction Platform</h1>
@@ -160,8 +160,8 @@ docker compose up --build
 
 ## 🗃️ Database Schema
 
-<p align="center">
-  <img src="public/diagram.png" alt="Database Schema" width="700"/>
+<p align="center"> 
+    <img src="https://i.imgur.com/AXOalJh.png" alt="Database Schema" width="700"/>
 </p>
 
 ---
