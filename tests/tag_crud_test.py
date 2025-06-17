@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock
 from uuid import uuid4
 from src.crud import tag as tag_crud
-from src.schemas.all_models import CreateTag, User
+from src.schemas.all_models import CreateTag
 from fastapi import HTTPException
 
 

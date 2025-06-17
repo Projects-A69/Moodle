@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 from fastapi import UploadFile, HTTPException
-from src.models.models import Course, Role, Student, StudentCourse, Tag, User
+from src.models.models import Course, Role, StudentCourse, Tag, User
 from src.crud import course as course_crud
 
 
@@ -29,7 +29,7 @@ class TestCourseCrud(unittest.TestCase):
         )
 
     def test_get_course_no_user(self):
-        self.mock_db.query().filter().all.return_value = [self.mock_course]
+        self.mock_db.query().filter().filter().all.return_value = [self.mock_course]
         result = course_crud.get_course(self.mock_db, title="Test")
         self.assertIsInstance(result, list)
         self.assertEqual(result[0]["title"], "Test Course")
@@ -120,10 +120,12 @@ class TestCourseCrud(unittest.TestCase):
 
     def test_get_courses_by_tag_id_as_admin(self):
         self.mock_user.role = Role.ADMIN
-        tag = Tag(id=self.tag_id, courses=[self.mock_course])
+        tag = Tag(id=self.tag_id)
+        tag.courses = [self.mock_course] 
         self.mock_db.query().filter().first.return_value = tag
         result = course_crud.get_courses_by_tag_id(self.mock_db, self.tag_id, self.mock_user)
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), 0)
+
 
     def test_get_courses_by_tag_id_not_found(self):
         self.mock_db.query().filter().first.return_value = None

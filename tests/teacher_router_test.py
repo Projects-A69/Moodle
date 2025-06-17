@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from uuid import uuid4, UUID
+from uuid import uuid4
 from itsdangerous import BadSignature, SignatureExpired
 
 from src.utils.custom_responses import BadRequest
