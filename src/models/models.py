@@ -87,7 +87,9 @@ class Course(Base):
     students = relationship(
         "Student", secondary="student_courses", back_populates="courses"
     )
-    tags = relationship("Tag", secondary="course_tags", back_populates="courses")
+    tags = relationship(
+        "CourseTag", back_populates="course", cascade="all, delete-orphan"
+    )
     sections = relationship(
         "Section", back_populates="course", cascade="all, delete-orphan"
     )
@@ -112,7 +114,9 @@ class Tag(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(100), unique=True, nullable=False)
 
-    courses = relationship("Course", secondary="course_tags", back_populates="tags")
+    course_tags = relationship(
+        "CourseTag", back_populates="tag", cascade="all, delete-orphan"
+    )
 
 
 class StudentCourse(Base):
@@ -134,5 +138,5 @@ class CourseTag(Base):
     course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id"), primary_key=True)
     tag_id = Column(UUID(as_uuid=True), ForeignKey("tags.id"), primary_key=True)
 
-    course = relationship("Course", backref="tag_associations")
-    tag = relationship("Tag", backref="course_associations")
+    course = relationship("Course", back_populates="tags")
+    tag = relationship("Tag", back_populates="course_tags")
