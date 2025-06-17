@@ -1,14 +1,15 @@
 <p align="center">
-  <img src="src/utils/UDI_logo.png" alt="UDI Learnify Logo" width="150"/>
+  <img src="src/utils/UDI_logo.png" alt="UDI Platform Logo" width="150"/>
 </p>
 
-<h1 align="center">Learnify – Modern E-learning Platform</h1>
+<h1 align="center">UDI – Unified Digital Instruction Platform</h1>
+<p align="center"><i>Created by Uasim, Dimitar, and Ivan</i></p>
 
 ---
 
 ## 🧭 Introduction
 
-**Learnify** is a full-featured, full-stack e-learning platform designed for students, teachers, and administrators. It offers a robust and secure environment to manage educational content, interact with users, and track course progress. Built using modern technologies, Learnify ensures a smooth experience across devices with support for dark/light modes and real-time feedback.
+**UDI** is a modern, full-stack e-learning platform built to empower digital education for students, teachers, and administrators. Featuring clean architecture, a responsive design, role-based access, and secure authentication, UDI simplifies the management of learning content, enrollments, and communication across all roles.
 
 ---
 
@@ -16,92 +17,86 @@
 
 ### 🔧 Backend – FastAPI (Python)
 
-* FastAPI, SQLAlchemy, Alembic
-* PostgreSQL database
-* JWT (OAuth2 password flow) authentication
-* Email via `smtplib`, `email.mime.text`
-* AWS S3 + Boto3 for file uploads
-* PIL (Pillow) for image processing
-* dotenv for environment configs
-* `unittest` for testing (99%+ coverage)
+* **Framework:** FastAPI, SQLAlchemy, Alembic
+* **Database:** PostgreSQL (NeonDB)
+* **Authentication:** JWT (OAuth2 password flow)
+* **Email Notifications:** Gmail SMTP (`smtplib`, `email.mime.text`)
+* **File Storage:** AWS S3 with Boto3
+* **Image Processing:** Pillow (PIL)
+* **Config Management:** `pydantic-settings`
+* **Dependency Management:** `uv` + `pyproject.toml`
+* **Testing:** `unittest`
+* **Dockerized:** Yes
 
 ### 🎨 Frontend – Vue.js
 
-* Vue 3 with Composition API
-* Vite as the build tool
-* Vue Router
-* Tailwind CSS for styling
-* `shadcn/vue`, `lucide-react`, Framer Motion
+* **Framework:** Vue 3 with Composition API
+* **Build Tool:** Vite
+* **Router:** Vue Router
+* **Styling:** Tailwind CSS
+* **UI:** shadcn/vue, lucide-react
+* **State/API:** Axios, JWT-decode
+* **Docker-ready** with `.env.template` support
 
 ---
 
 ## 🚀 Getting Started
 
-### 🔙 Backend Setup
+### Backend Setup
 
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/yourusername/learnify.git
-   cd learnify/backend
+   git clone https://github.com/yourusername/udi.git
+   cd udi/backend
    ```
 
-2. **Create and Activate a Virtual Environment**
+2. **Sync Dependencies with uv**
 
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # Windows: venv\Scripts\activate
+   uv venv
+   uv pip install -r requirements.txt
    ```
 
-3. **Install Dependencies**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Environment Configuration**
-   Copy the existing template and configure:
+3. **Environment Configuration**
 
    ```bash
    cp .env.template .env
    ```
 
-   Then fill in your values in `.env`:
+   Update credentials and values for:
 
-   ```env
-   DATABASE_URL=postgresql://user:password@localhost:5432/learnify
-   JWT_SECRET_KEY=your_secret_key
-   JWT_EXPIRATION=3600
-   EMAIL_USERNAME=your_email@gmail.com
-   EMAIL_PASSWORD=your_email_app_password
-   AWS_ACCESS_KEY_ID=your_key
-   AWS_SECRET_ACCESS_KEY=your_secret
-   AWS_BUCKET_NAME=learnify-media
-   ```
+   * `JWT_SECRET_KEY`, `DATABASE_URL`, SMTP, AWS, etc.
 
-5. **Run Migrations**
+4. **Run Database Migrations**
 
    ```bash
    alembic upgrade head
    ```
 
-6. **Start the Backend Server**
+5. **Start the Server**
 
    ```bash
    uvicorn src.main:app --reload
    ```
 
+Or via Docker Compose:
+
+```bash
+docker compose up --build
+```
+
 ---
 
-### 🌐 Frontend Setup
+### Frontend Setup
 
-1. **Navigate to the Frontend Folder**
+1. **Navigate to the Frontend**
 
    ```bash
    cd ../frontend
    ```
 
-2. **Install Dependencies**
+2. **Install Node Modules**
 
    ```bash
    npm install
@@ -113,7 +108,7 @@
    cp .env.template .env
    ```
 
-   Then update `.env` with your backend base URL and API endpoint.
+   Edit `VITE_API_URL=http://localhost:8000`
 
 4. **Run the Frontend Dev Server**
 
@@ -121,37 +116,43 @@
    npm run dev
    ```
 
+Or via Docker:
+
+```bash
+docker compose up --build
+```
+
 ---
 
-## ✨ Features
+## ✨ Key Features
 
 ### 👨‍🎓 Students
 
-* Register and upload profile picture
+* Register, upload profile pictures
 * Enroll in public/premium courses
-* Rate courses and track progress
-* Auto logout on token expiration
+* View content, rate courses
+* Track progress and favorites
 
 ### 👩‍🏫 Teachers
 
-* Register and wait for admin approval
-* Manage courses, sections, and resources
-* Approve enrollments
-* Get notified on student requests
+* Register and await admin approval
+* Create and manage courses and sections
+* Approve student enrollments
+* Get notified via email
 
 ### 🛡️ Admins
 
-* Approve/reject teachers
+* Approve or reject teachers
 * Manage users and course visibility
-* View course ratings and student enrollments
+* Access all ratings and enrollment data
 
-### 🌍 System-wide
+### 🌐 System-wide
 
-* Role-based access control
-* Responsive UI with dark/light theme
-* Secure JWT authentication
-* Email notifications and image uploads
-* Clean design with hover effects and animations
+* Secure role-based access with JWT
+* Email approval and notification flow
+* File/image handling via AWS S3
+* Theme switching (light/dark)
+* Fully containerized (Docker)
 
 ---
 
@@ -169,19 +170,19 @@
 python -m unittest discover tests
 ```
 
-**Covers:**
+**Test Coverage Includes:**
 
-* User auth + registration
-* Role logic (Admin, Teacher, Student)
-* Email handling
-* Course management
+* User workflows (register/login)
+* Admin approval and activation
+* Email token generation and validation
+* Secure token handling
 
 ---
 
 ## 📁 Project Structure
 
 ```
-learnify/
+udi/
 ├── backend/
 │   ├── src/
 │   │   ├── api/
@@ -191,25 +192,28 @@ learnify/
 │   │   ├── schemas/
 │   │   ├── utils/
 │   │   └── main.py
+│   ├── .env.template
 │   └── tests/
 ├── frontend/
 │   ├── components/
 │   ├── layouts/
 │   ├── pages/
+│   ├── .env.template
 │   └── App.vue
+├── docker-compose.yml
 └── public/
-    ├── logo.png
-    └── db-diagram.png
+    ├── UDI_logo.png
+    └── diagram.png
 ```
 
 ---
 
 ## 📌 Final Notes
 
-Learnify was built with real-world architecture in mind — clean separation of concerns, full test coverage, and modern UI/UX. It’s extendable with features like:
+UDI is a secure, scalable e-learning solution designed for real-world deployments. It emphasizes:
 
-* Quizzes and certificates
-* Real-time chat
-* Notifications and analytics
+* Modern dev practices with `uv` and Docker
+* Centralized role and permission management
+* Fully testable and extendable design
 
-Whether you're a student, teacher, or admin — Learnify offers a scalable solution for digital education.
+Built by Uasim, Dimitar, and Ivan with ❤️ for modern digital education.
