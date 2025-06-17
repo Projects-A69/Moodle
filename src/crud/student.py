@@ -111,9 +111,6 @@ def unsubscribe_from_course(
 def rate_course(
     db: Session, course_id: UUID, payload: CoursesRate, current_student: UserModel
 ):
-    """
-    Allows a student to rate a course from 1 to 10.
-    """
     course = db.query(Course).filter(Course.id == course_id).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
@@ -123,13 +120,21 @@ def rate_course(
         .filter(
             StudentCourse.course_id == course_id,
             StudentCourse.student_id == current_student.id,
+            StudentCourse.is_approved.is_(True),
         )
         .first()
     )
-    if not student_course or current_student.id != student_course.student_id:
-        raise HTTPException(
-            status_code=403, detail="You are not enrolled in this course"
-        )
+
+    if not student_course:
+        if course.is_premium:
+            raise HTTPException(
+                status_code=403, detail="You are not enrolled in this premium course"
+            )
+        else:
+            raise HTTPException(
+                status_code=403, detail="You cannot rate this public course. Please access it first."
+            )
+
     if student_course.progress == 0:
         raise HTTPException(
             status_code=403, detail="You must see the course before rating it"

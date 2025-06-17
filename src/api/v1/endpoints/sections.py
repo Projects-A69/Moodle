@@ -10,7 +10,7 @@ from src.crud.section import (
     leave_section,
     mark_as_completed,
 )
-from src.api.deps import get_db, get_teacher_user, get_student_user, optional_user
+from src.api.deps import get_db, get_teacher_user, get_student_user, optional_user, teacher_or_admin, teacher_or_admin_student
 from uuid import UUID
 
 
@@ -21,7 +21,7 @@ router = APIRouter(tags=["sections"])
 def get_sections(
     course_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(optional_user),
+    current_user: User = Depends(teacher_or_admin_student),
 ):
     return get_all_sections(db, course_id, current_user=current_user)
 
@@ -30,7 +30,7 @@ def get_sections(
 def get_section_by_id(
     section_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(optional_user),
+    current_user: User = Depends(teacher_or_admin_student),
 ):
     section = information_about_section(db, section_id, current_user)
     return section
@@ -40,7 +40,7 @@ def get_section_by_id(
 def complete_section(
     section_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(optional_user),
+    current_user: User = Depends(teacher_or_admin_student),
 ):
     return mark_as_completed(db, section_id, current_user)
 
@@ -50,7 +50,7 @@ def add_section(
     course_id: UUID,
     payload: SectionCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_teacher_user),
+    current_user: User = Depends(teacher_or_admin),
 ):
     return add_section_to_course(db, payload, course_id, current_user)
 
@@ -59,7 +59,7 @@ def add_section(
 def delete_section(
     section_id: UUID,
     db: Session = Depends(get_db),
-    current_user=Depends(get_teacher_user),
+    current_user=Depends(teacher_or_admin),
 ):
     section = information_about_section(db, section_id, current_user)
     return delete_section_from_course(db, section, current_user)
@@ -70,7 +70,7 @@ def update_section(
     payload: SectionUpdate,
     section: UUID = Path(..., alias="section_id"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_teacher_user),
+    current_user: User = Depends(teacher_or_admin),
 ):
     return update_info_about_section(db, section, payload, current_user)
 

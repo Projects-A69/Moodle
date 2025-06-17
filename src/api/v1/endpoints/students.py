@@ -41,8 +41,20 @@ def unsubscribe_from_course_endpoint(
 
     return unsubscribe_from_course(course_id=course_id, student_id=student_id, db=db)
 
+@router.get("/students/courses")
+def get_student_courses(
+    current_student: Student = Depends(get_student_user),
+    db: Session = Depends(get_db),
+):
+    return (
+        db.query(StudentCourse)
+        .options(joinedload(StudentCourse.course))
+        .filter(StudentCourse.student_id == current_student.id)
+        .all()
+    )
 
-@router.post("/{course_id}/students/{student_id}/rate")
+
+@router.post("/courses/{course_id}/rate")
 def rate_course_endpoint(
     course_id: UUID,
     payload: CoursesRate,
