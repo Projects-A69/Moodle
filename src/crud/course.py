@@ -2,6 +2,7 @@ from typing import Optional
 from uuid import UUID
 
 from fastapi import File, HTTPException, UploadFile
+from sqlalchemy import not_
 from sqlalchemy.orm import Session
 
 from src.models.models import Course, Role, StudentCourse, User
@@ -26,11 +27,11 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
                 "is_premium": course.is_premium,
                 "owner_id": course.owner_id,
             }
-            for course in read_courses.filter(Course.is_hidden == False).all()  # noqa: E712
+            for course in read_courses.filter(not_(Course.is_hidden)).all()
         ]
 
     if current_user.role == Role.STUDENT:
-        read_courses = read_courses.filter(Course.is_hidden == False)  # noqa: E712
+        read_courses = read_courses.filter(not_(Course.is_hidden))
 
         approved_student = (
             db.query(Course)
