@@ -8,6 +8,7 @@ from src.models.models import Course, Role, StudentCourse, User
 from src.models.models import Tag as TagModel
 from src.utils.s3 import upload_image_to_s3
 
+
 def get_course(db: Session, title: str, current_user: Optional[User] = None):
     read_courses = db.query(Course)
     if title:
@@ -119,6 +120,7 @@ def get_course(db: Session, title: str, current_user: Optional[User] = None):
 
     return []
 
+
 def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None):
     course = db.query(Course).filter(Course.id == id).first()
     if not course:
@@ -153,13 +155,12 @@ def get_course_by_id(db: Session, id: UUID, current_user: Optional[User] = None)
 
 def create_courses(
     db: Session,
-
     title: str,
     description: str,
     objectives: str,
     is_premium: bool,
     owner_id: UUID,
-    picture: UploadFile = File(None)
+    picture: UploadFile = File(None),
 ):
     if picture:
         picture_path = upload_image_to_s3(picture)
@@ -250,11 +251,13 @@ def rating_course(db: Session, id: UUID):
         "rating": course.rating,
         "ratings": [
             {
-                "student_name": rating.student.first_name if rating.student else "Anonymous",
-                "score": rating.score
+                "student_name": rating.student.first_name
+                if rating.student
+                else "Anonymous",
+                "score": rating.score,
             }
             for rating in ratings
-        ]
+        ],
     }
 
 
