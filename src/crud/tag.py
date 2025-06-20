@@ -11,7 +11,9 @@ def get_tags(db: Session):
     return tag
 
 
-def get_courses_by_tag_id(db: Session, tag_id: UUID, current_user: Optional[User] = None):
+def get_courses_by_tag_id(
+    db: Session, tag_id: UUID, current_user: Optional[User] = None
+):
     tag = search_course_by_tag(db, tag_id)
     if not tag:
         raise HTTPException(status_code=404, detail="Tag not found")
@@ -54,7 +56,9 @@ def add_tag_to_course(
     if tag is None:
         raise HTTPException(status_code=404, detail="Tag not found")
 
-    existing_link = db.query(CourseTag).filter_by(course_id=course.id, tag_id=tag.id).first()
+    existing_link = (
+        db.query(CourseTag).filter_by(course_id=course.id, tag_id=tag.id).first()
+    )
     if existing_link:
         raise HTTPException(status_code=400, detail="Tag already attached to course")
 

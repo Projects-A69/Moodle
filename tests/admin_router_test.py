@@ -49,13 +49,17 @@ class TestAdminRoutes(unittest.TestCase):
 
     def test_list_courses_empty(self):
         self.mock_db.query().offset().limit().all.return_value = []
-        result = admin.list_all_courses(self.mock_db, teacher_id=None, student_id=None, title=None)
+        result = admin.list_all_courses(
+            self.mock_db, teacher_id=None, student_id=None, title=None
+        )
         self.assertIsInstance(result, list)
 
     def test_list_courses_with_pagination_params(self):
         self.mock_db.query().offset().limit().all.return_value = []
         # The pagination params are actually handled in the route, CRUD takes filters
-        result = admin.list_all_courses(self.mock_db, teacher_id=None, student_id=None, title=None)
+        result = admin.list_all_courses(
+            self.mock_db, teacher_id=None, student_id=None, title=None
+        )
         self.assertIsInstance(result, list)
 
     def test_update_user_status_success(self):
@@ -70,7 +74,6 @@ class TestAdminRoutes(unittest.TestCase):
         self.mock_db.query().filter().first.return_value = None
         with self.assertRaises(Exception):
             admin.update_user_active(self.mock_db, uuid4())
-
 
     def test_approve_teacher_by_id_not_found_raises(self):
         self.mock_db.query().filter().first.return_value = None

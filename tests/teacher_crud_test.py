@@ -20,7 +20,10 @@ class TestApproveStudentById(unittest.TestCase):
     @patch("src.crud.teacher.get_by_id")
     def test_approve_student_success_existing_enrollment(self, mock_get_by_id):
         mock_get_by_id.return_value = self.student_user
-        self.db.query().filter().first.side_effect = [self.course, MagicMock(is_approved=False)]
+        self.db.query().filter().first.side_effect = [
+            self.course,
+            MagicMock(is_approved=False),
+        ]
 
         response = approve_student_by_id(self.db, self.student_id, self.course_id)
         self.assertIn("approved", response["message"])

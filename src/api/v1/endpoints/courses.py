@@ -26,9 +26,11 @@ def get_courses(
 ):
     return get_course(db, title=title, current_user=current_user)
 
+
 @router.get("/courses/{course_id}", response_model=CourseWithRatings)
 def get_rating_course(course_id: UUID, db: Session = Depends(get_db)):
     return rating_course(db, course_id)
+
 
 @router.get("/{course_id}")
 def get_courses_by_id(

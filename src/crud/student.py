@@ -132,7 +132,8 @@ def rate_course(
             )
         else:
             raise HTTPException(
-                status_code=403, detail="You cannot rate this public course. Please access it first."
+                status_code=403,
+                detail="You cannot rate this public course. Please access it first.",
             )
 
     if student_course.progress == 0:

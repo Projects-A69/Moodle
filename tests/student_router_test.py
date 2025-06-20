@@ -16,7 +16,7 @@ class TestStudentEndpoints(unittest.TestCase):
         self.current_user = User(id=self.student_id)
         self.payload = CoursesRate(score=5.0, comment="Great course!")
 
-    @patch('src.crud.student.subscribe_to_course')
+    @patch("src.crud.student.subscribe_to_course")
     def test_subscribe_to_courses(self, mock_subscribe):
         mock_subscribe.return_value = {"message": "Subscribed successfully"}
         result = student_crud.subscribe_to_course(
@@ -27,7 +27,7 @@ class TestStudentEndpoints(unittest.TestCase):
         self.assertIn("message", result)
         self.assertEqual(result["message"], "Subscribed successfully")
 
-    @patch('src.crud.student.unsubscribe_from_course')
+    @patch("src.crud.student.unsubscribe_from_course")
     def test_unsubscribe_from_course_endpoint(self, mock_unsubscribe):
         mock_unsubscribe.return_value = {"message": "Unsubscribed successfully"}
         result = student_crud.unsubscribe_from_course(
@@ -38,7 +38,7 @@ class TestStudentEndpoints(unittest.TestCase):
         self.assertIn("message", result)
         self.assertEqual(result["message"], "Unsubscribed successfully")
 
-    @patch('src.crud.student.rate_course')
+    @patch("src.crud.student.rate_course")
     def test_rate_course_endpoint(self, mock_rate):
         mock_rate.return_value = {"message": "Course rated successfully"}
         result = student_crud.rate_course(
@@ -47,14 +47,14 @@ class TestStudentEndpoints(unittest.TestCase):
         self.assertIn("message", result)
         self.assertEqual(result["message"], "Course rated successfully")
 
-    @patch('src.crud.student.get_all_favorite_courses')
+    @patch("src.crud.student.get_all_favorite_courses")
     def test_get_favorite_courses(self, mock_get_favorites):
         mock_get_favorites.return_value = ["Course1", "Course2"]
         result = student_crud.get_all_favorite_courses(self.mock_db, self.current_user)
         self.assertIsInstance(result, list)
         self.assertIn("Course1", result)
 
-    @patch('src.crud.student.toggle_favorite_course')
+    @patch("src.crud.student.toggle_favorite_course")
     def test_toggle_favorite_course_route(self, mock_toggle):
         mock_toggle.return_value = {"message": "Toggled favorite successfully"}
         result = student_crud.toggle_favorite_course(

@@ -46,7 +46,9 @@ class TestCourseCrud(unittest.TestCase):
         premium_course = Course(
             id=self.course_id, is_hidden=False, is_premium=True, owner_id=self.user_id
         )
-        self.mock_db.query.return_value.filter.return_value.first.return_value = premium_course
+        self.mock_db.query.return_value.filter.return_value.first.return_value = (
+            premium_course
+        )
         self.mock_user.role = Role.STUDENT
         self.mock_user.id = self.user_id
 
@@ -61,7 +63,9 @@ class TestCourseCrud(unittest.TestCase):
             course_crud.get_course_by_id(self.mock_db, self.course_id, self.mock_user)
 
     def test_create_course_title_exists(self):
-        self.mock_db.query.return_value.filter.return_value.first.return_value = self.mock_course
+        self.mock_db.query.return_value.filter.return_value.first.return_value = (
+            self.mock_course
+        )
         with self.assertRaises(HTTPException):
             course_crud.create_courses(
                 self.mock_db,
@@ -75,7 +79,9 @@ class TestCourseCrud(unittest.TestCase):
 
     def test_update_specific_course_not_owner(self):
         other_user = User(id=uuid4(), role=Role.STUDENT)
-        self.mock_db.query.return_value.filter.return_value.first.return_value = self.mock_course
+        self.mock_db.query.return_value.filter.return_value.first.return_value = (
+            self.mock_course
+        )
         with self.assertRaises(HTTPException):
             course_crud.update_specific_course(
                 self.mock_db,
@@ -86,8 +92,12 @@ class TestCourseCrud(unittest.TestCase):
 
     def test_rating_course_success(self):
         student_course = StudentCourse(score=8.0)
-        self.mock_db.query.return_value.filter.return_value.first.return_value = self.mock_course
-        self.mock_db.query.return_value.filter.return_value.all.return_value = [student_course]
+        self.mock_db.query.return_value.filter.return_value.first.return_value = (
+            self.mock_course
+        )
+        self.mock_db.query.return_value.filter.return_value.all.return_value = [
+            student_course
+        ]
 
         student_course.student = MagicMock()
         student_course.student.first_name = "John"
@@ -113,11 +123,12 @@ class TestCourseCrud(unittest.TestCase):
 
         self.mock_db.query.return_value.filter.return_value.first.return_value = tag
 
-
         self.mock_user.student = MagicMock()
         self.mock_user.student.courses = []
 
-        result = course_crud.get_courses_by_tag_id(self.mock_db, self.tag_id, self.mock_user)
+        result = course_crud.get_courses_by_tag_id(
+            self.mock_db, self.tag_id, self.mock_user
+        )
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["id"], self.mock_course.id)
 

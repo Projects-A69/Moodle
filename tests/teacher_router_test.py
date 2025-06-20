@@ -97,7 +97,9 @@ class TestTeachersEndpoints(unittest.TestCase):
             course_id=self.course_id, student_id=self.student_id, db=self.mock_db
         )
         self.assertEqual(result, {"removed": True})
-        mock_remove.assert_called_once_with(self.mock_db, self.course_id, self.student_id)
+        mock_remove.assert_called_once_with(
+            self.mock_db, self.course_id, self.student_id
+        )
 
     @patch("src.api.v1.endpoints.teachers.toggle_course_visibility_by_teacher")
     def test_toggle_course_visibility(self, mock_toggle):

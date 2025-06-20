@@ -252,9 +252,9 @@ def rating_course(db: Session, id: UUID):
         "rating": course.rating,
         "ratings": [
             {
-                "student_name": rating.student.first_name
-                if rating.student
-                else "Anonymous",
+                "student_name": (
+                    rating.student.first_name if rating.student else "Anonymous"
+                ),
                 "score": rating.score,
             }
             for rating in ratings

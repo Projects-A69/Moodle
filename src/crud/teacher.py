@@ -159,11 +159,17 @@ def toggle_course_visibility_by_teacher(
     if course.is_hidden:
         course.is_hidden = False
         db.commit()
-        return {"message": f"Course '{course.title}' is now visible.", "is_locked": False}
+        return {
+            "message": f"Course '{course.title}' is now visible.",
+            "is_locked": False,
+        }
 
     if course.students:
         raise BadRequest("You cannot hide a course that has enrolled students.")
 
     course.is_hidden = True
     db.commit()
-    return {"message": f"Course '{course.title}' has been hidden successfully.", "is_locked": True}
+    return {
+        "message": f"Course '{course.title}' has been hidden successfully.",
+        "is_locked": True,
+    }

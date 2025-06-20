@@ -54,12 +54,16 @@ def get_student_user(current_user: User = Depends(get_current_user)) -> User:
         raise Unauthorized("Only students can perform this action.")
     return current_user
 
+
 def teacher_or_admin(current_user: User = Depends(get_current_user)) -> Optional[User]:
     if current_user.role not in [Role.TEACHER, Role.ADMIN]:
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return current_user
 
-def teacher_or_admin_student(current_user: User = Depends(get_current_user)) -> Optional[User]:
+
+def teacher_or_admin_student(
+    current_user: User = Depends(get_current_user),
+) -> Optional[User]:
     if current_user.role not in [Role.TEACHER, Role.ADMIN, Role.STUDENT]:
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return current_user

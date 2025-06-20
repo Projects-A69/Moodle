@@ -40,7 +40,7 @@ class TestUserRoutes(unittest.TestCase):
         mock_get_user_info.return_value = {
             "first_name": "Test",
             "last_name": "User",
-            "email": "test@example.com"
+            "email": "test@example.com",
         }
         result = crud_user.get_user_info(self.mock_db, self.mock_user)
         self.assertIn("first_name", result)
@@ -50,7 +50,9 @@ class TestUserRoutes(unittest.TestCase):
     def test_logout_without_auth_token(self):
         # Simulate logic for unauthenticated logout
         user = None
-        result = {"message": "Successfully logged out." if user is None else "Unexpected"}
+        result = {
+            "message": "Successfully logged out." if user is None else "Unexpected"
+        }
         self.assertEqual(result["message"], "Successfully logged out.")
 
     def test_logout_invalid_method(self):
